@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
   start_encode(128, 128, 5);
 
   /* this will be 10647 moves; develops the "leg" of the ant pattern */
-  for (i = 0; i < 10647; i++) {
+  for (i = 0; i < 20647; i++) {
     /* 1 is black, 0 is white */
 
     /* change direction and then flip the color */
@@ -157,7 +157,12 @@ int main(int argc, char *argv[])
       posx -= 1;
     } else if(bear == 3 && posy+1 < 128) {
       posy += 1;
-    }
+    } else {
+		/* assuming the position would break out of the box */
+		next_frame((char *) buffer);
+		printf("--- ACHTUNG! BREAKING FOR EFFECT! ---\n");
+		break;
+	}
 
     next_frame((char *) buffer);
   }
