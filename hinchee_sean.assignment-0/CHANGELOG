@@ -1,0 +1,5 @@
+8/22 ~11pm: Began project
+8/23 ~11:45pm: Realized that % was the remainder function rather than a modern modulo function; code was adjusted accordingly, more if's were, regrettably, implemented
+8/23 ~12:10am: Observed the ants generate a "leg" in the pattern, google images confirmed that this was a feature rather than a bug
+8/23 ~12:12am: Added safety for the edges of the 128x128 grid in the movement
+8/23 ~12:30am: After brief break for food and such, touched up the comments and some formatting
