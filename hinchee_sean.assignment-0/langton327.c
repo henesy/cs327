@@ -160,7 +160,6 @@ int main(int argc, char *argv[])
     } else {
 		/* assuming the position would break out of the box */
 		next_frame((char *) buffer);
-		printf("--- ACHTUNG! BREAKING FOR EFFECT! ---\n");
 		break;
 	}
 
