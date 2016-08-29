@@ -3,3 +3,5 @@
 8/23 ~12:10am: Observed the ants generate a "leg" in the pattern, google images confirmed that this was a feature rather than a bug
 8/23 ~12:12am: Added safety for the edges of the 128x128 grid in the movement
 8/23 ~12:30am: After brief break for food and such, touched up the comments and some formatting
+8/25 ~6pm: Updated the Makefile with tweaks to more properly align with lecture
+
