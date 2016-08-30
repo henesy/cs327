@@ -1,2 +1,3 @@
-8/29: Boilerplate added for printing/initializing the array
+8/29 @7pm: Boilerplate added for printing/initializing the array
+8/29 @8pm: Memory allocation + 0'ing using calloc() fixed in init_dungeon()
 

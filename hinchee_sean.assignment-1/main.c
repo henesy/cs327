@@ -4,6 +4,7 @@
 typedef struct {
 	int		h; /* hardness */
 	char	c; /* visual character */
+	int		i; /* immutable */
 } Tile;
 
 
@@ -24,13 +25,36 @@ void print_dungeon() {
 	}
 }
 
+/* initializes the dungeon */
+void init_dungeon(int h, int w) {
+	screen_height	= h;
+	screen_width	= w;
+	
+	screen = calloc(h, sizeof(Tile *));
+	
+	int i;
+	for(i = 0; i < h; i++) {
+		screen[i] = calloc(w, sizeof(Tile));
+	}
+}
+
+/* procedurally generate the dungeon */
+void gen_dungeon() {
+	
+}
+
 
 /* Basic procedural dungeon generator */
 int main(int argc, char * argv[]) {
-	/* init the screen */
-	screen_height	= 24;
-	screen_width	= 80;
-	screen = (Tile **) calloc(screen_height * screen_width, sizeof(Tile));
+	/* process commandline arguments */
 
+
+	/* init the screen with default screen size */
+	init_dungeon(24, 80);
+	gen_dungeon();
+	print_dungeon();
+
+	free(screen);
+	return 0;
 }
 
