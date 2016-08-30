@@ -7,11 +7,11 @@ typedef struct {
 	int		i; /* immutable */
 } Tile;
 
-
 /* just handle screen and dungeon as separated (screen is top 3x80, dungeon is 21x80) */
 Tile ** screen;
 int screen_height;
 int screen_width;
+
 
 /* prints the dungeon */
 void print_dungeon() {
@@ -29,7 +29,7 @@ void print_dungeon() {
 void init_dungeon(int h, int w) {
 	screen_height	= h;
 	screen_width	= w;
-	
+
 	screen = calloc(h, sizeof(Tile *));
 	
 	int i;
@@ -40,7 +40,26 @@ void init_dungeon(int h, int w) {
 
 /* procedurally generate the dungeon */
 void gen_dungeon() {
+	/*** top 3 (0, 1, 2) are reserved for the pseudo-HUD ***/	
 	
+	/* immut-ify the outside rim */
+	int i;	
+	for(i = 0; i < screen_width; i++) {
+		(screen[3][i]).i = 1;
+	}
+	for(i = 0; i < screen_width; i++) {
+		(screen[screen_height-1][i]).i = 1;
+	}
+	for(i = 3; i < screen_height; i++) {
+		(screen[i][0]).i = 1;
+	}
+	for(i = 3; i < screen_height; i++) {
+		(screen[i][screen_width-1]).i = 1;
+	}
+
+	/* determine the core locations of the 6 base rooms */
+
+
 }
 
 
