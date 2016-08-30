@@ -7,12 +7,6 @@ typedef struct {
 } Tile;
 
 typedef struct {
-	Tile **	d; /* screen/dungeon buffer */
-	int		h; /* height */
-	int		w; /* width */
-} Dungeon;
-
-typedef struct {
 	int	x; /* x coordinate */
 	int	y; /* y coordinate */
 } Position;
@@ -23,6 +17,14 @@ typedef struct {
 	int			h;	/* height */
 	int			id;	/* room ID, potentially useful for organization */
 } Room;
+
+typedef struct {
+	Tile **	d;	/* dungeon buffer */
+	int		h;	/* height */
+	int		w;	/* width */
+	int		mr;	/* max rooms */
+	Room *	r;	/* rooms buffer */
+} Dungeon;
 
 
 /* prints the dungeon */
@@ -38,17 +40,22 @@ void print_dungeon(Dungeon * dungeon) {
 }
 
 /* initializes the dungeon structure */
-Dungeon init_dungeon(int h, int w) {
+Dungeon init_dungeon(int h, int w, int mr) {
 	Dungeon new_dungeon;
 	new_dungeon.h	= h;
 	new_dungeon.w	= w;
+	new_dungeon.mr	= mr;
 
+	/* dungeon visual buffer allocation+0'ing */
 	new_dungeon.d = calloc(new_dungeon.h, sizeof(Tile *));
 	
 	int i;
 	for(i = 0; i < new_dungeon.h; i++) {
 		new_dungeon.d[i] = calloc(new_dungeon.w, sizeof(Tile));
 	}
+
+	/* rooms allocation+0'ing */
+	new_dungeon.r = calloc(new_dungeon.mr, sizeof(Room));
 
 	return new_dungeon;
 }
@@ -91,12 +98,14 @@ int main(int argc, char * argv[]) {
 	/* process commandline arguments */
 
 
-	/* init the dungeon with default dungeon size */
-	Dungeon dungeon = init_dungeon(21, 80);
+	/* init the dungeon with default dungeon size and a max of 12 rooms */
+	Dungeon dungeon = init_dungeon(21, 80, 12);
 	gen_dungeon(&dungeon);
 	print_dungeon(&dungeon);
 
+	/* free our arrays */
 	free(dungeon.d);
+	free(dungeon.r);
 	return 0;
 }
 
