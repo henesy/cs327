@@ -1,3 +1,5 @@
 8/29 @7pm: Boilerplate added for printing/initializing the array
 8/29 @8pm: Memory allocation + 0'ing using calloc() fixed in init_dungeon()
+8/30 @2pm: Moved screen/dungeon to struct
+8/30 @3pm: Migrated from global variables to pointers and a structure type for the dungeon
 

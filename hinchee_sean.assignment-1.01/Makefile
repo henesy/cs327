@@ -1,8 +1,8 @@
 all: main
 
 main: main.c
-	gcc -Wall -Werror -ggdb main.c -o main
+	gcc -Wall -Werror -ggdb main.c -o dungeon_generator
 
 clean: 
-	rm main
+	rm dungeon_generator
 

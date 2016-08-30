@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
   /* skip every 5 frames in the 128x128 grid */
   start_encode(128, 128, 5);
 
-  /* this will be 10647 moves; develops the "leg" of the ant pattern */
+  /* this will be 2*10647 moves, shows a highway; develops the "leg" of the ant pattern */
   for (i = 0; i < 20647; i++) {
     /* 1 is black, 0 is white */
 
