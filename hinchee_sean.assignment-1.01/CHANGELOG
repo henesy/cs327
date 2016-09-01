@@ -4,4 +4,5 @@
 8/30 @3pm: Migrated from global variables to pointers and a structure type for the dungeon
 8/30 @3:20pm: Added rooms array in the dungeon
 9/01 @5:20pm: Added room placement; need to fix p and d buffer differences and room edge placement
+9/01 @6:50pm: Finalized room placement
 

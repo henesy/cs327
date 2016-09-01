@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-/* #include <unistd.h> */
+#include <string.h>
 
 typedef struct {
 	int		h; /* hardness */
@@ -35,10 +35,21 @@ typedef struct {
 /* prints the dungeon */
 void print_dungeon(Dungeon * dungeon) {
 	int i;
+	int j;
+	int h;
+	
+	for(h = 0; h < dungeon->nr; h++) {
+		for(i = dungeon->r[h].tl.y; i < dungeon->r[h].tl.y + dungeon->r[h].h; i++) {
+			for(j = dungeon->r[h].tl.x; j < dungeon->r[h].tl.x + dungeon->r[h].w; j++) {
+				dungeon->p[i][j].c = '.';
+			}
+		}
+	}
+
 	for(i = 0; i < dungeon->h; i++) {
 		int j;
 		for(j = 0; j < dungeon->w; j++) {
-			printf("%c", (dungeon->d[i][j]).c);
+			printf("%c", (dungeon->p[i][j]).c);
 		}
 		printf("\n");
 	}
@@ -77,8 +88,8 @@ Dungeon init_dungeon(int h, int w, int mr) {
 __NOTE__: Should wipe the print buffer after room generation has finished
 */
 int place_room(Dungeon * dungeon) {
-	int x = rand() % dungeon->w;
-	int y = rand() % dungeon->h;
+	int x = (rand() % (dungeon->w-1)) +1;
+	int y = (rand() % (dungeon->h-1)) +1;
 	Room new_room;
 	/* 
 	set top right to rng number; might be worth making a more detailed placer with a lower 
@@ -86,16 +97,19 @@ int place_room(Dungeon * dungeon) {
 	*/
 	new_room.tl.x = x; 
 	new_room.tl.y = y;	
-	new_room.br.x = x+3;
-	new_room.br.y = y+2;
+	/* for RNG, maybe do a rando room width/height and re-set .br */
+	new_room.h = 3;
+	new_room.w = 4;
+	new_room.br.x = x + new_room.w-1;
+	new_room.br.y = y + new_room.h-1;
 
 	/* check for rooms loaded into the dungeon buffer already */
 	int i;
 	int j;
 	int placed = -1;
 	int passed = 0;
-	for(i = y; i < dungeon->h && i < y+3; i++) {
-		for(j = x; j < dungeon->w && j < x+4; j++) {
+	for(i = y; i < dungeon->h-1 && i < y+3; i++) {
+		for(j = x; j < dungeon->w-1 && j < x+4; j++) {
 			if(dungeon->p[i][j].c != '.') {
 				passed++;
 			}
@@ -147,7 +161,7 @@ int place_room(Dungeon * dungeon) {
 	/* successful placement */
 	placed = 0;
 
-	/* fill the room into the dungeon buffer and add to room array */
+	/* fill the room into the dungeon buffer and add to room array */	
 	for(i = y; i < y+3; i++) {
 		for(j = x; j < x+4; j++) {
 			dungeon->p[i][j].c = '.';
@@ -196,7 +210,12 @@ void gen_dungeon(Dungeon * dungeon) {
 		(dungeon->d[i][dungeon->w-1]).h = 255;
 	}
 
-	dungeon->p = dungeon->d;
+	/* make p equal to d */
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			dungeon->p[i][j] = dungeon->d[i][j];
+		}
+	}
 }
 
 
@@ -219,8 +238,6 @@ int main(int argc, char * argv[]) {
 		if(tst < 0) {
 			cnt++;
 		}
-		print_dungeon(&dungeon);
-		printf("-------------------------------\n");
 	}
 	
 	print_dungeon(&dungeon);
