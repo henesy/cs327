@@ -2,4 +2,6 @@
 8/29 @8pm: Memory allocation + 0'ing using calloc() fixed in init_dungeon()
 8/30 @2pm: Moved screen/dungeon to struct
 8/30 @3pm: Migrated from global variables to pointers and a structure type for the dungeon
+8/30 @3:20pm: Added rooms array in the dungeon
+9/01 @5:20pm: Added room placement; need to fix p and d buffer differences and room edge placement
 

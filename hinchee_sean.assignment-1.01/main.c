@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+/* #include <unistd.h> */
 
 typedef struct {
 	int		h; /* hardness */
@@ -13,6 +15,7 @@ typedef struct {
 
 typedef struct {
 	Position	tl;	/* top left coordinate of the room, used as the core point of reference */
+	Position	br; /* bottom right coordinate of the room as per above */
 	int			w;	/* width */
 	int			h;	/* height */
 	int			id;	/* room ID, potentially useful for organization */
@@ -20,8 +23,10 @@ typedef struct {
 
 typedef struct {
 	Tile **	d;	/* dungeon buffer */
+	Tile **	p;	/* print buffer */
 	int		h;	/* height */
 	int		w;	/* width */
+	int		nr; /* number of rooms */
 	int		mr;	/* max rooms */
 	Room *	r;	/* rooms buffer */
 } Dungeon;
@@ -46,7 +51,7 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	new_dungeon.w	= w;
 	new_dungeon.mr	= mr;
 
-	/* dungeon visual buffer allocation+0'ing */
+	/* dungeon buffer allocation+0'ing */
 	new_dungeon.d = calloc(new_dungeon.h, sizeof(Tile *));
 	
 	int i;
@@ -54,13 +59,117 @@ Dungeon init_dungeon(int h, int w, int mr) {
 		new_dungeon.d[i] = calloc(new_dungeon.w, sizeof(Tile));
 	}
 
+	/* dungeon visual buffer allocation+0'ing */
+	new_dungeon.p = calloc(new_dungeon.h, sizeof(Tile *));
+
+	for(i = 0; i < new_dungeon.h; i++) {
+		new_dungeon.p[i] = calloc(new_dungeon.w, sizeof(Tile));
+	}	
+
 	/* rooms allocation+0'ing */
 	new_dungeon.r = calloc(new_dungeon.mr, sizeof(Room));
 
 	return new_dungeon;
 }
 
-/* procedurally generate the dungeon */
+/* 
+(attempt to) place a room within a given dungeon 
+__NOTE__: Should wipe the print buffer after room generation has finished
+*/
+int place_room(Dungeon * dungeon) {
+	int x = rand() % dungeon->w;
+	int y = rand() % dungeon->h;
+	Room new_room;
+	/* 
+	set top right to rng number; might be worth making a more detailed placer with a lower 
+		fail rate 
+	*/
+	new_room.tl.x = x; 
+	new_room.tl.y = y;	
+	new_room.br.x = x+3;
+	new_room.br.y = y+2;
+
+	/* check for rooms loaded into the dungeon buffer already */
+	int i;
+	int j;
+	int placed = -1;
+	int passed = 0;
+	for(i = y; i < dungeon->h && i < y+3; i++) {
+		for(j = x; j < dungeon->w && j < x+4; j++) {
+			if(dungeon->p[i][j].c != '.') {
+				passed++;
+			}
+		}
+	}
+
+	/* return a failure if not all cells within the "Room" passed */
+	if(passed < 12) {
+		return placed; /* should be -1 */
+	}
+	
+	/* return a failure if part of the room is out of bounds */
+	if(new_room.br.x >= dungeon->w || new_room.br.y >= dungeon->h) {
+		return placed;
+	}
+
+
+	/* check for surrounding rooms */	
+	
+	/* top row */
+	for(i = new_room.tl.x-1; i < new_room.br.x+2 && new_room.tl.x-1 >= 0 && new_room.br.x+1 < dungeon->w && new_room.tl.y-1 >= 0; i++) {
+		if((dungeon->p[new_room.tl.y-1][i]).c == '.') {
+			return placed;
+		}
+	}
+
+	/* bottom row */
+	for(i = new_room.tl.x-1; i < new_room.br.x+2 && new_room.tl.x-1 >= 0 && new_room.br.x+1 < dungeon->w && new_room.br.y+1 < dungeon->h; i++) {
+		if((dungeon->p[new_room.br.y+1][i]).c == '.') {
+			return placed;
+		}
+	}
+
+	/* left side */
+	for(i = new_room.tl.y; i < new_room.br.y+1 && new_room.br.y+1 < dungeon->h && new_room.tl.x-1 >= 0; i++) {
+		if((dungeon->p[i][new_room.tl.x-1]).c == '.') {
+			return placed;
+		}
+	}
+
+	/* right side */
+	for(i = new_room.tl.y; i < new_room.br.y+1 && new_room.br.y+1 < dungeon->h && new_room.br.x+1 < dungeon->w; i++) {
+		if((dungeon->p[i][new_room.br.x+1]).c == '.') {
+			return placed;
+		}
+	}
+
+
+	/* successful placement */
+	placed = 0;
+
+	/* fill the room into the dungeon buffer and add to room array */
+	for(i = y; i < y+3; i++) {
+		for(j = x; j < x+4; j++) {
+			dungeon->p[i][j].c = '.';
+		}
+	}
+
+
+
+	new_room.id = dungeon->nr;
+
+	if(dungeon->nr < dungeon->mr) {
+		dungeon->nr++;
+		dungeon->r[dungeon->nr-1] = new_room;
+	} else {
+		return -1;
+	}
+
+
+	return placed;
+}
+
+/* generate a blank dungeon */
 void gen_dungeon(Dungeon * dungeon) {
 	/*** top 3 (0, 1, 2) are reserved for the pseudo-HUD ***/	
 	int i, j;
@@ -87,9 +196,7 @@ void gen_dungeon(Dungeon * dungeon) {
 		(dungeon->d[i][dungeon->w-1]).h = 255;
 	}
 
-	/* determine the core locations of the 6 base rooms */
-
-
+	dungeon->p = dungeon->d;
 }
 
 
@@ -101,7 +208,23 @@ int main(int argc, char * argv[]) {
 	/* init the dungeon with default dungeon size and a max of 12 rooms */
 	Dungeon dungeon = init_dungeon(21, 80, 12);
 	gen_dungeon(&dungeon);
+	
+	/* testing until we integrate this into the gen_dungeon() fxn */
+	srand(time(NULL));
+	int i;
+	int cnt = 0;
+	int tst = 0;
+	for(i = 0; dungeon.nr < dungeon.mr && cnt < 2000; i++) {
+		tst = place_room(&dungeon);
+		if(tst < 0) {
+			cnt++;
+		}
+		print_dungeon(&dungeon);
+		printf("-------------------------------\n");
+	}
+	
 	print_dungeon(&dungeon);
+
 
 	/* free our arrays */
 	free(dungeon.d);
