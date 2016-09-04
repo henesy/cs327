@@ -252,10 +252,10 @@ void gen_corridors(Dungeon * dungeon) {
 	/* populate the dungeon grid (draw the paths using x/y chasing/pathing) */
 	
 	/** temporary print for posterity (compiler Wall Werror) **/
-	printf("%d\n", path_cnt);
+	/*printf("%d\n", path_cnt);
 	for(i = 0; i < path_cnt; i++) {
 		printf("%d to %d\n", paths[i].prev, paths[i].next);
-	}
+	}*/
 	
 	/* draw dungeon paths in the dungeon grid; start at room 0 as per above */
 
@@ -263,7 +263,7 @@ void gen_corridors(Dungeon * dungeon) {
 		int x = dungeon->r[paths[i].prev].ctr.x;
 		int y = dungeon->r[paths[i].prev].ctr.y;
 		
-		printf("%d: (%d, %d)\n", i, x, y);
+		/*printf("%d: (%d, %d)\n", i, x, y);*/
 		
 		while(x != dungeon->r[paths[i].next].ctr.x || y != dungeon->r[paths[i].next].ctr.y) {
 			int dirx = 0; /* -1 for left, 1 for right */
