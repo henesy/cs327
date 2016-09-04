@@ -2,10 +2,14 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <math.h>
+#define	TRUE	0
+#define	FALSE	1
 
 typedef struct {
-	int		h; /* hardness */
-	char	c; /* visual character */
+	int		h;	/* hardness */
+	char	c;	/* visual character */
+	int		p;	/* mark 1 if path, 0 if not a path (corridors) */
 } Tile;
 
 typedef struct {
@@ -13,12 +17,20 @@ typedef struct {
 	int	y; /* y coordinate */
 } Position;
 
+/* maybe make these pointers? */
 typedef struct {
-	Position	tl;	/* top left coordinate of the room, used as the core point of reference */
-	Position	br; /* bottom right coordinate of the room as per above */
-	int			w;	/* width */
-	int			h;	/* height */
-	int			id;	/* room ID, potentially useful for organization */
+	int prev; /* previous room in the path (using Room.id) */
+	int next; /* room the path leads to (using Room.id) */
+} Path;
+
+typedef struct {
+	Position	tl;		/* top left coordinate of the room, used as the core point of reference */
+	Position	br;		/* bottom right coordinate of the room as per above */
+	int			w;		/* width */
+	int			h;		/* height */
+	int			id;		/* room ID, potentially useful for organization */
+	int			p;		/* mark 1 if processed; 0 if not processed (corridors) */
+	Position	ctr;	/* "center" point; very rough, might need improved */
 } Room;
 
 typedef struct {
@@ -38,14 +50,31 @@ void print_dungeon(Dungeon * dungeon) {
 	int j;
 	int h;
 	
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			dungeon->p[i][j].c = ' ';
+		}
+	}
+
+	/* add rooms to the print buffer */
 	for(h = 0; h < dungeon->nr; h++) {
-		for(i = dungeon->r[h].tl.y; i < dungeon->r[h].tl.y + dungeon->r[h].h; i++) {
-			for(j = dungeon->r[h].tl.x; j < dungeon->r[h].tl.x + dungeon->r[h].w; j++) {
+		for(i = dungeon->r[h].tl.y; i < dungeon->r[h].br.y+1; i++) {
+			for(j = dungeon->r[h].tl.x; j < dungeon->r[h].br.x+1; j++) {
 				dungeon->p[i][j].c = '.';
 			}
 		}
 	}
 
+	/* add corridors to the print buffer */
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			if(dungeon->d[i][j].p == 1) {
+				dungeon->p[i][j].c = '#';
+			}
+		}
+	}
+
+	/* print the print buffer */
 	for(i = 0; i < dungeon->h; i++) {
 		int j;
 		for(j = 0; j < dungeon->w; j++) {
@@ -55,38 +84,7 @@ void print_dungeon(Dungeon * dungeon) {
 	}
 }
 
-/* initializes the dungeon structure */
-Dungeon init_dungeon(int h, int w, int mr) {
-	Dungeon new_dungeon;
-	new_dungeon.h	= h;
-	new_dungeon.w	= w;
-	new_dungeon.mr	= mr;
-
-	/* dungeon buffer allocation+0'ing */
-	new_dungeon.d = calloc(new_dungeon.h, sizeof(Tile *));
-	
-	int i;
-	for(i = 0; i < new_dungeon.h; i++) {
-		new_dungeon.d[i] = calloc(new_dungeon.w, sizeof(Tile));
-	}
-
-	/* dungeon visual buffer allocation+0'ing */
-	new_dungeon.p = calloc(new_dungeon.h, sizeof(Tile *));
-
-	for(i = 0; i < new_dungeon.h; i++) {
-		new_dungeon.p[i] = calloc(new_dungeon.w, sizeof(Tile));
-	}	
-
-	/* rooms allocation+0'ing */
-	new_dungeon.r = calloc(new_dungeon.mr, sizeof(Room));
-
-	return new_dungeon;
-}
-
-/* 
-(attempt to) place a room within a given dungeon 
-__NOTE__: Should wipe the print buffer after room generation has finished
-*/
+/* (attempt to) place a room within a given dungeon */
 int place_room(Dungeon * dungeon) {
 	int x = (rand() % (dungeon->w-1)) +1;
 	int y = (rand() % (dungeon->h-1)) +1;
@@ -169,11 +167,11 @@ int place_room(Dungeon * dungeon) {
 	}
 
 
-
-	new_room.id = dungeon->nr;
-
 	if(dungeon->nr < dungeon->mr) {
 		dungeon->nr++;
+		new_room.id = dungeon->nr-1; /* reflects position in the array */
+		new_room.ctr.x = new_room.w / 2;
+		new_room.ctr.y = new_room.h / 2;
 		dungeon->r[dungeon->nr-1] = new_room;
 	} else {
 		return -1;
@@ -181,6 +179,84 @@ int place_room(Dungeon * dungeon) {
 
 
 	return placed;
+}
+
+/* assistant function for gen_corridors() to check if all rooms are connected */
+int all_connected(int * cnxns) {
+	int all_are_connected = FALSE;
+	int len = sizeof(cnxns) / sizeof(int);
+	int cnt = 0;
+	int i;
+	
+	for(i = 0; i < len; i++) {
+		if(cnxns[i] == 1) {
+			cnt++;
+		}
+	}
+
+	if(cnt == len) {
+		all_are_connected = TRUE;
+	}
+	
+	return all_are_connected;
+}
+
+/* generates and marks corridors */
+void gen_corridors(Dungeon * dungeon) {
+	int connected[dungeon->nr];
+	double dists[dungeon->nr];
+	int max_paths = dungeon->nr * 3;
+	Path paths[max_paths]; /* max paths is 3 * number of rooms */
+	int path_cnt = 0;
+	int	room_pos = 0; /* current room in use */
+	int i;
+	
+	for(i = 0; i < dungeon->nr; i++) {
+		dists[i] = -1; /* infinite at -1 */
+	}
+	dists[0] = 0;
+	
+
+	/* primary loop, goal is to connect all rooms; 0 means true */
+	do {
+		int i;
+		double d;
+		Path new_path;
+
+		/* populate dists from the current position */
+		for(i = 0; i < dungeon->nr; i++) {
+			/* calculate distance */
+			d =  sqrt(pow(dungeon->r[i].ctr.x - dungeon->r[room_pos].ctr.x, 2) + pow(dungeon->r[i].ctr.y - dungeon->r[room_pos].ctr.y, 2));
+			dists[i] = d;
+		}
+
+		/* find the room to path to ;; if not connected already and the distance is shorter and isn't our current position */
+		int next = -1;
+		for(i = 0; i < dungeon->nr; i++) {
+			if(connected[i] != 1 && (dists[i] < next || (next == -1)) && room_pos != i) {
+				next = i;
+			}
+		}
+
+		new_path.prev = room_pos;
+		new_path.next = next;
+		paths[path_cnt] = new_path;
+		path_cnt++;
+
+	} while(all_connected(connected) == FALSE && path_cnt < max_paths);
+
+	/* populate the dungeon grid (draw the paths using x/y chasing/pathing) */
+	
+	/** temporary print for posterity (compiler Wall Werror) **/
+	printf("%d\n", path_cnt);
+	for(i = 0; i < path_cnt; i++) {
+		printf("%d to %d\n", paths[i].prev, paths[i].next);
+	}
+	
+
+
+
+
 }
 
 /* generate a blank dungeon */
@@ -216,6 +292,47 @@ void gen_dungeon(Dungeon * dungeon) {
 			dungeon->p[i][j] = dungeon->d[i][j];
 		}
 	}
+
+	/* populate the rooms */
+	int cnt = 0;
+	int tst = 0;
+	for(i = 0; dungeon->nr < dungeon->mr && cnt < 2000; i++) {
+		tst = place_room(dungeon);
+		if(tst < 0) {
+			cnt++;
+		}
+	}
+	
+	
+}
+
+/* initializes the dungeon structure */
+Dungeon init_dungeon(int h, int w, int mr) {
+	Dungeon new_dungeon;
+	new_dungeon.h	= h;
+	new_dungeon.w	= w;
+	new_dungeon.mr	= mr;
+	new_dungeon.nr	= 0;
+
+	/* dungeon buffer allocation+0'ing */
+	new_dungeon.d = calloc(new_dungeon.h, sizeof(Tile *));
+	
+	int i;
+	for(i = 0; i < new_dungeon.h; i++) {
+		new_dungeon.d[i] = calloc(new_dungeon.w, sizeof(Tile));
+	}
+
+	/* dungeon visual buffer allocation+0'ing */
+	new_dungeon.p = calloc(new_dungeon.h, sizeof(Tile *));
+
+	for(i = 0; i < new_dungeon.h; i++) {
+		new_dungeon.p[i] = calloc(new_dungeon.w, sizeof(Tile));
+	}	
+
+	/* rooms allocation+0'ing */
+	new_dungeon.r = calloc(new_dungeon.mr, sizeof(Room));
+
+	return new_dungeon;
 }
 
 
@@ -225,20 +342,11 @@ int main(int argc, char * argv[]) {
 
 
 	/* init the dungeon with default dungeon size and a max of 12 rooms */
+	srand(time(NULL));
 	Dungeon dungeon = init_dungeon(21, 80, 12);
 	gen_dungeon(&dungeon);
+	gen_corridors(&dungeon);
 	
-	/* testing until we integrate this into the gen_dungeon() fxn */
-	srand(time(NULL));
-	int i;
-	int cnt = 0;
-	int tst = 0;
-	for(i = 0; dungeon.nr < dungeon.mr && cnt < 2000; i++) {
-		tst = place_room(&dungeon);
-		if(tst < 0) {
-			cnt++;
-		}
-	}
 	
 	print_dungeon(&dungeon);
 
