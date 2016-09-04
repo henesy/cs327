@@ -6,4 +6,5 @@
 9/01 @05:20pm: Added room placement; need to fix p & d buffer differences and room edge placement
 9/01 @06:50pm: Finalized room placement
 9/03 @09:20pm: Added first stage of corridor generation
+9/04 @00:10am: Finalized corridor tracing/placement & fixed a big with array size calculation
 

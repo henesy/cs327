@@ -56,15 +56,6 @@ void print_dungeon(Dungeon * dungeon) {
 		}
 	}
 
-	/* add rooms to the print buffer */
-	for(h = 0; h < dungeon->nr; h++) {
-		for(i = dungeon->r[h].tl.y; i < dungeon->r[h].br.y+1; i++) {
-			for(j = dungeon->r[h].tl.x; j < dungeon->r[h].br.x+1; j++) {
-				dungeon->p[i][j].c = '.';
-			}
-		}
-	}
-
 	/* add corridors to the print buffer */
 	for(i = 0; i < dungeon->h; i++) {
 		for(j = 0; j < dungeon->w; j++) {
@@ -74,13 +65,23 @@ void print_dungeon(Dungeon * dungeon) {
 		}
 	}
 
+	/* add rooms to the print buffer */
+	for(h = 0; h < dungeon->nr; h++) {
+		for(i = dungeon->r[h].tl.y; i < dungeon->r[h].br.y+1; i++) {
+			for(j = dungeon->r[h].tl.x; j < dungeon->r[h].br.x+1; j++) {
+				dungeon->p[i][j].c = '.';
+			}
+		}
+	}
+	
+
 	/* print the print buffer */
 	for(i = 0; i < dungeon->h; i++) {
 		int j;
 		for(j = 0; j < dungeon->w; j++) {
 			printf("%c", (dungeon->p[i][j]).c);
 		}
-		printf("\n");
+		printf("\n");	
 	}
 }
 
@@ -170,8 +171,9 @@ int place_room(Dungeon * dungeon) {
 	if(dungeon->nr < dungeon->mr) {
 		dungeon->nr++;
 		new_room.id = dungeon->nr-1; /* reflects position in the array */
-		new_room.ctr.x = new_room.w / 2;
-		new_room.ctr.y = new_room.h / 2;
+		new_room.ctr.x = (new_room.w)/2 + new_room.tl.x;
+		new_room.ctr.y = (new_room.h)/2 + new_room.tl.y;
+		/* printf("%d: (%d, %d)\n", new_room.id, new_room.ctr.x, new_room.ctr.y); */
 		dungeon->r[dungeon->nr-1] = new_room;
 	} else {
 		return -1;
@@ -182,23 +184,16 @@ int place_room(Dungeon * dungeon) {
 }
 
 /* assistant function for gen_corridors() to check if all rooms are connected */
-int all_connected(int * cnxns) {
-	int all_are_connected = FALSE;
-	int len = sizeof(cnxns) / sizeof(int);
-	int cnt = 0;
+int all_connected(int * cnxns, int len) {
 	int i;
 	
 	for(i = 0; i < len; i++) {
-		if(cnxns[i] == 1) {
-			cnt++;
+		if(cnxns[i] != 1) {
+			return FALSE;
 		}
 	}
-
-	if(cnt == len) {
-		all_are_connected = TRUE;
-	}
 	
-	return all_are_connected;
+	return TRUE;
 }
 
 /* generates and marks corridors */
@@ -218,7 +213,7 @@ void gen_corridors(Dungeon * dungeon) {
 	
 
 	/* primary loop, goal is to connect all rooms; 0 means true */
-	do {
+	while(all_connected(connected, dungeon->nr) == FALSE && path_cnt < max_paths) {
 		int i;
 		double d;
 		Path new_path;
@@ -231,19 +226,28 @@ void gen_corridors(Dungeon * dungeon) {
 		}
 
 		/* find the room to path to ;; if not connected already and the distance is shorter and isn't our current position */
-		int next = -1;
+
+		int next = -1; 
 		for(i = 0; i < dungeon->nr; i++) {
-			if(connected[i] != 1 && (dists[i] < next || (next == -1)) && room_pos != i) {
+			if(connected[i] != 1 && next == -1 && room_pos != i) {
+				next = i;
+			} else if(connected[i] != 1 && dists[i] < dists[next] && room_pos != i) {
 				next = i;
 			}
 		}
-
-		new_path.prev = room_pos;
-		new_path.next = next;
-		paths[path_cnt] = new_path;
-		path_cnt++;
-
-	} while(all_connected(connected) == FALSE && path_cnt < max_paths);
+		
+		/** this would - in the future - be the point of adding extraneous paths **/
+		if(next != -1) {
+			connected[room_pos] = 1;
+			new_path.prev = room_pos;
+			new_path.next = next;
+			paths[path_cnt] = new_path;
+			room_pos = next;
+			path_cnt++;
+		} else {
+			break;
+		}
+	}
 
 	/* populate the dungeon grid (draw the paths using x/y chasing/pathing) */
 	
@@ -253,7 +257,55 @@ void gen_corridors(Dungeon * dungeon) {
 		printf("%d to %d\n", paths[i].prev, paths[i].next);
 	}
 	
+	/* draw dungeon paths in the dungeon grid; start at room 0 as per above */
 
+	for(i = 0; i < path_cnt; i++) {
+		int x = dungeon->r[paths[i].prev].ctr.x;
+		int y = dungeon->r[paths[i].prev].ctr.y;
+		
+		printf("%d: (%d, %d)\n", i, x, y);
+		
+		while(x != dungeon->r[paths[i].next].ctr.x || y != dungeon->r[paths[i].next].ctr.y) {
+			int dirx = 0; /* -1 for left, 1 for right */
+			int diry = 0; /* -1 for down, 1 for up */
+			
+			if(x < dungeon->r[paths[i].next].ctr.x) {
+				dirx = 1;
+			} else if(x > dungeon->r[paths[i].next].ctr.x) {
+				dirx = -1;
+			}
+
+			if(y < dungeon->r[paths[i].next].ctr.y) {
+				diry = 1;
+			} else if(y > dungeon->r[paths[i].next].ctr.y) {
+				diry = -1;
+			}
+
+			dungeon->d[y][x].p = 1;
+
+			/*
+			if(dirx != 0 && diry != 0) {
+				int dec = rand() % 2;
+				if(dec == 0) {
+					diry = 0;
+				} else {
+					dirx = 0;
+				}
+			}
+			*/
+
+			if(dirx == -1) {
+				x--;
+			} else if(dirx == 1) {
+				x++;
+			} else if(diry == -1) {
+				y--;
+			} else if(diry == 1) {
+				y++;
+			}
+		}
+
+	}
 
 
 
