@@ -3,8 +3,8 @@
 #include <time.h>
 #include <string.h>
 #include <math.h>
-#define	TRUE	0
-#define	FALSE	1
+#define	TRUE	1
+#define	FALSE	0
 
 typedef struct {
 	int		h;	/* hardness */
@@ -97,8 +97,20 @@ int place_room(Dungeon * dungeon) {
 	new_room.tl.x = x; 
 	new_room.tl.y = y;	
 	/* for RNG, maybe do a rando room width/height and re-set .br */
-	new_room.h = 3;
-	new_room.w = 4;
+	
+	HW: ;
+	
+	int we = (rand() % 4) + 4; /* width, expanded, up to 4 more */
+	int he = (rand() % 4) + 3; /* height, expanded, up to 4 more */
+
+	if(we == he) {
+		/* if we have a square, re-generate */
+		goto HW;
+	}
+
+	new_room.h = he;
+	new_room.w = we;
+	
 	new_room.br.x = x + new_room.w-1;
 	new_room.br.y = y + new_room.h-1;
 
@@ -107,8 +119,8 @@ int place_room(Dungeon * dungeon) {
 	int j;
 	int placed = -1;
 	int passed = 0;
-	for(i = y; i < dungeon->h-1 && i < y+3; i++) {
-		for(j = x; j < dungeon->w-1 && j < x+4; j++) {
+	for(i = y; i < dungeon->h-1 && i < y+he; i++) {
+		for(j = x; j < dungeon->w-1 && j < x+we; j++) {
 			if(dungeon->p[i][j].c != '.') {
 				passed++;
 			}
@@ -116,7 +128,7 @@ int place_room(Dungeon * dungeon) {
 	}
 
 	/* return a failure if not all cells within the "Room" passed */
-	if(passed < 12) {
+	if(passed < we*he) {
 		return placed; /* should be -1 */
 	}
 	
@@ -161,8 +173,8 @@ int place_room(Dungeon * dungeon) {
 	placed = 0;
 
 	/* fill the room into the dungeon buffer and add to room array */	
-	for(i = y; i < y+3; i++) {
-		for(j = x; j < x+4; j++) {
+	for(i = y; i < y+he; i++) {
+		for(j = x; j < x+we; j++) {
 			dungeon->p[i][j].c = '.';
 		}
 	}

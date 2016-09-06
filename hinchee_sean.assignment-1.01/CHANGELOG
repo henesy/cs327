@@ -7,4 +7,6 @@
 9/01 @06:50pm: Finalized room placement
 9/03 @09:20pm: Added first stage of corridor generation
 9/04 @00:10am: Finalized corridor tracing/placement & fixed a big with array size calculation
+9/04 @02:00pm: Fixed extraneous debugging output
+9/06 @02:51pm: Added dynamic room sizes with a guarantee that no square rooms will be generated
 
