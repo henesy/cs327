@@ -33,6 +33,7 @@ typedef struct {
 	int			id;		/* room ID, potentially useful for organization */
 	int			p;		/* mark 1 if processed; 0 if not processed (corridors) */
 	Position	ctr;	/* "center" point; very rough, might need improved */
+	int			c;		/* if connected or not; TRUE/FALSE switch */
 } Room;
 
 typedef struct {
@@ -52,6 +53,10 @@ typedef struct {
 void read_dungeon(Dungeon * dungeon, char * path) {
 	FILE * file;
 	file = fopen(path, "rb+");
+	if(file == NULL) {
+		fprintf(stderr, "FILE ERROR: Could not open dungeon file at %s! read_dungeon()\n", path);
+        exit(1);
+	}
 
 	/* read the file-type marker */
 	fseek(file, 0, SEEK_SET);
@@ -150,11 +155,11 @@ void write_dungeon(Dungeon * dungeon, char * path) {
 	/* should use mkdir (2) as stretch goal */
 	FILE * file;
 
-	/*
-	this should check for safety of the statement; check if existing: remove, create, etc.
-	this should be done by checking for null
-	*/
 	file = fopen(path, "wb+");
+	if(file == NULL) {
+		fprintf(stderr, "FILE ERROR: Could not open dungeon file at %s! write_dungeon()\n", path);
+        exit(1);
+	}
 
 	/* write the file-type marker */
 	fseek(file, 0, SEEK_SET);
@@ -222,7 +227,7 @@ void print_dungeon(Dungeon * dungeon) {
 	/* add corridors to the print buffer */
 	for(i = 0; i < dungeon->h; i++) {
 		for(j = 0; j < dungeon->w; j++) {
-			if(dungeon->d[i][j].p == 1) {
+			if(dungeon->d[i][j].p == 1 || dungeon->d[i][j].c == '#') {
 				dungeon->p[i][j].c = '#';
 			}
 		}
@@ -360,11 +365,11 @@ int place_room(Dungeon * dungeon) {
 }
 
 /* assistant function for gen_corridors() to check if all rooms are connected */
-int all_connected(int * cnxns, int len) {
+int all_connected(int * cnxns, Dungeon * dungeon) {
 	int i;
 
-	for(i = 0; i < len; i++) {
-		if(cnxns[i] != 1) {
+	for(i = 0; i < dungeon->nr; i++) {
+		if(cnxns[i] != 1 || dungeon->r[i].c != TRUE) {
 			return FALSE;
 		}
 	}
@@ -375,9 +380,9 @@ int all_connected(int * cnxns, int len) {
 /* generates and marks corridors */
 void gen_corridors(Dungeon * dungeon) {
 	int connected[dungeon->nr];
-	memset(connected, 0, dungeon->nr);
+	memset(connected, 0, dungeon->nr * sizeof(int));
 	double dists[dungeon->nr];
-	memset(dists, 0.0, dungeon->nr);
+	memset(dists, 0.0, dungeon->nr * sizeof(double));
 	int max_paths = dungeon->nr * 3;
 	Path paths[max_paths]; /* max paths is 3 * number of rooms */
 	int path_cnt = 0;
@@ -389,9 +394,13 @@ void gen_corridors(Dungeon * dungeon) {
 	}
 	dists[0] = 0;
 
+	/* ensure all rooms are disconnected */
+	for(i = 0; i < dungeon->nr; i++) {
+		dungeon->r[i].c = FALSE;
+	}
 
 	/* primary loop, goal is to connect all rooms; 0 means true */
-	while(all_connected(connected, dungeon->nr) == FALSE && path_cnt < max_paths) {
+	while(all_connected(connected, dungeon) == FALSE && path_cnt < max_paths) {
 		int i;
 		double d;
 		Path new_path;
@@ -416,6 +425,8 @@ void gen_corridors(Dungeon * dungeon) {
 
 		/** this would - in the future - be the point of adding extraneous paths **/
 		if(next != -1) {
+			dungeon->r[room_pos].c = TRUE;
+			dungeon->r[next].c = TRUE;
 			connected[room_pos] = 1;
 			new_path.prev = room_pos;
 			new_path.next = next;
@@ -425,6 +436,16 @@ void gen_corridors(Dungeon * dungeon) {
 		} else {
 			break;
 		}
+
+		/*
+		printf("number of paths, max paths: %d, %d\n", path_cnt, max_paths);
+		printf("number of rooms: %d\n", dungeon->nr);
+		for(i = 0; i < dungeon->nr; i++) {
+			printf("room %d is %d in Room and %d in cxns\n", i, dungeon->r[i].c, connected[i]);
+		}
+		printf("next is: %d\n", next);
+		*/
+
 	}
 
 	/* populate the dungeon grid (draw the paths using x/y chasing/pathing) */
@@ -466,17 +487,6 @@ void gen_corridors(Dungeon * dungeon) {
 				dungeon->d[y][x].h = 0;
 			}
 
-			/*
-			if(dirx != 0 && diry != 0) {
-				int dec = rand() % 2;
-				if(dec == 0) {
-					diry = 0;
-				} else {
-					dirx = 0;
-				}
-			}
-			*/
-
 			if(dirx == -1) {
 				x--;
 			} else if(dirx == 1) {
@@ -489,8 +499,6 @@ void gen_corridors(Dungeon * dungeon) {
 		}
 
 	}
-
-
 
 }
 
@@ -571,31 +579,54 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	return new_dungeon;
 }
 
+void test_args(char * argv_l, int * s, int * l) {
+		if(strcmp(argv_l, "--save") == 0) {
+			*s = TRUE;
+		} else if(strcmp(argv_l, "--load") == 0) {
+			*l = TRUE;
+		}
+}
+
 
 /* Basic procedural dungeon generator */
 int main(int argc, char * argv[]) {
 	/* process commandline arguments */
-
+	int saving = FALSE;
+	int loading = FALSE;
+	if(argc == 3) {
+		/* both --save and --load */
+		int i;
+		for(i = 1; i < argc; i++) {
+			test_args(argv[i], &saving, &loading);
+		}
+	} else if(argc == 2) {
+		/* one of --save or --load */
+		test_args(argv[1], &saving, &loading);
+	} else if(argc > 3) {
+		/* more than 2 commandline arguments, argv[0] is gratuitous */
+		printf("Too many arguments!\n");
+	} else {
+		/* other; most likely 0 */
+	}
 
 	/* init the dungeon with default dungeon size and a max of 12 rooms */
 	srand(time(NULL));
+	char * path = getenv("HOME");
+	strcat(path, "/.rlg327/dungeon");
 	Dungeon dungeon = init_dungeon(21, 80, 12);
-	gen_dungeon(&dungeon);
-	gen_corridors(&dungeon);
-
+	
+	if(loading == FALSE) {
+		gen_dungeon(&dungeon);
+		gen_corridors(&dungeon);
+	} else {
+		read_dungeon(&dungeon, path);
+	}
 
 	print_dungeon(&dungeon);
 
-	char * path = getenv("HOME");
-	strcat(path, "/.rlg327/dungeon");
-
-	write_dungeon(&dungeon, path);
-
-	Dungeon read_from_dungeon = init_dungeon(21, 80, 12);
-	read_dungeon(&read_from_dungeon, path);
-
-	print_dungeon(&read_from_dungeon);
-
+	if(saving == TRUE) {
+		write_dungeon(&dungeon, path);
+	}
 
 	/* free our arrays */
 	int i;
