@@ -4,6 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdint.h>
+#include <endian.h>
 #define	TRUE	1
 #define	FALSE	0
 
@@ -42,18 +43,112 @@ typedef struct {
 	int		nr; /* number of rooms */
 	int		mr;	/* max rooms */
 	Room *	r;	/* rooms buffer */
+	int		v;	/* file version */
+	int		s;	/* file size */
 } Dungeon;
 
 
-/* writes the dungeon file */
-void write_dungeon(Dungeon * dungeon) {
+/* reads from a dungeon file */
+void read_dungeon(Dungeon * dungeon, char * path) {
+	FILE * file;
+	file = fopen(path, "rb+");
+
+	/* read the file-type marker */
+	fseek(file, 0, SEEK_SET);
+	char marker[6];
+	fread(marker, 1, 6, file);
+
+	/* read the file version marker */
+	fseek(file, 6, SEEK_SET);
+	uint32_t file_version;
+	uint32_t file_version_be;
+	fread(&file_version_be, sizeof(uint32_t), 1, file);
+	file_version = be32toh(file_version_be);
+	dungeon->v = file_version;
+
+	/* read the size of file */
+	fseek(file, 10, SEEK_SET);
+	uint32_t size;
+	uint32_t size_be;
+	fread(&size_be, sizeof(uint32_t), 1, file);
+	size = be32toh(size_be);
+	dungeon->s = size;
+
+	/* read the hardness values in */
+	fseek(file, 14, SEEK_SET);
+	int i;
+	int j;
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			int h;
+			int8_t h_8;
+			fread(&h_8, sizeof(int8_t), 1, file);
+			h = (int) h_8;
+			dungeon->d[i][j].h = h;
+		}
+	}
+
+	/* read in rooms in dungeon */
+	fseek(file, 1694, SEEK_SET);
+	/* might want to make this just counted in 4's by the loop below, but w/e, math, amirite? */
+	int room_i = 0;
+	int room_count = (size - 1693) / 4;
+	dungeon->nr = room_count;
+	dungeon->r = calloc(room_count, sizeof(Room));
+	/* could probably be replaced with a getpos() call for complete-ness */
+	int pos;
+	for(pos = 1694; pos < size; pos += 4) {
+		int x_8;
+		int w_8;
+		int y_8;
+		int h_8;
+		fread(&x_8, sizeof(int8_t), 1, file);
+		fread(&w_8, sizeof(int8_t), 1, file);
+		fread(&y_8, sizeof(int8_t), 1, file);
+		fread(&h_8, sizeof(int8_t), 1, file);
+
+		dungeon->r[room_i].tl.x = (int8_t) x_8;
+		dungeon->r[room_i].w = (int8_t) w_8;
+		dungeon->r[room_i].tl.y = (int8_t) y_8;
+		dungeon->r[room_i].h = (int8_t) h_8;
+		dungeon->r[room_i].br.x = ((int8_t) x_8) + dungeon->r[room_i].w-1;
+		dungeon->r[room_i].br.y = ((int8_t) y_8) + dungeon->r[room_i].h-1;
+
+
+
+		room_i++;
+	}
+
+
+	/* populate the rooms and corridors if not in rooms */
+	/* add rooms to the dungeon buffer */
+	int h;
+	for(h = 0; h < dungeon->nr; h++) {
+		for(i = dungeon->r[h].tl.y; i < dungeon->r[h].br.y+1; i++) {
+			for(j = dungeon->r[h].tl.x; j < dungeon->r[h].br.x+1; j++) {
+				dungeon->d[i][j].c = '.';
+			}
+		}
+	}
+
+	/* add corridors to the dungeon buffer */
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			if(dungeon->d[i][j].c != '.' && dungeon->d[i][j].h == 0) {
+				dungeon->d[i][j].c = '#';
+				dungeon->d[i][j].p = 1;
+			}
+		}
+	}
+
+
+	fclose(file);
+}
+
+/* writes the dungeon file to ~/.rlg327/dungeon */
+void write_dungeon(Dungeon * dungeon, char * path) {
 	/* should use mkdir (2) as stretch goal */
 	FILE * file;
-	int path_size = 50;
-	char * path = calloc(path_size, sizeof(char));
-	/* kind of excessive path size; not sure what a good number would be though */
-	path = getenv("HOME");
-	path = strcat(path, "/.rlg327/dungeon");
 
 	/*
 	this should check for safety of the statement; check if existing: remove, create, etc.
@@ -70,12 +165,14 @@ void write_dungeon(Dungeon * dungeon) {
 	/* write the file version marker */
 	fseek(file, 6, SEEK_SET);
 	uint32_t file_version = 0;
-	fwrite(&file_version, sizeof(uint32_t), 1, file);
+	uint32_t file_version_be = htobe32(file_version);
+	fwrite(&file_version_be, sizeof(uint32_t), 1, file);
 
 	/* write the size of the file ;; unsure how to properly calculate */
 	fseek(file, 10, SEEK_SET);
  	uint32_t size = 1693 + (4 * dungeon->nr);
-	fwrite(&size, sizeof(uint32_t), 1, file);
+	uint32_t size_be = htobe32(size);
+	fwrite(&size_be, sizeof(uint32_t), 1, file);
 
 	/* row-major dungeon matrix */
 	fseek(file, 14, SEEK_SET);
@@ -107,7 +204,6 @@ void write_dungeon(Dungeon * dungeon) {
 		fwrite(&h, sizeof(int8_t), 1, file);
 	}
 
-	/*free(path);*/
 	fclose(file);
 }
 
@@ -279,7 +375,9 @@ int all_connected(int * cnxns, int len) {
 /* generates and marks corridors */
 void gen_corridors(Dungeon * dungeon) {
 	int connected[dungeon->nr];
+	memset(connected, 0, dungeon->nr);
 	double dists[dungeon->nr];
+	memset(dists, 0.0, dungeon->nr);
 	int max_paths = dungeon->nr * 3;
 	Path paths[max_paths]; /* max paths is 3 * number of rooms */
 	int path_cnt = 0;
@@ -405,7 +503,7 @@ void gen_dungeon(Dungeon * dungeon) {
 	for(i = 0; i < dungeon->h; i++) {
 		for(j = 0; j < dungeon->w; j++) {
 			(dungeon->d[i][j]).c = ' ';	/* all basic rooms are spaces */
-			int h = rand() % 256;
+			int h = (rand() % 254) + 1;
 			(dungeon->d[i][j]).h = h;
 		}
 	}
@@ -487,11 +585,28 @@ int main(int argc, char * argv[]) {
 
 
 	print_dungeon(&dungeon);
-	write_dungeon(&dungeon);
+
+	char * path = getenv("HOME");
+	strcat(path, "/.rlg327/dungeon");
+
+	write_dungeon(&dungeon, path);
+
+	Dungeon read_from_dungeon = init_dungeon(21, 80, 12);
+	read_dungeon(&read_from_dungeon, path);
+
+	print_dungeon(&read_from_dungeon);
 
 
 	/* free our arrays */
+	int i;
+	for(i = 0; i < dungeon.h; i++) {
+		free(dungeon.d[i]);
+	}
 	free(dungeon.d);
+	for(i = 0; i < dungeon.h; i++) {
+		free(dungeon.p[i]);
+	}
+	free(dungeon.p);
 	free(dungeon.r);
 	return 0;
 }
