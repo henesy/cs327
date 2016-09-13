@@ -2,4 +2,5 @@
 09/11 @02:30am: Added writing and reading from a file
 09/11 @12:34pm: Added commandline arguments support and fopen(3) error checking
 09/11 @01:30pm: Fixed a tricky bug where memset() was not 0'ing out the entire array space; pyrite was not connecting rooms consistently due to corrupted memory space
+09/13 @03:00pm: Added mkdir() usage to create the .rlg327/ directory in /home/$USER should one not exist
 

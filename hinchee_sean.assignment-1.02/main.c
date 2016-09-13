@@ -5,6 +5,8 @@
 #include <math.h>
 #include <stdint.h>
 #include <endian.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #define	TRUE	1
 #define	FALSE	0
 
@@ -152,8 +154,17 @@ void read_dungeon(Dungeon * dungeon, char * path) {
 
 /* writes the dungeon file to ~/.rlg327/dungeon */
 void write_dungeon(Dungeon * dungeon, char * path) {
-	/* should use mkdir (2) as stretch goal */
 	FILE * file;
+
+	/* folder creation logic */
+	char * env_home = getenv("HOME");
+	char * fdir_path;
+	fdir_path = calloc(strlen(env_home) + 9, sizeof(char));
+	strcpy(fdir_path, env_home);
+	strcat(fdir_path, "/.rlg327");
+	mkdir(fdir_path, S_IRWXU);
+	/* mkdir will return -1 when it fails, but it will fail if the file exists so it doesn't especially matter to catch it as no output would be provided */
+
 
 	file = fopen(path, "wb+");
 	if(file == NULL) {
@@ -209,6 +220,7 @@ void write_dungeon(Dungeon * dungeon, char * path) {
 		fwrite(&h, sizeof(int8_t), 1, file);
 	}
 
+	free(fdir_path);
 	fclose(file);
 }
 
@@ -611,7 +623,11 @@ int main(int argc, char * argv[]) {
 
 	/* init the dungeon with default dungeon size and a max of 12 rooms */
 	srand(time(NULL));
-	char * path = getenv("HOME");
+	
+	/* create 2 char pointers so as not to pollute the original HOME variable */
+	char * env_path = getenv("HOME");
+	char * path = calloc(strlen(env_path) + 17, sizeof(char));
+	strcpy(path, env_path);
 	strcat(path, "/.rlg327/dungeon");
 	Dungeon dungeon = init_dungeon(21, 80, 12);
 	
@@ -639,5 +655,6 @@ int main(int argc, char * argv[]) {
 	}
 	free(dungeon.p);
 	free(dungeon.r);
+	free(path);
 	return 0;
 }
