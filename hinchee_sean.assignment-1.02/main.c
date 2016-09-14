@@ -591,11 +591,18 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	return new_dungeon;
 }
 
-void test_args(char * argv_l, int * s, int * l) {
-		if(strcmp(argv_l, "--save") == 0) {
+void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *cp) {
+		if(strcmp(argv[this], "--save") == 0) {
 			*s = TRUE;
-		} else if(strcmp(argv_l, "--load") == 0) {
+		} else if(strcmp(argv[this], "--load") == 0) {
 			*l = TRUE;
+		} else if(strcmp(argv[this], "-f") == 0) {
+			*p = TRUE;
+			*cp = this+1;
+			if(this+1 > argc-1) {
+				printf("Invalid filename argument!\n");
+				*p = FALSE;
+			}
 		}
 }
 
@@ -603,18 +610,21 @@ void test_args(char * argv_l, int * s, int * l) {
 /* Basic procedural dungeon generator */
 int main(int argc, char * argv[]) {
 	/* process commandline arguments */
+	int max_args = 5;
 	int saving = FALSE;
 	int loading = FALSE;
-	if(argc == 3) {
+	int pathing = FALSE;
+	int custom_path = 0;
+	if(argc > 2 && argc <= max_args) {
 		/* both --save and --load */
 		int i;
 		for(i = 1; i < argc; i++) {
-			test_args(argv[i], &saving, &loading);
+			test_args(argc, argv, i, &saving, &loading, &pathing, &custom_path);
 		}
 	} else if(argc == 2) {
 		/* one of --save or --load */
-		test_args(argv[1], &saving, &loading);
-	} else if(argc > 3) {
+		test_args(argc, argv, 1, &saving, &loading, &pathing, &custom_path);
+	} else if(argc > max_args) {
 		/* more than 2 commandline arguments, argv[0] is gratuitous */
 		printf("Too many arguments!\n");
 	} else {
@@ -626,9 +636,17 @@ int main(int argc, char * argv[]) {
 	
 	/* create 2 char pointers so as not to pollute the original HOME variable */
 	char * env_path = getenv("HOME");
-	char * path = calloc(strlen(env_path) + 17, sizeof(char));
+	/* char * path = calloc(strlen(env_path) + 17, sizeof(char)); */
+	char * path = calloc(strlen(env_path) + 50, sizeof(char));
 	strcpy(path, env_path);
-	strcat(path, "/.rlg327/dungeon");
+	strcat(path, "/.rlg327");
+	if(pathing == TRUE) {
+		strcat(path, "/");
+		strcat(path, argv[custom_path]);
+	} else {
+		strcat(path, "/dungeon");
+	}
+
 	Dungeon dungeon = init_dungeon(21, 80, 12);
 	
 	if(loading == FALSE) {
