@@ -143,6 +143,7 @@ void new_map_dungeon(Dungeon * dungeon) {
 	int px = dungeon->ss[dungeon->pc].p.x;
 	int py = dungeon->ss[dungeon->pc].p.y;
 	tiles[py][px].cost = 0;
+	tiles[py][px].v = TRUE;
 	binheap_insert(&h, &tiles[py][px]);
 
 	/* primary cost calculation logic */
@@ -161,14 +162,13 @@ void new_map_dungeon(Dungeon * dungeon) {
 			if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
 				int hard = dungeon->d[y][x].h;
 				if(hard == 0) {
-					if(tiles[y][x].cost == INT_MAX) {
-						if((tiles[y][x].cost > tc && tiles[y][x].v == TRUE) || tiles[y][x].v == FALSE) {
+						int trial_cost = tc + h_calc(hard);
+						if((tiles[y][x].cost > trial_cost && tiles[y][x].v == TRUE) || tiles[y][x].v == FALSE) {
 							tiles[y][x].cost = tc + h_calc(hard);
 							tiles[y][x].v = TRUE;
 				
 							binheap_insert(&h, (void *) &tiles[y][x]);
 						}
-					}
 				}
 			}
 		}
