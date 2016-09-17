@@ -46,20 +46,21 @@ typedef struct {
 } Room;
 
 typedef struct {
-	Tile 	**	d;	/* dungeon buffer */
-	Tile 	**	p;	/* print buffer */
-	int			h;	/* height */
-	int			w;	/* width */
-	int			nr; /* number of rooms */
-	int			mr;	/* max rooms */
-	Room 	*	r;	/* rooms buffer */
-	int			v;	/* file version */
-	int			s;	/* file size */
-	Sprite	*	ss;	/* sprite array */
-	int			ns;	/* number of sprites */
-	int			ms;	/* max number of sprites */
-	int		**	cs;	/* costs for djikstra's map */
-	int			pc;	/* location of PC in SpriteS array (.ss) */
+	Tile 	**	d;		/* dungeon buffer */
+	Tile 	**	p;		/* print buffer */
+	int			h;		/* height */
+	int			w;		/* width */
+	int			nr; 	/* number of rooms */
+	int			mr;		/* max rooms */
+	Room 	*	r;		/* rooms buffer */
+	int			v;		/* file version */
+	int			s;		/* file size */
+	Sprite	*	ss;		/* sprite array */
+	int			ns;		/* number of sprites */
+	int			ms;		/* max number of sprites */
+	int		**	csnt;
+	int		**	cst;	/* costs for djikstra's map */
+	int			pc;		/* location of PC in SpriteS array (.ss) */
 } Dungeon;
 
 typedef struct {
@@ -75,12 +76,34 @@ void print_hardnesS(Dungeon * dungeon) {
 }
 
 /* prints heatmap */
+void print_t_heatmap(Dungeon * dungeon) {
+	int i;
+	int j;
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			int c = dungeon->cst[i][j];
+			if(c >= 0 && c < 10) {
+				printf("%d", c);
+			} else if(c >= 10 && c < 36) {
+				printf("%c", 'a' + (c - 10));
+			} else if(c >= 36 && c < 62) {
+				printf("%c", 'A' + (c - 36));
+			} else {
+				printf("%c", dungeon->d[i][j].c);
+			}
+		}
+		printf("\n");
+	}
+
+}
+
+/* prints heatmap */
 void print_nont_heatmap(Dungeon * dungeon) {
 	int i;
 	int j;
 	for(i = 0; i < dungeon->h; i++) {
 		for(j = 0; j < dungeon->w; j++) {
-			int c = dungeon->cs[i][j];
+			int c = dungeon->csnt[i][j];
 			if(c >= 0 && c < 10) {
 				printf("%d", c);
 			} else if(c >= 10 && c < 36) {
@@ -107,17 +130,19 @@ int h_calc(int h) {
 
 	if(h >= 0 && h < 85) {
 		return 1;
-	} else if(h > 84 && h < 171) {
+	}
+	if(h > 84 && h < 171) {
 		return 2;
-	} else if(h > 170 && h < 255) {
+	}
+	if(h > 170 && h < 255) {
 		return 3;
 	}
-	
+
 	return hc;
 }
 
-/* djikstra's take 2 */
-void new_map_dungeon(Dungeon * dungeon) {
+/* djikstra's take 2; with tunnelling */
+void new_map_dungeon_t(Dungeon * dungeon) {
 	binheap_t h;
 	Tile_Node tiles[dungeon->h][dungeon->w];
 
@@ -129,7 +154,7 @@ void new_map_dungeon(Dungeon * dungeon) {
 
 	int i;
 	int j;
-	
+
 	/* set all indices and insert the default values */
 	for(i = 0; i < dungeon->h; i++) {
 		for(j = 0; j < dungeon->w; j++) {
@@ -155,19 +180,20 @@ void new_map_dungeon(Dungeon * dungeon) {
 		int hx = ((Tile_Node *) p)->x;
 		int hy = ((Tile_Node *) p)->y;
 		int tc = ((Tile_Node *) p)->cost;
-		
+
 		int i;
 		for(i = 0; i < 8; i++) {
 			int x = hx + xs[i];
 			int y = hy + ys[i];
 			if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
 				int hard = dungeon->d[y][x].h;
-				if(hard == 0) {
+				if(hard < 255) {
 						int trial_cost = tc + h_calc(hard);
+						printf("%d\n", tc);
 						if((tiles[y][x].cost > trial_cost && tiles[y][x].v == TRUE) || tiles[y][x].v == FALSE) {
 							tiles[y][x].cost = tc + h_calc(hard);
 							tiles[y][x].v = TRUE;
-				
+
 							binheap_insert(&h, (void *) &tiles[y][x]);
 						}
 				}
@@ -179,9 +205,81 @@ void new_map_dungeon(Dungeon * dungeon) {
 	/* copy the heatmap to the dungeon */
 	for(i = 0; i < dungeon->h; i++) {
 		for(j = 0; j < dungeon->w; j++) {
-			dungeon->cs[i][j] = tiles[i][j].cost;
+			dungeon->cst[i][j] = tiles[i][j].cost;
 		}
-	} 
+	}
+
+
+	/* clean up the heap */
+	binheap_delete(&h);
+}
+
+/* djikstra's take 2 */
+void new_map_dungeon_nont(Dungeon * dungeon) {
+	binheap_t h;
+	Tile_Node tiles[dungeon->h][dungeon->w];
+
+	binheap_init(&h, compare_int, NULL);
+
+	/* starts from top left */
+	int xs[8] = {-1,0,1,1,1,0,-1,-1};
+	int ys[8] = {-1,-1,-1,0,1,1,1,0};
+
+	int i;
+	int j;
+
+	/* set all indices and insert the default values */
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			tiles[i][j].y = i;
+			tiles[i][j].x = j;
+			tiles[i][j].cost = INT_MAX;
+			tiles[i][j].v = FALSE;
+		}
+	}
+
+	/* set the player's cost as 0: */
+	int px = dungeon->ss[dungeon->pc].p.x;
+	int py = dungeon->ss[dungeon->pc].p.y;
+	tiles[py][px].cost = 0;
+	tiles[py][px].v = TRUE;
+	binheap_insert(&h, &tiles[py][px]);
+
+	/* primary cost calculation logic */
+
+	binheap_node_t	*p;
+
+	while((p = binheap_remove_min(&h))) {
+		int hx = ((Tile_Node *) p)->x;
+		int hy = ((Tile_Node *) p)->y;
+		int tc = ((Tile_Node *) p)->cost;
+
+		int i;
+		for(i = 0; i < 8; i++) {
+			int x = hx + xs[i];
+			int y = hy + ys[i];
+			if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
+				int hard = dungeon->d[y][x].h;
+				if(hard == 0) {
+						int trial_cost = tc + h_calc(hard);
+						if((tiles[y][x].cost > trial_cost && tiles[y][x].v == TRUE) || tiles[y][x].v == FALSE) {
+							tiles[y][x].cost = tc + h_calc(hard);
+							tiles[y][x].v = TRUE;
+
+							binheap_insert(&h, (void *) &tiles[y][x]);
+						}
+				}
+			}
+		}
+
+	}
+
+	/* copy the heatmap to the dungeon */
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			dungeon->csnt[i][j] = tiles[i][j].cost;
+		}
+	}
 
 
 	/* clean up the heap */
@@ -197,11 +295,11 @@ void map_dungeon(Dungeon * dungeon) {
 	binheap_t 		h;
 	/*binheap_node_t	*costs[dungeon->h][dungeon->w];*/
 	Tile_Node		tiles[dungeon->h][dungeon->w];
-	
+
 
 	/* initiate the binary heap */
 	binheap_init(&h, compare_int, NULL);
-	
+
 	int i;
 	int j;
 	/* set all indices and insert the default values */
@@ -227,7 +325,7 @@ void map_dungeon(Dungeon * dungeon) {
 		int hx = ((Tile_Node *) p)->x;
 		int hy = ((Tile_Node *) p)->y;
 		int tc = ((Tile_Node *) p)->cost;
-		
+
 		int bx = hx-1;
 		int by = hy-1;
 		int lx = hx+2;
@@ -236,7 +334,7 @@ void map_dungeon(Dungeon * dungeon) {
 		if(hy+1 > dungeon->h)
 			ly = dungeon->h-1;
 		if(hx+2 > dungeon->w)
-			lx = dungeon->w-1;	
+			lx = dungeon->w-1;
 		if(hx-1 < 0)
 			bx = 0;
 		if(hy-1 < 0)
@@ -261,7 +359,7 @@ void map_dungeon(Dungeon * dungeon) {
 			if(hard == 0 && tiles[ly][i].cost == INT_MAX) {
 				if(tiles[ly][i].cost > tc + 1 + h_calc(hard) || tiles[ly][i].cost == INT_MAX)
 					tiles[ly][i].cost = tc + 1 + h_calc(hard);
-				
+
 				binheap_insert(&h, (void *) &tiles[ly][i]);
 			}
 		}
@@ -291,9 +389,9 @@ void map_dungeon(Dungeon * dungeon) {
 	/* copy the heatmap to the dungeon */
 	for(i = 0; i < dungeon->h; i++) {
 		for(j = 0; j < dungeon->w; j++) {
-			dungeon->cs[i][j] = tiles[i][j].cost;
+			dungeon->csnt[i][j] = tiles[i][j].cost;
 		}
-	} 
+	}
 
 
 	/* clean up the heap */
@@ -876,9 +974,15 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	new_dungeon.ss = calloc(new_dungeon.ms, sizeof(Sprite));
 
 	/* djikstra-based cost map allocation */
-	new_dungeon.cs = calloc(w*h, sizeof(int *));
+	new_dungeon.cst = calloc(w*h, sizeof(int *));
 	for(i = 0; i < new_dungeon.h; i++) {
-		new_dungeon.cs[i] = calloc(new_dungeon.w, sizeof(int));
+		new_dungeon.cst[i] = calloc(new_dungeon.w, sizeof(int));
+	}
+
+	/* djikstra-based cost map allocation */
+	new_dungeon.csnt = calloc(w*h, sizeof(int *));
+	for(i = 0; i < new_dungeon.h; i++) {
+		new_dungeon.csnt[i] = calloc(new_dungeon.w, sizeof(int));
 	}
 
 	return new_dungeon;
@@ -928,7 +1032,7 @@ int main(int argc, char * argv[]) {
 
 	/* init the dungeon with default dungeon size and a max of 12 rooms */
 	srand(time(NULL));
-	
+
 	/* create 2 char pointers so as not to pollute the original HOME variable */
 	char * env_path = getenv("HOME");
 	/* char * path = calloc(strlen(env_path) + 17, sizeof(char)); */
@@ -943,7 +1047,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	Dungeon dungeon = init_dungeon(21, 80, 12);
-	
+
 	if(loading == FALSE) {
 		gen_dungeon(&dungeon);
 		gen_corridors(&dungeon);
@@ -953,11 +1057,13 @@ int main(int argc, char * argv[]) {
 	/*** dungeon is fully initiated ***/
 	Sprite pc = gen_sprite(&dungeon, '@', -1, -1, 1);
 	add_sprite(&dungeon, pc);
-	new_map_dungeon(&dungeon);
+	new_map_dungeon_nont(&dungeon);
+	new_map_dungeon_t(&dungeon);
 
 	print_dungeon(&dungeon);
 
 	print_nont_heatmap(&dungeon);
+	print_t_heatmap(&dungeon);
 
 	if(saving == TRUE) {
 		write_dungeon(&dungeon, path);
@@ -975,10 +1081,14 @@ int main(int argc, char * argv[]) {
 	free(dungeon.p);
 	free(dungeon.r);
 	free(dungeon.ss);
-	free(dungeon.cs);
 	for(i = 0; i < dungeon.h; i++) {
-		free(dungeon.cs[i]);
+		free(dungeon.csnt[i]);
 	}
+	free(dungeon.csnt);
+	for(i = 0; i < dungeon.h; i++) {
+		free(dungeon.cst[i]);
+	}
+	free(dungeon.cst);
 	free(path);
 	return 0;
 }
