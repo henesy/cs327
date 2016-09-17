@@ -1,4 +1,5 @@
 09/16 @10:00pm: Began work on dijkstra's algorithm mapping
 09/17 @03:00am: Non-perfect dijkstra's implemented; had loopback issues
-09/17 @01:45pm: dijkstra's for non-tunnelling monsters complete
+09/17 @01:45pm: dijkstra's for non-tunneling monsters complete
+09/17 @04:10pm: dijkstra's for tunneling and non-tunneling monsters complete with printing of all 3 views
 
