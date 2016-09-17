@@ -4,4 +4,5 @@
 09/11 @01:30pm: Fixed a tricky bug where memset() was not 0'ing out the entire array space; pyrite was not connecting rooms consistently due to corrupted memory space
 09/13 @03:00pm: Added mkdir() usage to create the .rlg327/ directory in /home/$USER should one not exist
 09/13 @08:30pm: Added -f flag for specifying a path to save/read the dungeon to/from 
+09/14 @09:30am: Fixed a mistake in the extraneous -f flag code
 
