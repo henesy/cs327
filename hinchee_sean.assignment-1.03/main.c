@@ -165,8 +165,9 @@ void new_map_dungeon(Dungeon * dungeon) {
 						if((tiles[y][x].cost > tc && tiles[y][x].v == TRUE) || tiles[y][x].v == FALSE) {
 							tiles[y][x].cost = tc + h_calc(hard);
 							tiles[y][x].v = TRUE;
+				
+							binheap_insert(&h, (void *) &tiles[y][x]);
 						}
-						binheap_insert(&h, (void *) &tiles[y][x]);
 					}
 				}
 			}
