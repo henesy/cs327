@@ -189,7 +189,6 @@ void new_map_dungeon_t(Dungeon * dungeon) {
 				int hard = dungeon->d[y][x].h;
 				if(hard < 255) {
 						int trial_cost = tc + h_calc(hard);
-						printf("%d\n", tc);
 						if((tiles[y][x].cost > trial_cost && tiles[y][x].v == TRUE) || tiles[y][x].v == FALSE) {
 							tiles[y][x].cost = tc + h_calc(hard);
 							tiles[y][x].v = TRUE;
@@ -199,7 +198,6 @@ void new_map_dungeon_t(Dungeon * dungeon) {
 				}
 			}
 		}
-
 	}
 
 	/* copy the heatmap to the dungeon */
@@ -615,7 +613,7 @@ void write_dungeon(Dungeon * dungeon, char * path) {
 }
 
 /* prints the dungeon */
-void print_dungeon(Dungeon * dungeon) {
+void print_dungeon(Dungeon * dungeon, int nt, int t) {
 	int i;
 	int j;
 	int h;
@@ -649,6 +647,39 @@ void print_dungeon(Dungeon * dungeon) {
 		dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = dungeon->ss[i].c;
 	}
 
+	/* print non-tunnelling dijkstra's */
+	if(nt > 0) {
+		for(i = 0; i < dungeon->h; i++) {
+			for(j = 0; j < dungeon->w; j++) {
+				if(dungeon->d[i][j].h == 0) {
+					int c = dungeon->csnt[i][j];
+					if(c >= 0 && c < 10) {
+						dungeon->p[i][j].c = '0' + c;
+					} else if(c >= 10 && c < 36) {
+						dungeon->p[i][j].c = 'a' + (c - 10);
+					} else if(c >= 36 && c < 62) {
+						dungeon->p[i][j].c = 'A' + (c - 36);
+					}
+				}
+			}
+		}
+	}
+
+	/* print tunnelling dijkstra's */
+	if(t > 0) {
+		for(i = 0; i < dungeon->h; i++) {
+			for(j = 0; j < dungeon->w; j++) {
+				int c = dungeon->cst[i][j];
+				if(c >= 0 && c < 10) {
+					dungeon->p[i][j].c = '0' + c;
+				} else if(c >= 10 && c < 36) {
+					dungeon->p[i][j].c = 'a' + (c - 10);
+				} else if(c >= 36 && c < 62) {
+					dungeon->p[i][j].c = 'A' + (c - 36);
+				}
+			}
+		}
+	}
 
 	/* print the print buffer */
 	for(i = 0; i < dungeon->h; i++) {
@@ -1060,10 +1091,9 @@ int main(int argc, char * argv[]) {
 	new_map_dungeon_nont(&dungeon);
 	new_map_dungeon_t(&dungeon);
 
-	print_dungeon(&dungeon);
-
-	print_nont_heatmap(&dungeon);
-	print_t_heatmap(&dungeon);
+	print_dungeon(&dungeon, 0, 0);
+	print_dungeon(&dungeon, 1, 0);
+	print_dungeon(&dungeon, 0, 1);
 
 	if(saving == TRUE) {
 		write_dungeon(&dungeon, path);
