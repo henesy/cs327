@@ -7,7 +7,7 @@ extern "C" {
 
 # include <stdint.h>
 
-struct binheap_hode;
+struct binheap_node;
 typedef struct binheap_node binheap_node_t;
 
 typedef struct binheap {

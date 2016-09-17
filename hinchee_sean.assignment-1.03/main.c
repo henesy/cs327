@@ -7,6 +7,7 @@
 #include <endian.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <limits.h>
 #include "binheap.h"
 #define	TRUE	1
 #define	FALSE	0
@@ -57,14 +58,132 @@ typedef struct {
 	Sprite	*	ss;	/* sprite array */
 	int			ns;	/* number of sprites */
 	int			ms;	/* max number of sprites */
-	int		*	cs;	/* costs for djikstra's map */
+	int		**	cs;	/* costs for djikstra's map */
 	int			pc;	/* location of PC in SpriteS array (.ss) */
 } Dungeon;
 
+typedef struct {
+	int x;
+	int y;
+	int cost;
+	int v;
+} Tile_Node;
+
+
+/* print hardness */
+void print_hardnesS(Dungeon * dungeon) {
+}
+
+/* prints heatmap */
+void print_heatmap(Dungeon * dungeon) {
+	int i;
+	int j;
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			int c = dungeon->cs[i][j];
+			if(c >= 0 && c < 10) {
+				printf("%d", c);
+			} else if(c >= 10 && c < 36) {
+				printf("%c", 'a' + (c - 10));
+			} else if(c >= 36 && c < 62) {
+				printf("%c", 'A' + (c - 36));
+			} else {
+				printf("%c", dungeon->d[i][j].c);
+			}
+		}
+		printf("\n");
+	}
+}
 
 /* compare two ints used as costs ;; 0 if same, <0 if higher than key; >0 if lower than key */
 int compare_int(const void *key, const void *with) {
 	return *(const int *) key - *(const int *) with;
+}
+
+/* returns the hardness cost of an int hardness */
+int h_calc(int h) {
+	int hc = 0;
+
+	if(h >= 0 && h < 85) {
+		return 1;
+	} else if(h > 84 && h < 171) {
+		return 2;
+	} else if(h > 170 && h < 255) {
+		return 3;
+	}
+	
+	return hc;
+}
+
+/* djikstra's take 2 */
+void new_map_dungeon(Dungeon * dungeon) {
+	binheap_t h;
+	Tile_Node tiles[dungeon->h][dungeon->w];
+
+	binheap_init(&h, compare_int, NULL);
+
+	/* starts from top left */
+	int xs[8] = {-1,0,1,1,1,0,-1,-1};
+	int ys[8] = {-1,-1,-1,0,1,1,1,0};
+
+	int i;
+	int j;
+	
+	/* set all indices and insert the default values */
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			tiles[i][j].y = i;
+			tiles[i][j].x = j;
+			tiles[i][j].cost = INT_MAX;
+			tiles[i][j].v = FALSE;
+		}
+	}
+
+	/* set the player's cost as 0: */
+	int px = dungeon->ss[dungeon->pc].p.x;
+	int py = dungeon->ss[dungeon->pc].p.y;
+	tiles[py][px].cost = 0;
+	binheap_insert(&h, &tiles[py][px]);
+
+	/* primary cost calculation logic */
+
+	binheap_node_t	*p;
+
+	while((p = binheap_remove_min(&h))) {
+		int hx = ((Tile_Node *) p)->x;
+		int hy = ((Tile_Node *) p)->y;
+		int tc = ((Tile_Node *) p)->cost;
+		
+		int i;
+		for(i = 0; i < 8; i++) {
+			int x = hx + xs[i];
+			int y = hy + ys[i];
+			if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
+				int hard = dungeon->d[y][x].h;
+				if(hard == 0) {
+					if(tiles[y][x].cost == INT_MAX) {
+						if((tiles[y][x].cost > tc && tiles[y][x].v == TRUE) || tiles[y][x].v == FALSE) {
+							tiles[y][x].cost = tc + h_calc(hard);
+							tiles[y][x].v = TRUE;
+						}
+						binheap_insert(&h, (void *) &tiles[y][x]);
+					}
+				}
+			}
+		}
+
+	}
+
+	/* copy the heatmap to the dungeon */
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			dungeon->cs[i][j] = tiles[i][j].cost;
+		}
+	} 
+
+
+	/* clean up the heap */
+	binheap_delete(&h);
 }
 
 /* run djikstra's on the dungeon and map the weights */
@@ -73,12 +192,106 @@ void map_dungeon(Dungeon * dungeon) {
 	costs are labelled as 0-9, a-z, A-Z; as such printable values are mapped from 0-61 (62 values)
 	map is built from the player out
 	**/
-	int size = dungeon->h * dungeon->w;
-	binheap_t h;
+	binheap_t 		h;
+	/*binheap_node_t	*costs[dungeon->h][dungeon->w];*/
+	Tile_Node		tiles[dungeon->h][dungeon->w];
+	
 
 	/* initiate the binary heap */
-	binheap_init_from_array(&h, dungeon->cs, sizeof(*(dungeon->cs)), size, compare_int, NULL);
+	binheap_init(&h, compare_int, NULL);
 	
+	int i;
+	int j;
+	/* set all indices and insert the default values */
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			tiles[i][j].y = i;
+			tiles[i][j].x = j;
+			tiles[i][j].cost = INT_MAX;
+		}
+	}
+
+	/* set the player's cost as 0: */
+	int px = dungeon->ss[dungeon->pc].p.x;
+	int py = dungeon->ss[dungeon->pc].p.y;
+	tiles[py][px].cost = 0;
+	binheap_insert(&h, &tiles[py][px]);
+
+	/* primary cost calculation logic */
+
+	binheap_node_t	*p;
+
+	while((p = binheap_remove_min(&h))) {
+		int hx = ((Tile_Node *) p)->x;
+		int hy = ((Tile_Node *) p)->y;
+		int tc = ((Tile_Node *) p)->cost;
+		
+		int bx = hx-1;
+		int by = hy-1;
+		int lx = hx+2;
+		int ly = hy+1;
+
+		if(hy+1 > dungeon->h)
+			ly = dungeon->h-1;
+		if(hx+2 > dungeon->w)
+			lx = dungeon->w-1;	
+		if(hx-1 < 0)
+			bx = 0;
+		if(hy-1 < 0)
+			by = 0;
+
+		/* above the point */
+		for(i = bx; i < lx; i++) {
+			int hard;
+			hard = dungeon->d[by][i].h;
+			if(hard == 0 && tiles[by][i].cost == INT_MAX) {
+				if(tiles[by][i].cost > tc + 1 + h_calc(hard) || tiles[by][i].cost == INT_MAX)
+					tiles[by][i].cost = tc + 1 +h_calc(hard);
+
+				binheap_insert(&h, (void *) &tiles[by][i]);
+			}
+		}
+
+		/* below the point */
+		for(i = bx; i < lx; i++) {
+			int hard;
+			hard = dungeon->d[ly][i].h;
+			if(hard == 0 && tiles[ly][i].cost == INT_MAX) {
+				if(tiles[ly][i].cost > tc + 1 + h_calc(hard) || tiles[ly][i].cost == INT_MAX)
+					tiles[ly][i].cost = tc + 1 + h_calc(hard);
+				
+				binheap_insert(&h, (void *) &tiles[ly][i]);
+			}
+		}
+
+		/* left */
+		int hard;
+		hard = dungeon->d[hy][bx].h;
+		if(hard == 0 && tiles[hy][bx].cost == INT_MAX) {
+			if( tiles[hy][bx].cost > tc + 1 + h_calc(hard) || tiles[hy][bx].cost == INT_MAX )
+				tiles[hy][bx].cost = tc + 1 + h_calc(hard);
+
+			binheap_insert(&h, (void *) &tiles[hy][bx]);
+		}
+
+		/* right */
+		hard = dungeon->d[hy][hx+1].h;
+		if(hard == 0 && tiles[hy][hx+1].cost == INT_MAX) {
+			if( tiles[hy][hx+1].cost > tc + 1 + h_calc(hard) || tiles[hy][hx+1].cost == INT_MAX)
+				tiles[hy][hx+1].cost = tc + 1 + h_calc(hard);
+
+			binheap_insert(&h, (void *) &tiles[hy][hx+1]);
+		}
+
+
+	}
+
+	/* copy the heatmap to the dungeon */
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			dungeon->cs[i][j] = tiles[i][j].cost;
+		}
+	} 
 
 
 	/* clean up the heap */
@@ -661,7 +874,10 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	new_dungeon.ss = calloc(new_dungeon.ms, sizeof(Sprite));
 
 	/* djikstra-based cost map allocation */
-	new_dungeon.cs = calloc(w*h, sizeof(int));
+	new_dungeon.cs = calloc(w*h, sizeof(int *));
+	for(i = 0; i < new_dungeon.h; i++) {
+		new_dungeon.cs[i] = calloc(new_dungeon.w, sizeof(int));
+	}
 
 	return new_dungeon;
 }
@@ -735,9 +951,11 @@ int main(int argc, char * argv[]) {
 	/*** dungeon is fully initiated ***/
 	Sprite pc = gen_sprite(&dungeon, '@', -1, -1, 1);
 	add_sprite(&dungeon, pc);
-
+	new_map_dungeon(&dungeon);
 
 	print_dungeon(&dungeon);
+
+	print_heatmap(&dungeon);
 
 	if(saving == TRUE) {
 		write_dungeon(&dungeon, path);
