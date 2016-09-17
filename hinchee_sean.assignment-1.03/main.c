@@ -75,7 +75,7 @@ void print_hardnesS(Dungeon * dungeon) {
 }
 
 /* prints heatmap */
-void print_heatmap(Dungeon * dungeon) {
+void print_nont_heatmap(Dungeon * dungeon) {
 	int i;
 	int j;
 	for(i = 0; i < dungeon->h; i++) {
@@ -93,6 +93,7 @@ void print_heatmap(Dungeon * dungeon) {
 		}
 		printf("\n");
 	}
+
 }
 
 /* compare two ints used as costs ;; 0 if same, <0 if higher than key; >0 if lower than key */
@@ -956,7 +957,7 @@ int main(int argc, char * argv[]) {
 
 	print_dungeon(&dungeon);
 
-	print_heatmap(&dungeon);
+	print_nont_heatmap(&dungeon);
 
 	if(saving == TRUE) {
 		write_dungeon(&dungeon, path);
@@ -975,6 +976,9 @@ int main(int argc, char * argv[]) {
 	free(dungeon.r);
 	free(dungeon.ss);
 	free(dungeon.cs);
+	for(i = 0; i < dungeon.h; i++) {
+		free(dungeon.cs[i]);
+	}
 	free(path);
 	return 0;
 }
