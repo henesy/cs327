@@ -61,8 +61,8 @@ void print_nont_heatmap(Dungeon * dungeon) {
 
 /* compare two ints used as costs ;; 0 if same, <0 if higher than key; >0 if lower than key */
 int compare_int(const void *key, const void *with) {
-	printf("%d\n", *(const int *) key);
-	return *(const int *) key - *(const int *) with;
+	//printf("%d\n", *(const int *) key);
+	return (const int) ((*(Tile_Node *) key).cost - (*(Tile_Node *) with).cost);
 }
 
 /* compare movement turns/priority for turns */
@@ -893,8 +893,8 @@ int main(int argc, char * argv[]) {
 
 
 	print_dungeon(&dungeon, 0, 0);
-	print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
-	print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
+	//print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
+	//print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
 
 	/*** tear down sequence ***/
 	binheap_delete(&h);
