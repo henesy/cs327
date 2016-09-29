@@ -9,67 +9,7 @@
 #include <sys/types.h>
 #include <limits.h>
 #include "binheap.h"
-#define	TRUE	1
-#define	FALSE	0
-
-typedef struct {
-	int		h;	/* hardness */
-	char	c;	/* visual character */
-	int		p;	/* mark 1 if path, 0 if not a path (corridors) */
-} Tile;
-
-typedef struct {
-	int	x; /* x coordinate */
-	int	y; /* y coordinate */
-} Position;
-
-/* maybe make these pointers? */
-typedef struct {
-	int prev; /* previous room in the path (using Room.id) */
-	int next; /* room the path leads to (using Room.id) */
-} Path;
-
-typedef struct {
-	Position	p;	/* position of the sprite in the dungeon */
-	char		c;	/* character to print for the sprite */
-} Sprite;
-
-typedef struct {
-	Position	tl;		/* top left coordinate of the room, used as the core point of reference */
-	Position	br;		/* bottom right coordinate of the room as per above */
-	int			w;		/* width */
-	int			h;		/* height */
-	int			id;		/* room ID, potentially useful for organization */
-	int			p;		/* mark 1 if processed; 0 if not processed (corridors) */
-	Position	ctr;	/* "center" point; very rough, might need improved */
-	int			c;		/* if connected or not; TRUE/FALSE switch */
-} Room;
-
-typedef struct {
-	Tile 	**	d;		/* dungeon buffer */
-	Tile 	**	p;		/* print buffer */
-	int			h;		/* height */
-	int			w;		/* width */
-	int			nr; 	/* number of rooms */
-	int			mr;		/* max rooms */
-	Room 	*	r;		/* rooms buffer */
-	int			v;		/* file version */
-	int			s;		/* file size */
-	Sprite	*	ss;		/* sprite array */
-	int			ns;		/* number of sprites */
-	int			ms;		/* max number of sprites */
-	int		**	csnt;
-	int		**	cst;	/* costs for djikstra's map */
-	int			pc;		/* location of PC in SpriteS array (.ss) */
-} Dungeon;
-
-typedef struct {
-	int x;
-	int y;
-	int cost;
-	int v;
-} Tile_Node;
-
+#include "dungeon_generator.h"
 
 /* print hardness */
 void print_hardnesS(Dungeon * dungeon) {
@@ -121,7 +61,13 @@ void print_nont_heatmap(Dungeon * dungeon) {
 
 /* compare two ints used as costs ;; 0 if same, <0 if higher than key; >0 if lower than key */
 int compare_int(const void *key, const void *with) {
+	printf("%d\n", *(const int *) key);
 	return *(const int *) key - *(const int *) with;
+}
+
+/* compare movement turns/priority for turns */
+int compare_move(const void *key, const void *with) {
+	return -1;
 }
 
 /* returns the hardness cost of an int hardness */
@@ -142,7 +88,7 @@ int h_calc(int h) {
 }
 
 /* djikstra's take 2; with tunnelling */
-void new_map_dungeon_t(Dungeon * dungeon) {
+void map_dungeon_t(Dungeon * dungeon) {
 	binheap_t h;
 	Tile_Node tiles[dungeon->h][dungeon->w];
 
@@ -213,7 +159,7 @@ void new_map_dungeon_t(Dungeon * dungeon) {
 }
 
 /* djikstra's take 2 */
-void new_map_dungeon_nont(Dungeon * dungeon) {
+void map_dungeon_nont(Dungeon * dungeon) {
 	binheap_t h;
 	Tile_Node tiles[dungeon->h][dungeon->w];
 
@@ -282,161 +228,6 @@ void new_map_dungeon_nont(Dungeon * dungeon) {
 
 	/* clean up the heap */
 	binheap_delete(&h);
-}
-
-/* run djikstra's on the dungeon and map the weights */
-void map_dungeon(Dungeon * dungeon) {
-	/**
-	costs are labelled as 0-9, a-z, A-Z; as such printable values are mapped from 0-61 (62 values)
-	map is built from the player out
-	**/
-	binheap_t 		h;
-	/*binheap_node_t	*costs[dungeon->h][dungeon->w];*/
-	Tile_Node		tiles[dungeon->h][dungeon->w];
-
-
-	/* initiate the binary heap */
-	binheap_init(&h, compare_int, NULL);
-
-	int i;
-	int j;
-	/* set all indices and insert the default values */
-	for(i = 0; i < dungeon->h; i++) {
-		for(j = 0; j < dungeon->w; j++) {
-			tiles[i][j].y = i;
-			tiles[i][j].x = j;
-			tiles[i][j].cost = INT_MAX;
-		}
-	}
-
-	/* set the player's cost as 0: */
-	int px = dungeon->ss[dungeon->pc].p.x;
-	int py = dungeon->ss[dungeon->pc].p.y;
-	tiles[py][px].cost = 0;
-	binheap_insert(&h, &tiles[py][px]);
-
-	/* primary cost calculation logic */
-
-	binheap_node_t	*p;
-
-	while((p = binheap_remove_min(&h))) {
-		int hx = ((Tile_Node *) p)->x;
-		int hy = ((Tile_Node *) p)->y;
-		int tc = ((Tile_Node *) p)->cost;
-
-		int bx = hx-1;
-		int by = hy-1;
-		int lx = hx+2;
-		int ly = hy+1;
-
-		if(hy+1 > dungeon->h)
-			ly = dungeon->h-1;
-		if(hx+2 > dungeon->w)
-			lx = dungeon->w-1;
-		if(hx-1 < 0)
-			bx = 0;
-		if(hy-1 < 0)
-			by = 0;
-
-		/* above the point */
-		for(i = bx; i < lx; i++) {
-			int hard;
-			hard = dungeon->d[by][i].h;
-			if(hard == 0 && tiles[by][i].cost == INT_MAX) {
-				if(tiles[by][i].cost > tc + 1 + h_calc(hard) || tiles[by][i].cost == INT_MAX)
-					tiles[by][i].cost = tc + 1 +h_calc(hard);
-
-				binheap_insert(&h, (void *) &tiles[by][i]);
-			}
-		}
-
-		/* below the point */
-		for(i = bx; i < lx; i++) {
-			int hard;
-			hard = dungeon->d[ly][i].h;
-			if(hard == 0 && tiles[ly][i].cost == INT_MAX) {
-				if(tiles[ly][i].cost > tc + 1 + h_calc(hard) || tiles[ly][i].cost == INT_MAX)
-					tiles[ly][i].cost = tc + 1 + h_calc(hard);
-
-				binheap_insert(&h, (void *) &tiles[ly][i]);
-			}
-		}
-
-		/* left */
-		int hard;
-		hard = dungeon->d[hy][bx].h;
-		if(hard == 0 && tiles[hy][bx].cost == INT_MAX) {
-			if( tiles[hy][bx].cost > tc + 1 + h_calc(hard) || tiles[hy][bx].cost == INT_MAX )
-				tiles[hy][bx].cost = tc + 1 + h_calc(hard);
-
-			binheap_insert(&h, (void *) &tiles[hy][bx]);
-		}
-
-		/* right */
-		hard = dungeon->d[hy][hx+1].h;
-		if(hard == 0 && tiles[hy][hx+1].cost == INT_MAX) {
-			if( tiles[hy][hx+1].cost > tc + 1 + h_calc(hard) || tiles[hy][hx+1].cost == INT_MAX)
-				tiles[hy][hx+1].cost = tc + 1 + h_calc(hard);
-
-			binheap_insert(&h, (void *) &tiles[hy][hx+1]);
-		}
-
-
-	}
-
-	/* copy the heatmap to the dungeon */
-	for(i = 0; i < dungeon->h; i++) {
-		for(j = 0; j < dungeon->w; j++) {
-			dungeon->csnt[i][j] = tiles[i][j].cost;
-		}
-	}
-
-
-	/* clean up the heap */
-	binheap_delete(&h);
-}
-
-/* add a sprite to the dungeon */
-void add_sprite(Dungeon * dungeon, Sprite s) {
-	if(dungeon->ns < dungeon->ms) {
-		dungeon->ns++;
-	} else {
-		goto END;
-	}
-
-	if(s.c == '@') {
-		dungeon->pc = dungeon->ns - 1;
-	}
-
-	dungeon->ss[dungeon->ns - 1] = s;
-
-	END: ;
-}
-
-/* generate a sprite, because in-line structs are icky */
-Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
-	Sprite s;
-
-	/* place in a room if 1 or more. implicitly random */
-	if(r > 0) {
-		int r_id = rand() % dungeon->nr;
-		x = (rand() % dungeon->r[r_id].w) + dungeon->r[r_id].tl.x;
-		y = (rand() % dungeon->r[r_id].h) + dungeon->r[r_id].tl.y;
-	} else {
-		/* randomize location if a valid one is not provided */
-		if(x < 0 || x > dungeon->w) {
-			x = (rand() % (dungeon->w-2)) + 1;
-		}
-		if(y < 0 || y > dungeon->h) {
-			y = (rand() % (dungeon->h-2)) + 1;
-		}
-	}
-
-	s.p.x = x;
-	s.p.y = y;
-	s.c = c;
-
-	return s;
 }
 
 /* reads from a dungeon file */
@@ -982,6 +773,7 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	new_dungeon.nr	= 0;
 	new_dungeon.ns	= 0;
 	new_dungeon.ms	= w*h; /* max sprites would be 1 per dungeon slot */
+	new_dungeon.t	= 0;
 
 	/* dungeon buffer allocation+0'ing */
 	new_dungeon.d = calloc(new_dungeon.h, sizeof(Tile *));
@@ -1019,7 +811,7 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	return new_dungeon;
 }
 
-void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *cp) {
+void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *cp, int *nm) {
 		if(strcmp(argv[this], "--save") == 0) {
 			*s = TRUE;
 		} else if(strcmp(argv[this], "--load") == 0) {
@@ -1031,6 +823,8 @@ void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *
 				printf("Invalid filename argument!\n");
 				*p = FALSE;
 			}
+		} else if(strcmp(argv[this], "--nummon") == 0) {
+			*nm = atoi(argv[this+1]);
 		}
 }
 
@@ -1038,20 +832,21 @@ void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *
 /* Basic procedural dungeon generator */
 int main(int argc, char * argv[]) {
 	/*** process commandline arguments ***/
-	int max_args = 5;
+	int max_args = 7;
 	int saving = FALSE;
 	int loading = FALSE;
 	int pathing = FALSE;
+	int num_mon = 0;
 	int custom_path = 0;
 	if(argc > 2 && argc <= max_args) {
 		/* both --save and --load */
 		int i;
 		for(i = 1; i < argc; i++) {
-			test_args(argc, argv, i, &saving, &loading, &pathing, &custom_path);
+			test_args(argc, argv, i, &saving, &loading, &pathing, &custom_path, &num_mon);
 		}
 	} else if(argc == 2) {
-		/* one of --save or --load */
-		test_args(argc, argv, 1, &saving, &loading, &pathing, &custom_path);
+		/* one arg */
+		test_args(argc, argv, 1, &saving, &loading, &pathing, &custom_path, &num_mon);
 	} else if(argc > max_args) {
 		/* more than 2 commandline arguments, argv[0] is gratuitous */
 		printf("Too many arguments!\n");
@@ -1088,12 +883,21 @@ int main(int argc, char * argv[]) {
 	/*** dungeon is fully initiated ***/
 	Sprite pc = gen_sprite(&dungeon, '@', -1, -1, 1);
 	add_sprite(&dungeon, pc);
-	new_map_dungeon_nont(&dungeon);
-	new_map_dungeon_t(&dungeon);
+	map_dungeon_nont(&dungeon);
+	map_dungeon_t(&dungeon);
+	/*** dungeon is fully generated ***/
+
+    binheap_t h;
+	binheap_init(&h, compare_move, NULL);
+
+
 
 	print_dungeon(&dungeon, 0, 0);
-	print_dungeon(&dungeon, 1, 0);
-	print_dungeon(&dungeon, 0, 1);
+	print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
+	print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
+
+	/*** tear down sequence ***/
+	binheap_delete(&h);
 
 	if(saving == TRUE) {
 		write_dungeon(&dungeon, path);
