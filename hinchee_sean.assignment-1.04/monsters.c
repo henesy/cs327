@@ -2,13 +2,71 @@
 #include "dungeon_generator.h"
 #include "binheap.h"
 
+/* check if we can move to a location (objectively) */
+bool test_loc(Dungeon * dungeon, int x, int y, Sprite s) {
+	int hard = dungeon->d[y][x].h;
+	if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
+		if(dungeon->d[y][x].h < 255) {
+			if(s.s.tu == FALSE && hard > 0)
+				return FALSE;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+Event gen_move_sprite(Dungeon * dungeon, int sn) {
+	Event e;
+
+	//make ss[sn] when possible
+	int sx = dungeon->ss[sn].p.x;
+	int sy = dungeon->ss[sn].p.y;
+	/*
+	int xs[8] = {-1,0,1,1,1,0,-1,-1};
+	int ys[8] = {-1,-1,-1,0,1,1,1,0};
+
+
+	Sprite s = dungeon->ss[sn];
+
+	// increment the turn
+	dungeon->ss[sn].t += (100 / s.s.s);
+
+	// run through tests
+	int i;
+	for(i = 0; i < 8; i++) {
+		int x = sx + xs[i];
+		int y = sy + ys[i];
+		if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
+
+		}
+	}
+	*/
+	e.to.x = sx;
+	e.to.y = sy;
+	e.sn = sn;
+
+	return e;
+}
+
+/* parse and apply a movement */
+void parse_move(Dungeon * dungeon, Event * turn) {
+
+}
+
 /* move a sprite following its built in rules */
-void gen_move_sprite(Dungeon * dungeon, int sn, binheap_t * h) {
-    int xs[8] = {-1,0,1,1,1,0,-1,-1};
+Event gen_move_sprite_old(Dungeon * dungeon, int sn) {
+	Event e;
+
+	int xs[8] = {-1,0,1,1,1,0,-1,-1};
 	int ys[8] = {-1,-1,-1,0,1,1,1,0};
 
     int sx = dungeon->ss[sn].p.x;
     int sy = dungeon->ss[sn].p.y;
+	Sprite s = dungeon->ss[sn];
+	int qp = -1;
+
+	/* increment the turn */
+	dungeon->ss[sn].t += (100 / s.s.s);
 
     int i;
     for(i = 0; i < 8; i++) {
@@ -17,12 +75,65 @@ void gen_move_sprite(Dungeon * dungeon, int sn, binheap_t * h) {
         if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
             int hard = dungeon->d[y][x].h;
             if(hard < 255) {
-                /* protect against map edges */
+                /* check for erratic behaviour */
+				if(s.s.eb == TRUE) {
+					int b = rand() % 2;
+					if(b) {
+						goto RP;
+					}
+				}
+
+				/* check if tunneling */
+				if(hard > 0 && s.s.tu == FALSE) {
+					continue;
+				}
+
+
+				/* check for line of sight / telepathic */
+				if(s.s.te == FALSE) {
+					/* if line of sight ;; path and cache -> exit ;; else go to RP ; */
+					if(dungeon->d[y][x].c == '.') {
+
+					} else {
+						goto RP;
+					}
+
+				} else {
+					/* path direct to PC if possible */
+					Sprite pc = dungeon->ss[dungeon->pc];
+					if(sx < pc.p.x)
+						x = sx + 1;
+					if(sx > pc.p.x)
+						x = sx - 1;
+					if(sy < pc.p.y)
+						y = sy + 1;
+					if(sy > pc.p.y)
+						y = sy - 1;
+
+				}
+
+
+				/* check for lowest if intelligent */
+				if(s.s.in == TRUE) {
+					if(s.s.tu == TRUE) {
+						if(dungeon->cst[ys[qp]+sy][xs[qp]+sx] > dungeon->cst[y][x] || qp == -1) {
+							qp = i;
+						}
+					} else {
+						if(dungeon->csnt[ys[qp]+sy][xs[qp]+sx] > dungeon->csnt[y][x] || qp == -1) {
+							qp = i;
+						}
+					}
+				} else {
+					RP: ;
+					qp = rand() % 9;
+					break;
+				}
 
             }
         }
     }
-
+	return e;
 }
 
 /* add a sprite to the dungeon */
@@ -55,6 +166,9 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
     if(s.c == '@') {
         s.s.s = 10;
         s.s.tu = FALSE;
+		s.s.eb = FALSE;
+		s.s.te = FALSE;
+		s.s.in = FALSE;
 	} else {
         /* if not the pc a value 5-20 */
         s.s.s = (rand() % 16) + 5;

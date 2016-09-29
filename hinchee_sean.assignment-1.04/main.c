@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <limits.h>
+#include <unistd.h>
 #include "binheap.h"
 #include "dungeon_generator.h"
 
@@ -67,7 +68,15 @@ int compare_int(const void *key, const void *with) {
 
 /* compare movement turns/priority for turns */
 int compare_move(const void *key, const void *with) {
-	return -1;
+	Event k = *(Event *) key;
+	Event w = *(Event *) with;
+
+	if(k.turn < w.turn)
+		return -1;
+	if(k.turn > w.turn)
+		return 1;
+
+	return 0;
 }
 
 /* returns the hardness cost of an int hardness */
@@ -608,15 +617,21 @@ int all_connected(int * cnxns, Dungeon * dungeon) {
 
 /* generates and marks corridors */
 void gen_corridors(Dungeon * dungeon) {
+	int i;
 	int connected[dungeon->nr];
+	for(i = 0; i < dungeon->nr; i++) {
+		connected[i] = 0;
+	}
 	memset(connected, 0, dungeon->nr * sizeof(int));
 	double dists[dungeon->nr];
+	for(i = 0; i < dungeon->nr; i++) {
+		dists[i] = 0;
+	}
 	memset(dists, 0.0, dungeon->nr * sizeof(double));
 	int max_paths = dungeon->nr * 3;
 	Path paths[max_paths]; /* max paths is 3 * number of rooms */
 	int path_cnt = 0;
 	int	room_pos = 0; /* current room in use */
-	int i;
 
 	for(i = 0; i < dungeon->nr; i++) {
 		dists[i] = -1; /* infinite at -1 */
@@ -890,11 +905,31 @@ int main(int argc, char * argv[]) {
     binheap_t h;
 	binheap_init(&h, compare_move, NULL);
 
+	/* main loop */
+	Event nexts[dungeon.ns];
+
+	int i;
+	for(i = 0; i < dungeon.ns; i++) {
+		Event next = gen_move_sprite(&dungeon, i);
+		nexts[i] = next;
+	}
+	for(i = 0; i < dungeon.ns; i++) {
+		binheap_insert(&h, &nexts[i]);
+	}
 
 
-	print_dungeon(&dungeon, 0, 0);
-	//print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
-	//print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
+	bool run = TRUE;
+	while(run == TRUE) {
+		Event *turn = (Event*) binheap_remove_min(&h);
+		parse_move(&dungeon, turn);
+		Event next = gen_move_sprite(&dungeon, turn->sn);
+		binheap_insert(&h, &next);
+
+		print_dungeon(&dungeon, 0, 0);
+		//print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
+		//print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
+		sleep(3);
+	}
 
 	/*** tear down sequence ***/
 	binheap_delete(&h);
@@ -904,7 +939,6 @@ int main(int argc, char * argv[]) {
 	}
 
 	/* free our arrays */
-	int i;
 	for(i = 0; i < dungeon.h; i++) {
 		free(dungeon.d[i]);
 	}

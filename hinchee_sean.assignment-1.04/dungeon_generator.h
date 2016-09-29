@@ -1,6 +1,6 @@
 #ifndef dungeon_generator
 #define dungeon_generator
-
+#include "binheap.h"
 /* set up booleans */
 #define	TRUE	1
 #define	FALSE	0
@@ -35,7 +35,8 @@ typedef struct {
 typedef struct {
 	Position	p;	/* position of the sprite in the dungeon */
 	char		c;	/* character to print for the sprite */
-    Stats       s;
+    Stats       s;	/* stats for a sprite */
+	int			t;	/* turn count */
 } Sprite;
 
 typedef struct {
@@ -75,10 +76,18 @@ typedef struct {
 	int v;
 } Tile_Node;
 
+typedef struct {
+	int			 sn;	/* sprite number */
+	int 		speed;	/* speed of the Sprite */
+	int			turn;	/* turn counter */
+	Position	to;		/* where we move to */
+} Event;
+
 /*** Function prototypes ***/
 /* monsters.c */
 void add_sprite(Dungeon * dungeon, Sprite s);
 Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r);
-
+Event gen_move_sprite(Dungeon * dungeon, int sn);
+void parse_move(Dungeon * dungeon, Event * turn);
 
 #endif
