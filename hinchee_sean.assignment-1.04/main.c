@@ -68,15 +68,17 @@ int compare_int(const void *key, const void *with) {
 
 /* compare movement turns/priority for turns */
 int compare_move(const void *key, const void *with) {
-	Event k = *(Event *) key;
-	Event w = *(Event *) with;
+	Sprite k = *(Sprite *) key;
+	Sprite w = *(Sprite *) with;
 
-	if(k.turn < w.turn)
+	return k.t-w.t;
+	/*
+	if(k.t < w.t)
 		return -1;
-	if(k.turn > w.turn)
+	if(k.t > w.t)
 		return 1;
 
-	return 0;
+	return 0;*/
 }
 
 /* returns the hardness cost of an int hardness */
@@ -444,7 +446,7 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 
 	/* add sprites to the print buffer */
 	for(i = 0; i < dungeon->ns; i++) {
-		printf("%d, %d: %c\n", dungeon->ss[i].p.y, dungeon->ss[i].p.x, dungeon->ss[i].c);
+		printf("%d, %d: %c speed: %d turn: %d\n", dungeon->ss[i].p.y, dungeon->ss[i].p.x, dungeon->ss[i].c, dungeon->ss[i].s.s, dungeon->ss[i].t);
 		dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = dungeon->ss[i].c;
 	}
 
@@ -904,6 +906,7 @@ int main(int argc, char * argv[]) {
 	int i;
 	for(i = 0; i < num_mon; i++) {
 		Sprite m = gen_sprite(&dungeon,'m' , -1, -1, 1);
+		m.sn = i;
 		add_sprite(&dungeon, m);
 	}
 
@@ -911,27 +914,36 @@ int main(int argc, char * argv[]) {
 	map_dungeon_t(&dungeon);
 	/*** dungeon is fully generated ***/
 
-    binheap_t h;
-	binheap_init(&h, compare_move, NULL);
+    //binheap_t h;
+	//binheap_init(&h, compare_move, NULL);
 
 	/* main loop */
-	Event nexts[dungeon.ns];
+	//Event nexts[dungeon.ns]
 
 	for(i = 0; i < dungeon.ns; i++) {
-		Event next = gen_move_sprite(&dungeon, i);
-		nexts[i] = next;
+		gen_move_sprite(&dungeon, i);
+		//nexts[i] = next;
 	}
-	for(i = 0; i < dungeon.ns; i++) {
-		binheap_insert(&h, &nexts[i]);
-	}
+
 
 
 	bool run = TRUE;
 	while(run == TRUE) {
-		Event *turn = (Event*) binheap_remove_min(&h);
-		parse_move(&dungeon, turn);
-		Event next = gen_move_sprite(&dungeon, turn->sn);
-		binheap_insert(&h, &next);
+		//Sprite *s = (Sprite*) binheap_remove_min(&h);
+		int l = 0;
+		for(i = 0; i < dungeon.ns; i++) {
+			if(dungeon.ss[i].t < dungeon.ss[l].t) {
+				l = i;
+			}
+		}
+		printf("sprite %d being worked on!\n", l);
+		//dungeon.ss[s->sn];
+		printf("parsing move for %d at %d!\n", l, dungeon.ss[l].t);
+		parse_move(&dungeon, l);
+		gen_move_sprite(&dungeon, l);
+		printf("inserting move for %d at %d!\n", l, dungeon.ss[l].t);
+		//binheap_insert(&h, (void *)s);
+		//printf("binheap size: %d\n", h.size);
 
 		print_dungeon(&dungeon, 0, 0);
 		//print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
@@ -940,7 +952,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	/*** tear down sequence ***/
-	binheap_delete(&h);
+	//binheap_delete(&h);
 
 	if(saving == TRUE) {
 		write_dungeon(&dungeon, path);

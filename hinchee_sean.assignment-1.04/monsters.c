@@ -35,8 +35,7 @@ void with_pc(Dungeon * dungeon, Sprite * s, bool *in) {
 		*in = TRUE;
 }
 
-Event gen_move_sprite(Dungeon * dungeon, int sn) {
-	Event e;
+void gen_move_sprite(Dungeon * dungeon, int sn) {
 
 	//make ss[sn] when possible
 	int sx = dungeon->ss[sn].p.x;
@@ -58,6 +57,10 @@ Event gen_move_sprite(Dungeon * dungeon, int sn) {
 		int px = sx + xs[i];
 		int py = sy + ys[i];
 
+		/* drunken PC movement as per assignment 1.04 */
+		if(sn == dungeon->pc)
+			goto PCEB;
+
 		/* check erratic behaviour */
 		if(s->s.eb == FALSE || (s->s.eb == TRUE && eb)) {
 			/** check if intelligent / telepathic **/
@@ -66,16 +69,17 @@ Event gen_move_sprite(Dungeon * dungeon, int sn) {
 			/* see if you're in the same room */
 			bool in_room = FALSE;
 			with_pc(dungeon, s, &in_room);
-			printf("%c in room? %d\n",s->c , in_room);
+			//printf("%c in room? %d\n",s->c , in_room);
 		} else {
 			/* we are erratically behaving */
+			PCEB: ;
 			j = 0;
 			EB: ;
 			int c = rand() % 9;
 			px = xs[c] + sx;
 			py = ys[c] + sy;
-			/* try to find a place to go up to 8 times */
-			if(test_loc(dungeon, px, py, s) == FALSE && j < 8) {
+			/* try to find a place to go up to 16 times */
+			if(test_loc(dungeon, px, py, s) == FALSE && j < 16) {
 				j++;
 				goto EB;
 			}
@@ -96,17 +100,16 @@ Event gen_move_sprite(Dungeon * dungeon, int sn) {
 	if(new.y < 0)
 		new.y = sy;
 
-	e.to.x = new.x;
-	e.to.y = new.y;
-	e.sn = sn;
+	dungeon->ss[sn].to.x = new.x;
+	dungeon->ss[sn].to.y = new.y;
 
-	return e;
+	//return e;
 }
 
 /* parse and apply a movement */
-void parse_move(Dungeon * dungeon, Event * turn) {
-	dungeon->ss[turn->sn].p.x = turn->to.x;
-	dungeon->ss[turn->sn].p.y = turn->to.y;
+void parse_move(Dungeon * dungeon, int sn) {
+	dungeon->ss[sn].p.x = dungeon->ss[sn].to.x;
+	dungeon->ss[sn].p.y = dungeon->ss[sn].to.y;
 }
 
 /* move a sprite following its built in rules */

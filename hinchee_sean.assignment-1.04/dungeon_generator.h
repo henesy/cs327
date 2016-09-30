@@ -37,6 +37,8 @@ typedef struct {
 	char		c;	/* character to print for the sprite */
     Stats       s;	/* stats for a sprite */
 	int			t;	/* turn count */
+	Position	to;	/* to move to */
+	int			sn;	/* sprite number */
 } Sprite;
 
 typedef struct {
@@ -88,7 +90,7 @@ typedef struct {
 /* monsters.c */
 void add_sprite(Dungeon * dungeon, Sprite s);
 Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r);
-Event gen_move_sprite(Dungeon * dungeon, int sn);
-void parse_move(Dungeon * dungeon, Event * turn);
+void gen_move_sprite(Dungeon * dungeon, int sn);
+void parse_move(Dungeon * dungeon, int sn);
 
 #endif
