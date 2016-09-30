@@ -3,11 +3,11 @@
 #include "binheap.h"
 
 /* check if we can move to a location (objectively) */
-bool test_loc(Dungeon * dungeon, int x, int y, Sprite s) {
-	int hard = dungeon->d[y][x].h;
+bool test_loc(Dungeon * dungeon, int x, int y, Sprite *s) {
 	if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
+		int hard = dungeon->d[y][x].h;
 		if(dungeon->d[y][x].h < 255) {
-			if(s.s.tu == FALSE && hard > 0)
+			if(s->s.tu == FALSE && hard > 0)
 				return FALSE;
 			return TRUE;
 		}
@@ -21,28 +21,52 @@ Event gen_move_sprite(Dungeon * dungeon, int sn) {
 	//make ss[sn] when possible
 	int sx = dungeon->ss[sn].p.x;
 	int sy = dungeon->ss[sn].p.y;
-	/*
 	int xs[8] = {-1,0,1,1,1,0,-1,-1};
 	int ys[8] = {-1,-1,-1,0,1,1,1,0};
 
+	Sprite *s = &(dungeon->ss[sn]);
 
-	Sprite s = dungeon->ss[sn];
+	/* increment the turn */
+	dungeon->ss[sn].t += (100 / s->s.s);
 
-	// increment the turn
-	dungeon->ss[sn].t += (100 / s.s.s);
+	Position new = {-1, -1};
 
-	// run through tests
 	int i;
+	int j;
+	int eb = rand() % 2; /* we have a 50% chance to behave erratically */
 	for(i = 0; i < 8; i++) {
-		int x = sx + xs[i];
-		int y = sy + ys[i];
-		if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
+		int px = sx + xs[i];
+		int py = sy + ys[i];
 
+		/* check erratic behaviour */
+		if(s->s.eb == FALSE || (s->s.eb == TRUE && eb)) {
+			/* check if intelligent / telepathic */
+			new.x = sx;
+			new.y = sy;
+		} else {
+			/* we are erratically behaving */
+			j = 0;
+			EB: ;
+			int c = rand() % 9;
+			px = xs[c] + sx;
+			py = ys[c] + sy;
+			/* try to find a place to go up to 8 times */
+			if(test_loc(dungeon, px, py, s) == FALSE && j < 8) {
+				j++;
+				goto EB;
+			}
+			break;
 		}
 	}
-	*/
-	e.to.x = sx;
-	e.to.y = sy;
+
+	/* safety net */
+	if(new.x < 0)
+		new.x = sx;
+	if(new.y < 0)
+		new.y = sy;
+
+	e.to.x = new.x;
+	e.to.y = new.y;
 	e.sn = sn;
 
 	return e;
@@ -50,7 +74,8 @@ Event gen_move_sprite(Dungeon * dungeon, int sn) {
 
 /* parse and apply a movement */
 void parse_move(Dungeon * dungeon, Event * turn) {
-
+	dungeon->ss[turn->sn].p.x = turn->to.x;
+	dungeon->ss[turn->sn].p.y = turn->to.y;
 }
 
 /* move a sprite following its built in rules */
@@ -235,6 +260,7 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 
     s.p.x = x;
     s.p.y = y;
+	s.t = 100/s.s.s;
 
 	return s;
 }

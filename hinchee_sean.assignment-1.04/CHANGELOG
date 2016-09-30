@@ -1,2 +1,3 @@
 09/29 01:52pm: Created boilerplate, tuned Dijkstra's
+09/29 07:02pm: Accounted for tunneling and erratic behaviour ;; re-wrote move logic
 

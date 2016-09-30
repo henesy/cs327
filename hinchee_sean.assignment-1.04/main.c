@@ -444,6 +444,7 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 
 	/* add sprites to the print buffer */
 	for(i = 0; i < dungeon->ns; i++) {
+		printf("%d, %d: %c\n", dungeon->ss[i].p.y, dungeon->ss[i].p.x, dungeon->ss[i].c);
 		dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = dungeon->ss[i].c;
 	}
 
@@ -622,12 +623,12 @@ void gen_corridors(Dungeon * dungeon) {
 	for(i = 0; i < dungeon->nr; i++) {
 		connected[i] = 0;
 	}
-	memset(connected, 0, dungeon->nr * sizeof(int));
+	//memset(connected, 0, dungeon->nr * sizeof(int));
 	double dists[dungeon->nr];
 	for(i = 0; i < dungeon->nr; i++) {
 		dists[i] = 0;
 	}
-	memset(dists, 0.0, dungeon->nr * sizeof(double));
+	//memset(dists, 0.0, dungeon->nr * sizeof(double));
 	int max_paths = dungeon->nr * 3;
 	Path paths[max_paths]; /* max paths is 3 * number of rooms */
 	int path_cnt = 0;
@@ -898,6 +899,13 @@ int main(int argc, char * argv[]) {
 	/*** dungeon is fully initiated ***/
 	Sprite pc = gen_sprite(&dungeon, '@', -1, -1, 1);
 	add_sprite(&dungeon, pc);
+
+	int i;
+	for(i = 0; i < num_mon; i++) {
+		Sprite m = gen_sprite(&dungeon,'m' , -1, -1, 1);
+		add_sprite(&dungeon, m);
+	}
+
 	map_dungeon_nont(&dungeon);
 	map_dungeon_t(&dungeon);
 	/*** dungeon is fully generated ***/
@@ -908,7 +916,6 @@ int main(int argc, char * argv[]) {
 	/* main loop */
 	Event nexts[dungeon.ns];
 
-	int i;
 	for(i = 0; i < dungeon.ns; i++) {
 		Event next = gen_move_sprite(&dungeon, i);
 		nexts[i] = next;
