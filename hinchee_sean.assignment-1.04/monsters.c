@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "dungeon_generator.h"
 #include "binheap.h"
@@ -13,6 +14,25 @@ bool test_loc(Dungeon * dungeon, int x, int y, Sprite *s) {
 		}
 	}
 	return FALSE;
+}
+
+/* checks if a given sprite shares a room with the PC */
+void with_pc(Dungeon * dungeon, Sprite * s, bool *in) {
+	int pc_rid	= -1;
+	int s_rid	= -1;
+	Sprite *pc = &(dungeon->ss[dungeon->pc]);
+
+	int i;
+	for(i = 0; i < dungeon->nr; i++) {
+		if(s->p.x <= dungeon->r[i].br.x && s->p.y <= dungeon->r[i].br.y && s->p.x >= dungeon->r[i].tl.x && s->p.y >= dungeon->r[i].tl.y) {
+			s_rid = i;
+		}
+		if(pc->p.x <= dungeon->r[i].br.x && pc->p.y <= dungeon->r[i].br.y && pc->p.x >= dungeon->r[i].tl.x && pc->p.y >= dungeon->r[i].tl.y) {
+			pc_rid = i;
+		}
+	}
+	if(pc_rid > 0 && s_rid > 0 && pc_rid == s_rid)
+		*in = TRUE;
 }
 
 Event gen_move_sprite(Dungeon * dungeon, int sn) {
@@ -40,9 +60,13 @@ Event gen_move_sprite(Dungeon * dungeon, int sn) {
 
 		/* check erratic behaviour */
 		if(s->s.eb == FALSE || (s->s.eb == TRUE && eb)) {
-			/* check if intelligent / telepathic */
+			/** check if intelligent / telepathic **/
 			new.x = sx;
 			new.y = sy;
+			/* see if you're in the same room */
+			bool in_room = FALSE;
+			with_pc(dungeon, s, &in_room);
+			printf("%c in room? %d\n",s->c , in_room);
 		} else {
 			/* we are erratically behaving */
 			j = 0;
@@ -55,6 +79,13 @@ Event gen_move_sprite(Dungeon * dungeon, int sn) {
 				j++;
 				goto EB;
 			}
+			if(test_loc(dungeon, px, py, s) == TRUE) {
+				/* if the location is okay, commit it*/
+				printf("committing a random movement!\n");
+				new.x = px;
+				new.y = py;
+			}
+
 			break;
 		}
 	}

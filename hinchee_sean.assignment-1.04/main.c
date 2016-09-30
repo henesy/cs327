@@ -790,6 +790,7 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	new_dungeon.ns	= 0;
 	new_dungeon.ms	= w*h; /* max sprites would be 1 per dungeon slot */
 	new_dungeon.t	= 0;
+	new_dungeon.go	= FALSE;
 
 	/* dungeon buffer allocation+0'ing */
 	new_dungeon.d = calloc(new_dungeon.h, sizeof(Tile *));
@@ -935,7 +936,7 @@ int main(int argc, char * argv[]) {
 		print_dungeon(&dungeon, 0, 0);
 		//print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
 		//print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
-		sleep(3);
+		sleep(1);
 	}
 
 	/*** tear down sequence ***/

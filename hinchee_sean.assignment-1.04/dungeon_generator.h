@@ -67,6 +67,7 @@ typedef struct {
 	int		**	cst;	/* costs for djikstra's map */
 	int			pc;		/* location of PC in SpriteS array (.ss) */
     int         t;      /* turn number */
+	bool		go;		/* game over T/F */
 } Dungeon;
 
 typedef struct {
@@ -77,7 +78,7 @@ typedef struct {
 } Tile_Node;
 
 typedef struct {
-	int			 sn;	/* sprite number */
+	int			sn;	/* sprite number */
 	int 		speed;	/* speed of the Sprite */
 	int			turn;	/* turn counter */
 	Position	to;		/* where we move to */
