@@ -1,5 +1,5 @@
 09/29 01:52pm: Created boilerplate, tuned Dijkstra's
 09/29 07:02pm: Accounted for tunneling and erratic behaviour ;; re-wrote move logic
 09/29 08:41pm: Fixed a seg fault related to defaults being called (a feature)
-
+09/30 12:05am: Got turns working properly ;; cut out a lot of cruft code
 

@@ -39,6 +39,8 @@ typedef struct {
 	int			t;	/* turn count */
 	Position	to;	/* to move to */
 	int			sn;	/* sprite number */
+	Position	pc;	/* last known location of the PC */
+	bool		a;	/* alive T/F */
 } Sprite;
 
 typedef struct {
@@ -92,5 +94,6 @@ void add_sprite(Dungeon * dungeon, Sprite s);
 Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r);
 void gen_move_sprite(Dungeon * dungeon, int sn);
 void parse_move(Dungeon * dungeon, int sn);
+bool check_any_monsters(Dungeon * dungeon);
 
 #endif

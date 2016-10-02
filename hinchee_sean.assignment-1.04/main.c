@@ -446,8 +446,9 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 
 	/* add sprites to the print buffer */
 	for(i = 0; i < dungeon->ns; i++) {
-		printf("%d, %d: %c speed: %d turn: %d\n", dungeon->ss[i].p.y, dungeon->ss[i].p.x, dungeon->ss[i].c, dungeon->ss[i].s.s, dungeon->ss[i].t);
-		dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = dungeon->ss[i].c;
+		//printf("%d, %d: %c speed: %d turn: %d\n", dungeon->ss[i].p.y, dungeon->ss[i].p.x, dungeon->ss[i].c, dungeon->ss[i].s.s, dungeon->ss[i].t);
+		if(dungeon->ss[i].a == TRUE)
+			dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = dungeon->ss[i].c;
 	}
 
 	/* print non-tunnelling dijkstra's */
@@ -926,7 +927,7 @@ int main(int argc, char * argv[]) {
 	}
 
 
-
+	bool first = TRUE;
 	bool run = TRUE;
 	while(run == TRUE) {
 		//Sprite *s = (Sprite*) binheap_remove_min(&h);
@@ -936,24 +937,38 @@ int main(int argc, char * argv[]) {
 				l = i;
 			}
 		}
-		printf("sprite %d being worked on!\n", l);
+		//printf("sprite %d being worked on!\n", l);
 		//dungeon.ss[s->sn];
-		printf("parsing move for %d at %d!\n", l, dungeon.ss[l].t);
+		//printf("parsing move for %d at %d!\n", l, dungeon.ss[l].t);
 		parse_move(&dungeon, l);
 		gen_move_sprite(&dungeon, l);
-		printf("inserting move for %d at %d!\n", l, dungeon.ss[l].t);
+		//printf("inserting move for %d at %d!\n", l, dungeon.ss[l].t);
 		//binheap_insert(&h, (void *)s);
 		//printf("binheap size: %d\n", h.size);
-
-		print_dungeon(&dungeon, 0, 0);
+		if(l == dungeon.pc || first == TRUE) {
+			print_dungeon(&dungeon, 0, 0);
+			sleep(1);
+		}
 		//print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
 		//print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
-		sleep(1);
+
+		/* note: this will stop the game before the new world gets drawn since the monster will move to the player and thus kill him */
+		if(dungeon.go == TRUE || dungeon.ss[dungeon.pc].a == FALSE)
+			break;
+
+		bool any = check_any_monsters(&dungeon);
+		if(any == FALSE) {
+			printf("You win!\n");
+			goto END;
+		}
+		first = FALSE;
 	}
+	print_dungeon(&dungeon, 0, 0);
+	printf("Game Over!\n");
 
 	/*** tear down sequence ***/
 	//binheap_delete(&h);
-
+	END: ;
 	if(saving == TRUE) {
 		write_dungeon(&dungeon, path);
 	}

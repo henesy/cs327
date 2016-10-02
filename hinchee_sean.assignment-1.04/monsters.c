@@ -36,7 +36,6 @@ void with_pc(Dungeon * dungeon, Sprite * s, bool *in) {
 }
 
 void gen_move_sprite(Dungeon * dungeon, int sn) {
-
 	//make ss[sn] when possible
 	int sx = dungeon->ss[sn].p.x;
 	int sy = dungeon->ss[sn].p.y;
@@ -50,47 +49,135 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 
 	Position new = {-1, -1};
 
-	int i;
-	int j;
-	int eb = rand() % 2; /* we have a 50% chance to behave erratically */
-	for(i = 0; i < 8; i++) {
-		int px = sx + xs[i];
-		int py = sy + ys[i];
+	// make sure we're alive
+	if(s->a == TRUE) {
+		int i;
+		int j;
+		int eb = rand() % 2; /* we have a 50% chance to behave erratically */
+		for(i = 0; i < 8; i++) {
+			int px = sx + xs[i];
+			int py = sy + ys[i];
 
-		/* drunken PC movement as per assignment 1.04 */
-		if(sn == dungeon->pc)
-			goto PCEB;
+			/* drunken PC movement as per assignment 1.04 */
+			if(sn == dungeon->pc)
+				goto PCEB;
 
-		/* check erratic behaviour */
-		if(s->s.eb == FALSE || (s->s.eb == TRUE && eb)) {
-			/** check if intelligent / telepathic **/
-			new.x = sx;
-			new.y = sy;
-			/* see if you're in the same room */
-			bool in_room = FALSE;
-			with_pc(dungeon, s, &in_room);
-			//printf("%c in room? %d\n",s->c , in_room);
-		} else {
-			/* we are erratically behaving */
-			PCEB: ;
-			j = 0;
-			EB: ;
-			int c = rand() % 9;
-			px = xs[c] + sx;
-			py = ys[c] + sy;
-			/* try to find a place to go up to 16 times */
-			if(test_loc(dungeon, px, py, s) == FALSE && j < 16) {
-				j++;
-				goto EB;
+			/* check erratic behaviour */
+			if(s->s.eb == FALSE || (s->s.eb == TRUE && eb)) {
+				/** check if intelligent / telepathic **/
+				//new.x = sx;
+				//new.y = sy;
+				if(s->s.te == FALSE) {
+					/* see if you're in the same room */
+					bool in_room = FALSE;
+					with_pc(dungeon, s, &in_room);
+					if(in_room == TRUE) {
+						//cache PC location
+						s->pc = dungeon->ss[dungeon->pc].p;
+
+						IN: ;
+						if(s->s.in == TRUE) {
+							/* we are intelligent and can see our mark (tele or otherwise) */
+							int k;
+							int lowest = 0;
+							if(s->s.tu) {
+								//tunneling
+								for(k = 0; k < 8; k++) {
+									if(dungeon->cst[ys[k]+sy][xs[k]+sx] < dungeon->cst[ys[lowest]+sy][xs[lowest]+sx] && test_loc(dungeon, xs[lowest]+sx, ys[lowest]+sy, s) == TRUE)
+										lowest = k;
+								}
+							} else {
+								//non-tunneling
+								for(k = 0; k < 8; k++) {
+									if(dungeon->csnt[ys[k]+sy][xs[k]+sx] < dungeon->csnt[ys[lowest]+sy][xs[lowest]+sx] && test_loc(dungeon, xs[lowest]+sx, ys[lowest]+sy, s) == TRUE)
+										lowest = k;
+								}
+							}
+							new.x = xs[lowest] + sx;
+							new.y = ys[lowest] + sy;
+							break;
+								/*
+								if(test_loc(dungeon, px, py, s) == TRUE) {
+									//if we can move to the point
+									if(s->s.tu) {
+										//tunneling
+										if(new.x > 0 && new.y > 0 && new.x != sx && new.y != sy) {
+											if(dungeon->cst[py][px] < dungeon->cst[new.y][new.x]) {
+												new.x = px;
+												new.y = py;
+											}
+										} else {
+											new.x = px;
+											new.y = py;
+										}
+									} else {
+										//non-tunneling
+										if(new.x > 0 && new.y > 0 && new.x != sx && new.y != sy) {
+											if(dungeon->csnt[py][px] < dungeon->csnt[new.y][new.x]) {
+												new.x = px;
+												new.y = py;
+											}
+										} else {
+											new.x = px;
+											new.y = py;
+										}
+									}
+								}
+								*/
+						} else {
+							//if not intelligent
+							if(s->pc.x < sx)
+								px = sx - 1;
+							if(s->pc.x > sx)
+								px = sx + 1;
+							if(s->pc.y < sy)
+								py = sy - 1;
+							if(s->pc.y > sy)
+								py = sy + 1;
+
+							if(test_loc(dungeon, px, py, s) == TRUE) {
+								new.x = px;
+								new.y = py;
+								break;
+							}
+						}
+					} else {
+						//not in the same room and not telepathic
+						//randomize
+						goto PCEB;
+					}
+				} else {
+					//we know where the PC is
+					s->pc = dungeon->ss[dungeon->pc].p;
+					/**
+					intelligence test still applies
+					we just treat it as if we're always in the room " "
+					**/
+					goto IN;
+				}
+
+				//printf("%c in room? %d\n",s->c , in_room);
+			} else {
+				/* we are erratically behaving */
+				PCEB: ;
+				j = 0;
+				EB: ;
+				int c = rand() % 9;
+				px = xs[c] + sx;
+				py = ys[c] + sy;
+				/* try to find a place to go up to n times */
+				if(test_loc(dungeon, px, py, s) == FALSE && j < 8) {
+					j++;
+					goto EB;
+				}
+				if(test_loc(dungeon, px, py, s) == TRUE) {
+					/* if the location is okay, commit it*/
+					new.x = px;
+					new.y = py;
+				}
+
+				break;
 			}
-			if(test_loc(dungeon, px, py, s) == TRUE) {
-				/* if the location is okay, commit it*/
-				printf("committing a random movement!\n");
-				new.x = px;
-				new.y = py;
-			}
-
-			break;
 		}
 	}
 
@@ -102,6 +189,20 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 
 	dungeon->ss[sn].to.x = new.x;
 	dungeon->ss[sn].to.y = new.y;
+
+	if(new.x == dungeon->ss[dungeon->pc].p.x && new.y == dungeon->ss[dungeon->pc].p.y)
+		dungeon->go = TRUE;
+
+	/* check if we have to kill another sprite */
+	int i;
+	for(i = 0; i < dungeon->ns; i++) {
+		if(i != sn) {
+			if(dungeon->ss[i].p.x == dungeon->ss[sn].to.x && dungeon->ss[i].p.y == dungeon->ss[sn].to.y)
+				dungeon->ss[i].a = FALSE;
+			if(dungeon->ss[i].p.x == dungeon->ss[sn].p.x && dungeon->ss[i].p.y == dungeon->ss[sn].p.y)
+				dungeon->ss[sn].a = FALSE;
+		}
+	}
 
 	//return e;
 }
@@ -220,6 +321,7 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 	Sprite s;
 
 	s.c = c;
+	s.a = TRUE;
 
     /* set stats */
     if(s.c == '@') {
@@ -297,4 +399,15 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 	s.t = 100/s.s.s;
 
 	return s;
+}
+
+/* checks if any monsters other than the player are alive */
+bool check_any_monsters(Dungeon * dungeon) {
+	int i;
+	for(i = 0; i < dungeon->ns; i++) {
+		if(dungeon->ss[i].a == TRUE && i != 0)
+			return TRUE;
+	}
+
+	return FALSE;
 }
