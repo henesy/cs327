@@ -410,6 +410,7 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 
     /* put the tunneling monsters anywhere */
     if(s.s.tu == TRUE) {
+		PRT: ;
         /* randomize location anywhere in the dungeon */
         if(x < 0 || x > dungeon->w) {
             x = (rand() % (dungeon->w-2)) + 1;
@@ -417,11 +418,21 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
         if(y < 0 || y > dungeon->h) {
             y = (rand() % (dungeon->h-2)) + 1;
         }
+
+		if(s.c != '@' && dungeon->nr > 1) {
+			s.p.x = x;
+		    s.p.y = y;
+
+			bool w_pc = FALSE;
+			with_pc(dungeon, &s, &w_pc);
+			if(w_pc == TRUE)
+				goto PRT;
+		}
     }
 
     /* place in a room if 1 or more. implicitly random ;; force in a room even if tunneling */
     if(r > 0 || s.s.tu == FALSE) {
-		PR: ;
+		PRNT: ;
         int r_id = rand() % dungeon->nr;
         x = (rand() % dungeon->r[r_id].w) + dungeon->r[r_id].tl.x;
         y = (rand() % dungeon->r[r_id].h) + dungeon->r[r_id].tl.y;
@@ -433,7 +444,7 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 			bool w_pc = FALSE;
 			with_pc(dungeon, &s, &w_pc);
 			if(w_pc == TRUE)
-				goto PR;
+				goto PRNT;
 		}
     } else {
 
