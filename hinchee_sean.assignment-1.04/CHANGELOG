@@ -5,4 +5,5 @@
 10/01 11:45pm: Functional monsters and killing/game over/win implemented ;; some clean up may be done
 10/03 10:00pm: Fixed an odd segfault bug and removed monsters being added to the player's room, if possible
 10/03 10:50pm: Fixed another segfault/movement bug with intelligent + telepathic type monsters ;; ensured monsters who can't tunnel don't spawn outside of of a room
+10/04 01:22pm: Fixed tunneling monsters spawning with the player
 
