@@ -429,7 +429,7 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 	/* add corridors to the print buffer */
 	for(i = 0; i < dungeon->h; i++) {
 		for(j = 0; j < dungeon->w; j++) {
-			if(dungeon->d[i][j].p == 1 || dungeon->d[i][j].c == '#') {
+			if(dungeon->d[i][j].p == 1 || dungeon->d[i][j].c == '#' || dungeon->d[i][j].h == 0) {
 				dungeon->p[i][j].c = '#';
 			}
 		}
@@ -856,7 +856,7 @@ int main(int argc, char * argv[]) {
 	int saving = FALSE;
 	int loading = FALSE;
 	int pathing = FALSE;
-	int num_mon = 0;
+	int num_mon = 1;
 	int custom_path = 0;
 	if(argc > 2 && argc <= max_args) {
 		/* both --save and --load */
@@ -946,8 +946,13 @@ int main(int argc, char * argv[]) {
 		//binheap_insert(&h, (void *)s);
 		//printf("binheap size: %d\n", h.size);
 		if(l == dungeon.pc || first == TRUE) {
+			//printf("num sprites: %d\n", dungeon.ns);
+			map_dungeon_nont(&dungeon);
+			map_dungeon_t(&dungeon);
 			print_dungeon(&dungeon, 0, 0);
-			sleep(1);
+			//print_dungeon(&dungeon, 0, 1);
+			//print_dungeon(&dungeon, 1, 0);
+			sleep(2);
 		}
 		//print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
 		//print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
