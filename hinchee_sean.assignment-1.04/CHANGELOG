@@ -7,4 +7,5 @@
 10/03 10:50pm: Fixed another segfault/movement bug with intelligent + telepathic type monsters ;; ensured monsters who can't tunnel don't spawn outside of of a room
 10/04 01:22pm: Fixed tunneling monsters spawning with the player
 10/05 02:00am: Fixed re-rendering the Dijkstra's tunneling map every time something is tunnel-ified ;; fixed setting initiatives to 0 at beginning rather than init'ing non-0
+10/05 02:30am: Fixed a bug where occasionally the game would hang at start
 
