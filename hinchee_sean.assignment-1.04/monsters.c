@@ -233,8 +233,10 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 		if(i != sn) {
 			if(dungeon->ss[i].p.x == dungeon->ss[sn].to.x && dungeon->ss[i].p.y == dungeon->ss[sn].to.y && dungeon->ss[sn].a == TRUE)
 				dungeon->ss[i].a = FALSE;
+			/*
 			else if(dungeon->ss[i].p.x == dungeon->ss[sn].p.x && dungeon->ss[i].p.y == dungeon->ss[sn].p.y && dungeon->ss[i].a == TRUE)
 				dungeon->ss[sn].a = FALSE;
+			*/
 		}
 	}
 
@@ -452,7 +454,8 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 
     s.p.x = x;
     s.p.y = y;
-	s.t = 100/s.s.s;
+	//s.t = 100/s.s.s;
+	s.t = 0;
 
 	return s;
 }

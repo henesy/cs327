@@ -96,4 +96,7 @@ void gen_move_sprite(Dungeon * dungeon, int sn);
 void parse_move(Dungeon * dungeon, int sn);
 bool check_any_monsters(Dungeon * dungeon);
 
+/* main.c */
+void map_dungeon_t(Dungeon * dungeon);
+
 #endif
