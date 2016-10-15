@@ -106,6 +106,7 @@ void print_hardness(Dungeon * dungeon);
 void print_t_heatmap(Dungeon * dungeon);
 void print_nont_heatmap(Dungeon * dungeon);
 void print_dungeon(Dungeon * dungeon, int nt, int t);
+void print_dungeon_nnc(Dungeon * dungeon, int nt, int t);
 
 /* main.c */
 void map_dungeon_t(Dungeon * dungeon);

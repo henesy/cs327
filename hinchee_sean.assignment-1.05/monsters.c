@@ -36,6 +36,7 @@ void with_pc(Dungeon * dungeon, Sprite * s, Bool *in) {
 }
 
 void gen_move_sprite(Dungeon * dungeon, int sn) {
+
 	//make ss[sn] when possible
 	int sx = dungeon->ss[sn].p.x;
 	int sy = dungeon->ss[sn].p.y;
@@ -53,6 +54,17 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 	if(dungeon->d[s->p.y][s->p.x].h < 0)
 		dungeon->d[s->p.y][s->p.x].h = 0;
 
+	if(sn == 0) {
+		if(test_loc(dungeon, dungeon->ss[0].to.x, dungeon->ss[0].to.y, s) == FALSE) {
+			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x;
+			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y;
+		}
+		dungeon->ss[dungeon->pc].p.x = dungeon->ss[dungeon->pc].to.x;
+		dungeon->ss[dungeon->pc].p.y = dungeon->ss[dungeon->pc].to.y;
+
+		goto ALL_END;
+	}
+
 	// make sure we're alive
 	if(s->a == TRUE) {
 		int i;
@@ -64,8 +76,6 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 
 			if(px >= 0 && px < dungeon->w && py >= 0 && py < dungeon->h) {
 				/* drunken PC movement as per assignment 1.04 */
-				if(sn == dungeon->pc)
-					goto PCEB;
 
 				/* check erratic behaviour */
 				if(s->s.eb == FALSE || (s->s.eb == TRUE && eb)) {
@@ -239,7 +249,7 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 			*/
 		}
 	}
-
+	ALL_END: ;
 	//return e;
 }
 

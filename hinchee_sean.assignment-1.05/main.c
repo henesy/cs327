@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <limits.h>
 #include <unistd.h>
+#include <ncurses.h>
 #include "binheap.h"
 #include "dungeon_generator.h"
 
@@ -351,7 +352,8 @@ void write_dungeon(Dungeon * dungeon, char * path) {
 	fclose(file);
 }
 
-void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *cp, int *nm) {
+/* parses commandline arguments */
+void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *cp, int *nm, int *nnc) {
 		if(strcmp(argv[this], "--save") == 0) {
 			*s = TRUE;
 		} else if(strcmp(argv[this], "--load") == 0) {
@@ -365,28 +367,43 @@ void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *
 			}
 		} else if(strcmp(argv[this], "--nummon") == 0) {
 			*nm = atoi(argv[this+1]);
+		} else if(strcmp(argv[this], "--no-ncurses") == 0) {
+			*nnc = TRUE;
 		}
+}
+
+/* processes pc movements ;; validity checking is in monsters.c's gen_move_sprite() */
+void parse_pc(Dungeon * dungeon, int32_t k) {
+	if(k == KEY_LEFT)
+		dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+	else if(k == KEY_RIGHT)
+		dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
+	else if(k == KEY_UP)
+		dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
+	else if(k == KEY_DOWN)
+		dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
 }
 
 
 /* Basic procedural dungeon generator */
 int main(int argc, char * argv[]) {
 	/*** process commandline arguments ***/
-	int max_args = 7;
+	int max_args = 8;
 	int saving = FALSE;
 	int loading = FALSE;
 	int pathing = FALSE;
+	int nnc = FALSE;
 	int num_mon = 1;
 	int custom_path = 0;
 	if(argc > 2 && argc <= max_args) {
 		/* both --save and --load */
 		int i;
 		for(i = 1; i < argc; i++) {
-			test_args(argc, argv, i, &saving, &loading, &pathing, &custom_path, &num_mon);
+			test_args(argc, argv, i, &saving, &loading, &pathing, &custom_path, &num_mon, &nnc);
 		}
 	} else if(argc == 2) {
 		/* one arg */
-		test_args(argc, argv, 1, &saving, &loading, &pathing, &custom_path, &num_mon);
+		test_args(argc, argv, 1, &saving, &loading, &pathing, &custom_path, &num_mon, &nnc);
 	} else if(argc > max_args) {
 		/* more than 2 commandline arguments, argv[0] is gratuitous */
 		printf("Too many arguments!\n");
@@ -441,42 +458,60 @@ int main(int argc, char * argv[]) {
 	/* main loop */
 	//Event nexts[dungeon.ns]
 
-	for(i = 0; i < dungeon.ns; i++) {
+	for(i = 1; i < dungeon.ns; i++) {
 		gen_move_sprite(&dungeon, i);
 		//nexts[i] = next;
 	}
 
+	/* ncurses or not ;; this will likely amount to nothing */
+	void (*printer)(Dungeon*, int, int);
+	if(nnc == FALSE) {
+		printer = &print_dungeon;
+		initscr();
+		raw();
+		noecho();
+		curs_set(0);
+	} else {
+		printer = &print_dungeon_nnc;
+	}
 
+	print_dungeon(&dungeon, 0, 0);
 	Bool first = TRUE;
 	Bool run = TRUE;
 	while(run == TRUE) {
-		//Sprite *s = (Sprite*) binheap_remove_min(&h);
+		//int32_t key;
+		//key = getch();
+
 		int l = 0;
 		for(i = 0; i < dungeon.ns; i++) {
 			if(dungeon.ss[i].t < dungeon.ss[l].t) {
 				l = i;
 			}
 		}
-		//printf("sprite %d being worked on!\n", l);
-		//dungeon.ss[s->sn];
-		//printf("parsing move for %d at %d!\n", l, dungeon.ss[l].t);
-		parse_move(&dungeon, l);
-		gen_move_sprite(&dungeon, l);
-		//printf("inserting move for %d at %d!\n", l, dungeon.ss[l].t);
-		//binheap_insert(&h, (void *)s);
-		//printf("binheap size: %d\n", h.size);
+
+
 		if(l == dungeon.pc || first == TRUE) {
-			//printf("num sprites: %d\n", dungeon.ns);
+			int32_t key;
+			key = getch();
+			if(key == 'Q')
+				run = FALSE;
+			parse_pc(&dungeon, key);
+			gen_move_sprite(&dungeon, l);
 			map_dungeon_nont(&dungeon);
 			map_dungeon_t(&dungeon);
 			print_dungeon(&dungeon, 0, 0);
-			//print_dungeon(&dungeon, 0, 1);
-			//print_dungeon(&dungeon, 1, 0);
-			sleep(2);
+		} else {
+			parse_move(&dungeon, l);
+			gen_move_sprite(&dungeon, l);
 		}
+
+
 		//print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
 		//print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
 
+		//clear();
+		refresh();
+		/** --- game over sequence checking --- **/
 		/* note: this will stop the game before the new world gets drawn since the monster will move to the player and thus kill him */
 		if(dungeon.go == TRUE || dungeon.ss[dungeon.pc].a == FALSE)
 			break;
@@ -488,12 +523,15 @@ int main(int argc, char * argv[]) {
 		}
 		first = FALSE;
 	}
-	print_dungeon(&dungeon, 0, 0);
+	printer(&dungeon, 0, 0);
 	printf("Game Over!\n");
 
 	/*** tear down sequence ***/
 	//binheap_delete(&h);
 	END: ;
+	if(nnc == FALSE)
+		endwin();
+
 	if(saving == TRUE) {
 		write_dungeon(&dungeon, path);
 	}
