@@ -4,7 +4,7 @@
 #include "binheap.h"
 
 /* check if we can move to a location (objectively) */
-Bool test_loc(Dungeon * dungeon, int x, int y, Sprite *s) {
+bool test_loc(Dungeon * dungeon, int x, int y, Sprite *s) {
 	if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
 		int hard = dungeon->d[y][x].h;
 		if(dungeon->d[y][x].h < 255) {
@@ -17,7 +17,7 @@ Bool test_loc(Dungeon * dungeon, int x, int y, Sprite *s) {
 }
 
 /* checks if a given sprite shares a room with the PC */
-void with_pc(Dungeon * dungeon, Sprite * s, Bool *in) {
+void with_pc(Dungeon * dungeon, Sprite * s, bool *in) {
 	int pc_rid	= -1;
 	int s_rid	= -1;
 	Sprite *pc = &(dungeon->ss[dungeon->pc]);
@@ -74,7 +74,7 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 					//new.y = sy;
 					if(s->s.te == FALSE) {
 						/* see if you're in the same room */
-						Bool in_room = FALSE;
+						bool in_room = FALSE;
 						with_pc(dungeon, s, &in_room);
 						if(in_room == TRUE) {
 							//cache PC location
@@ -85,7 +85,7 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 								/* we are intelligent and can see our mark (tele or otherwise) */
 								int k;
 								int lowest = 0;
-								Bool set = FALSE;
+								bool set = FALSE;
 								if(s->s.tu) {
 									//tunneling
 									for(k = 0; k < 8; k++) {
@@ -426,7 +426,7 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 			s.p.x = x;
 		    s.p.y = y;
 
-			Bool w_pc = FALSE;
+			bool w_pc = FALSE;
 			with_pc(dungeon, &s, &w_pc);
 			if(w_pc == TRUE && t < 8) {
 				t++;
@@ -447,7 +447,7 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 			s.p.x = x;
 		    s.p.y = y;
 
-			Bool w_pc = FALSE;
+			bool w_pc = FALSE;
 			with_pc(dungeon, &s, &w_pc);
 			if(w_pc == TRUE && t < 8) {
 				t++;
@@ -467,7 +467,7 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 }
 
 /* checks if any monsters other than the player are alive */
-Bool check_any_monsters(Dungeon * dungeon) {
+bool check_any_monsters(Dungeon * dungeon) {
 	int i;
 	for(i = 0; i < dungeon->ns; i++) {
 		if(dungeon->ss[i].a == TRUE && i != 0)

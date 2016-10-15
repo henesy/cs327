@@ -1,10 +1,10 @@
 #ifndef dungeon_generator
 #define dungeon_generator
 #include "binheap.h"
-/* set up Booleans */
+/* set up booleans */
 #define	TRUE	1
 #define	FALSE	0
-typedef int Bool;
+typedef int bool;
 
 /* custom structures */
 typedef struct {
@@ -25,10 +25,10 @@ typedef struct {
 } Path;
 
 typedef struct {
-    Bool    in; /* intelligence */
-    Bool    te; /* telepathy */
-    Bool    tu; /* tunneling ability */
-    Bool    eb; /* erratic behaviour */
+    bool    in; /* intelligence */
+    bool    te; /* telepathy */
+    bool    tu; /* tunneling ability */
+    bool    eb; /* erratic behaviour */
     int     s;  /* speed ;; pc has 10 ; 5-20 */
 } Stats;
 
@@ -40,7 +40,7 @@ typedef struct {
 	Position	to;	/* to move to */
 	int			sn;	/* sprite number */
 	Position	pc;	/* last known location of the PC */
-	Bool		a;	/* alive T/F */
+	bool		a;	/* alive T/F */
 } Sprite;
 
 typedef struct {
@@ -71,7 +71,7 @@ typedef struct {
 	int		**	cst;	/* costs for djikstra's map */
 	int			pc;		/* location of PC in SpriteS array (.ss) */
     int         t;      /* turn number */
-	Bool		go;		/* game over T/F */
+	bool		go;		/* game over T/F */
 } Dungeon;
 
 typedef struct {
@@ -94,18 +94,7 @@ void add_sprite(Dungeon * dungeon, Sprite s);
 Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r);
 void gen_move_sprite(Dungeon * dungeon, int sn);
 void parse_move(Dungeon * dungeon, int sn);
-Bool check_any_monsters(Dungeon * dungeon);
-
-/* world.c */
-void gen_corridors(Dungeon * dungeon);
-void gen_dungeon(Dungeon * dungeon);
-Dungeon init_dungeon(int h, int w, int mr);
-
-/* printing.c */
-void print_hardness(Dungeon * dungeon);
-void print_t_heatmap(Dungeon * dungeon);
-void print_nont_heatmap(Dungeon * dungeon);
-void print_dungeon(Dungeon * dungeon, int nt, int t);
+bool check_any_monsters(Dungeon * dungeon);
 
 /* main.c */
 void map_dungeon_t(Dungeon * dungeon);
