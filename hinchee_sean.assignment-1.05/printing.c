@@ -127,7 +127,7 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 		int j;
 		for(j = 0; j < dungeon->w; j++) {
 			//printf("%c", (dungeon->p[i][j]).c);
-            mvaddch(i, j, (dungeon->p[i][j]).c);
+            mvaddch(i+1, j, (dungeon->p[i][j]).c);
 		}
 	}
     //clear();

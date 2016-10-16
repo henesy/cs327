@@ -373,16 +373,57 @@ void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *
 }
 
 /* processes pc movements ;; validity checking is in monsters.c's gen_move_sprite() */
-void parse_pc(Dungeon * dungeon, int32_t k) {
-	if(k == 'h')
-		dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
-	else if(k == 'l')
-		dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
-	else if(k == 'k')
-		dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
-	else if(k == 'j')
-		dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
+void parse_pc(Dungeon * dungeon, Bool * run) {
+	GCH: ;
+	int32_t k;
+	k = getch();
+	if(k == 'Q') {
+		*run = FALSE;
+		return;
+	}
 
+	switch(k) {
+		case 'h':
+			H: ;
+			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+			break;
+		case '4':
+			goto H;
+		case 'l':
+			L: ;
+			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
+			break;
+		case '6':
+			goto L;
+		case 'k':
+			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
+			break;
+		case 'j':
+			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
+			break;
+		case 'y':
+			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
+			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+			break;
+		case 'u':
+			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
+			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
+			break;
+		case 'n':
+			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
+			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
+			break;
+		case 'b':
+			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
+			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+			break;
+		case '5':
+			break;
+		case ' ':
+			break;
+		default:
+			goto GCH;
+	}
 
 	if(dungeon->d[dungeon->ss[dungeon->pc].to.y][dungeon->ss[dungeon->pc].to.x].h > 0) {
 		dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x;
@@ -501,11 +542,7 @@ int main(int argc, char * argv[]) {
 
 
 		if(l == dungeon.pc || first == TRUE) {
-			int32_t key;
-			key = getch();
-			if(key == 'Q')
-				run = FALSE;
-			parse_pc(&dungeon, key);
+			parse_pc(&dungeon, &run);
 			//gen_move_sprite(&dungeon, l);
 			map_dungeon_nont(&dungeon);
 			map_dungeon_t(&dungeon);
