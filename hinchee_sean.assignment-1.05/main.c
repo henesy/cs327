@@ -374,14 +374,24 @@ void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *
 
 /* processes pc movements ;; validity checking is in monsters.c's gen_move_sprite() */
 void parse_pc(Dungeon * dungeon, int32_t k) {
-	if(k == KEY_LEFT)
+	if(k == 'h')
 		dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
-	else if(k == KEY_RIGHT)
+	else if(k == 'l')
 		dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
-	else if(k == KEY_UP)
+	else if(k == 'k')
 		dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
-	else if(k == KEY_DOWN)
+	else if(k == 'j')
 		dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
+
+
+	if(dungeon->d[dungeon->ss[dungeon->pc].to.y][dungeon->ss[dungeon->pc].to.x].h > 0) {
+		dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x;
+		dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y;
+	} else {
+		dungeon->ss[dungeon->pc].p.x = dungeon->ss[dungeon->pc].to.x;
+		dungeon->ss[dungeon->pc].p.y = dungeon->ss[dungeon->pc].to.y;
+	}
+	dungeon->ss[0].t += (100 / dungeon->ss[0].s.s);
 }
 
 
@@ -496,7 +506,7 @@ int main(int argc, char * argv[]) {
 			if(key == 'Q')
 				run = FALSE;
 			parse_pc(&dungeon, key);
-			gen_move_sprite(&dungeon, l);
+			//gen_move_sprite(&dungeon, l);
 			map_dungeon_nont(&dungeon);
 			map_dungeon_t(&dungeon);
 			print_dungeon(&dungeon, 0, 0);

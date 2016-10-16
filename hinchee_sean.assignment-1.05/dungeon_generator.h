@@ -95,6 +95,7 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r);
 void gen_move_sprite(Dungeon * dungeon, int sn);
 void parse_move(Dungeon * dungeon, int sn);
 Bool check_any_monsters(Dungeon * dungeon);
+Bool test_loc(Dungeon * dungeon, int x, int y, Sprite *s);
 
 /* world.c */
 void gen_corridors(Dungeon * dungeon);

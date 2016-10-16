@@ -36,7 +36,6 @@ void with_pc(Dungeon * dungeon, Sprite * s, Bool *in) {
 }
 
 void gen_move_sprite(Dungeon * dungeon, int sn) {
-
 	//make ss[sn] when possible
 	int sx = dungeon->ss[sn].p.x;
 	int sy = dungeon->ss[sn].p.y;
@@ -53,17 +52,6 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 	dungeon->d[s->p.y][s->p.x].h -= 85;
 	if(dungeon->d[s->p.y][s->p.x].h < 0)
 		dungeon->d[s->p.y][s->p.x].h = 0;
-
-	if(sn == 0) {
-		if(test_loc(dungeon, dungeon->ss[0].to.x, dungeon->ss[0].to.y, s) == FALSE) {
-			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x;
-			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y;
-		}
-		dungeon->ss[dungeon->pc].p.x = dungeon->ss[dungeon->pc].to.x;
-		dungeon->ss[dungeon->pc].p.y = dungeon->ss[dungeon->pc].to.y;
-
-		goto ALL_END;
-	}
 
 	// make sure we're alive
 	if(s->a == TRUE) {
@@ -249,8 +237,6 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 			*/
 		}
 	}
-	ALL_END: ;
-	//return e;
 }
 
 /* parse and apply a movement */
@@ -470,6 +456,8 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 
     s.p.x = x;
     s.p.y = y;
+	s.to.x = x;
+	s.to.y = y;
 	//s.t = 100/s.s.s;
 	s.t = 0;
 
