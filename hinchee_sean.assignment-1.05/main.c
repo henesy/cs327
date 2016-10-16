@@ -396,30 +396,64 @@ void parse_pc(Dungeon * dungeon, Bool * run) {
 		case '6':
 			goto L;
 		case 'k':
+			K: ;
 			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
 			break;
+		case '8':
+			goto K;
 		case 'j':
+			J: ;
 			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
 			break;
+		case '2':
+			goto J;
 		case 'y':
+			Y: ;
 			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
 			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
 			break;
+		case '7':
+			goto Y;
 		case 'u':
+			U: ;
 			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
 			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
 			break;
+		case '9':
+			goto U;
 		case 'n':
+			N: ;
 			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
 			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
 			break;
+		case '3':
+			goto N;
 		case 'b':
+			B: ;
 			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
 			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+			break;
+		case '1':
+			goto B;
+		case '>':
+
+			break;
+		case '<':
+
 			break;
 		case '5':
 			break;
 		case ' ':
+			break;
+		case KEY_UP:
+
+			break;
+		case KEY_DOWN:
+
+			break;
+		case 27:
+			/* ESC */
+
 			break;
 		default:
 			goto GCH;
@@ -522,6 +556,7 @@ int main(int argc, char * argv[]) {
 		raw();
 		noecho();
 		curs_set(0);
+		keypad(stdscr, TRUE);
 	} else {
 		printer = &print_dungeon_nnc;
 	}
