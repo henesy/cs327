@@ -53,6 +53,8 @@ void print_nont_heatmap(Dungeon * dungeon) {
 
 /* prints the dungeon */
 void print_dungeon(Dungeon * dungeon, int nt, int t) {
+	clear();
+	
 	int i;
 	int j;
 	int h;

@@ -372,6 +372,90 @@ void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *
 		}
 }
 
+/* monster list view */
+void monster_list(Dungeon * dungeon) {
+	clear();
+	
+	/* monster view array and population */
+	char mons [dungeon->ns-1][30];
+	int i;
+	for(i = 1; i < dungeon->ns; i++) {
+		char ns[6];
+		char ew[5];
+		
+		int hd = dungeon->ss[0].p.y - dungeon->ss[i].p.y;
+		int wd = dungeon->ss[0].p.x - dungeon->ss[i].p.x;
+		
+		if(hd > 0)
+			strcpy(ns, "north");
+		else
+			strcpy(ns, "south");
+		
+		if(wd > 0)
+			strcpy(ew, "west");
+		else
+			strcpy(ew, "east");
+		
+		sprintf(mons[i-1], "%c, %2d %s and %2d %s", dungeon->ss[i].c, abs(hd), ns, abs(wd), ew);
+	}
+	
+	/* secondary window */
+	WINDOW *w;
+	w = newwin(24, 80, 0, 0);
+	Bool scroll = FALSE;
+	int top = 0;
+	int bot;
+	if(24 < dungeon->ns -1) {
+		scroll = TRUE;
+		bot = 23;
+	} else {
+		bot = dungeon->ns -2;
+	}
+	
+	
+	for(;;) {
+		/* put the monster view to the screen */
+		for(i = top; i < dungeon->ns -1 && i <= bot; i++) {
+			mvprintw(i, 0, mons[i]);
+		}
+		
+		/* handle user interaction */
+		MLV: ;
+		int32_t k;
+		k = getch();
+
+		switch(k) {
+			case KEY_UP:
+				/* scroll up */
+				if(scroll == FALSE)
+					goto MLV;
+					
+				
+				
+				break;
+			case KEY_DOWN:
+				/* scroll down */
+				if(scroll == FALSE)
+					goto MLV;
+				
+				
+				
+				break;
+			case 27:
+				/* ESC */
+				return;
+				break;
+			default:
+				goto MLV;
+		}
+		
+		wrefresh(w);
+	}
+	
+	delwin(w);
+	print_dungeon(dungeon, 0, 0);
+}
+
 /* processes pc movements ;; validity checking is in monsters.c's gen_move_sprite() */
 void parse_pc(Dungeon * dungeon, Bool * run) {
 	GCH: ;
@@ -436,29 +520,25 @@ void parse_pc(Dungeon * dungeon, Bool * run) {
 		case '1':
 			goto B;
 		case '>':
+			/* stair up */
 
 			break;
 		case '<':
+			/* stair down */
 
 			break;
 		case '5':
 			break;
 		case ' ':
 			break;
-		case KEY_UP:
-
-			break;
-		case KEY_DOWN:
-
-			break;
-		case 27:
-			/* ESC */
-
+		case 'm':
+			monster_list(dungeon);
 			break;
 		default:
 			goto GCH;
 	}
 
+    /* movement validity check */
 	if(dungeon->d[dungeon->ss[dungeon->pc].to.y][dungeon->ss[dungeon->pc].to.x].h > 0) {
 		dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x;
 		dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y;
@@ -467,6 +547,16 @@ void parse_pc(Dungeon * dungeon, Bool * run) {
 		dungeon->ss[dungeon->pc].p.y = dungeon->ss[dungeon->pc].to.y;
 	}
 	dungeon->ss[0].t += (100 / dungeon->ss[0].s.s);
+
+    /* check for killing an NPC */
+    int sn = 0;
+    int i;
+	for(i = 1; i < dungeon->ns; i++) {
+		if(i != sn) {
+			if((dungeon->ss[i].to.x == dungeon->ss[sn].to.x) && (dungeon->ss[i].to.y == dungeon->ss[sn].to.y) && dungeon->ss[sn].a == TRUE)
+				dungeon->ss[i].a = FALSE;
+        }
+    }
 }
 
 
@@ -581,6 +671,15 @@ int main(int argc, char * argv[]) {
 			//gen_move_sprite(&dungeon, l);
 			map_dungeon_nont(&dungeon);
 			map_dungeon_t(&dungeon);
+			
+			int sn = 0;
+			for(i = 1; i < dungeon.ns; i++) {
+				if(i != sn) {
+					if((dungeon.ss[i].p.x == dungeon.ss[sn].p.x) && (dungeon.ss[i].p.y == dungeon.ss[sn].p.y) && dungeon.ss[sn].a == TRUE)
+						dungeon.ss[i].a = FALSE;
+				}
+			}
+			
 			print_dungeon(&dungeon, 0, 0);
 		} else {
 			parse_move(&dungeon, l);

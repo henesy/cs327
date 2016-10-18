@@ -229,7 +229,7 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 	int i;
 	for(i = 0; i < dungeon->ns; i++) {
 		if(i != sn) {
-			if(dungeon->ss[i].p.x == dungeon->ss[sn].to.x && dungeon->ss[i].p.y == dungeon->ss[sn].to.y && dungeon->ss[sn].a == TRUE)
+			if((dungeon->ss[i].to.x == dungeon->ss[sn].to.x) && (dungeon->ss[i].to.y == dungeon->ss[sn].to.y) && dungeon->ss[sn].a == TRUE)
 				dungeon->ss[i].a = FALSE;
 			/*
 			else if(dungeon->ss[i].p.x == dungeon->ss[sn].p.x && dungeon->ss[i].p.y == dungeon->ss[sn].p.y && dungeon->ss[i].a == TRUE)

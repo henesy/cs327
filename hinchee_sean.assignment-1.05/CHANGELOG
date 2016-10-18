@@ -2,4 +2,5 @@
 10/15@03:40pm: can print and monster movement is intact, pc isn't moving yet
 10/15@09:08pm: added player movement at full functionality, many cores were dumped during creation of this change
 10/15@10:34pm: added most input commands
+10/17@07:36pm: added monster list functionality bar scrolling
 
