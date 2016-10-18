@@ -7,4 +7,6 @@
 10/17@08:31pm: added dungeon re-generation and as such, stairwells
 10/17@08:45pm: fixed a memory leak issue and reduced all leaks to native ncurses leaks ;; fixed stairs overlapping occasionally
 10/17@08:52pm: composed and edited README
+10/18@02:26pm: tweaked the ncurses escape delay
+10/18@02:34pm: fixed a bug where the monster list viewing was treated as a valid move 
 

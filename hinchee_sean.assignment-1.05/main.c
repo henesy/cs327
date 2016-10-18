@@ -543,7 +543,8 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			break;
 		case 'm':
 			monster_list(dungeon);
-			break;
+			print_dungeon(dungeon, 0, 0);
+			goto GCH;
 		default:
 			goto GCH;
 	}
@@ -677,6 +678,7 @@ int main(int argc, char * argv[]) {
 		raw();
 		noecho();
 		curs_set(0);
+		set_escdelay(25);
 		keypad(stdscr, TRUE);
 	} else {
 		printer = &print_dungeon_nnc;
