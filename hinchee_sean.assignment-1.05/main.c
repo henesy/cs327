@@ -412,11 +412,11 @@ void monster_list(Dungeon * dungeon) {
 		bot = dungeon->ns -2;
 	}
 	
-	
+	int j;
 	for(;;) {
 		/* put the monster view to the screen */
-		for(i = top; i < dungeon->ns -1 && i <= bot; i++) {
-			mvprintw(i, 0, mons[i]);
+		for(i = top, j = 0; i < dungeon->ns -1 && i <= bot && j < 24; i++, j++) {
+			mvprintw(j, 0, mons[i]);
 		}
 		
 		/* handle user interaction */
@@ -430,7 +430,11 @@ void monster_list(Dungeon * dungeon) {
 				if(scroll == FALSE)
 					goto MLV;
 					
-				
+				if(top-1 >= 0) {
+					top--;
+					bot--;
+				}
+				clear();
 				
 				break;
 			case KEY_DOWN:
@@ -438,7 +442,11 @@ void monster_list(Dungeon * dungeon) {
 				if(scroll == FALSE)
 					goto MLV;
 				
-				
+				if(bot+1 < dungeon->ns-1) {
+					bot++;
+					top++;
+				}
+				clear();
 				
 				break;
 			case 27:
