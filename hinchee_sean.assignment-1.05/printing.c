@@ -82,6 +82,9 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 			}
 		}
 	}
+	
+	dungeon->p[dungeon->su.y][dungeon->su.x].c = '<';
+	dungeon->p[dungeon->sd.y][dungeon->sd.x].c = '>';
 
 	/* add sprites to the print buffer */
 	for(i = 0; i < dungeon->ns; i++) {

@@ -465,7 +465,7 @@ void monster_list(Dungeon * dungeon) {
 }
 
 /* processes pc movements ;; validity checking is in monsters.c's gen_move_sprite() */
-void parse_pc(Dungeon * dungeon, Bool * run) {
+void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 	GCH: ;
 	int32_t k;
 	k = getch();
@@ -527,13 +527,15 @@ void parse_pc(Dungeon * dungeon, Bool * run) {
 			break;
 		case '1':
 			goto B;
-		case '>':
-			/* stair up */
-
-			break;
 		case '<':
+			/* stair up */
+			if(dungeon->ss[0].p.x == dungeon->su.x && dungeon->ss[0].p.y == dungeon->su.y)
+				*regen = TRUE;
+			break;
+		case '>':
 			/* stair down */
-
+			if(dungeon->ss[0].p.x == dungeon->sd.x && dungeon->ss[0].p.y == dungeon->sd.y)
+				*regen = TRUE;
 			break;
 		case '5':
 			break;
@@ -612,6 +614,13 @@ int main(int argc, char * argv[]) {
 		strcat(path, "/dungeon");
 	}
 
+	/* persistent player character */
+	Bool regen = FALSE;
+	Sprite p_pc;
+	
+	/*** dungeon generation starts here ***/
+	DUNGEN: ;
+
 	Dungeon dungeon = init_dungeon(21, 80, 12);
 
 	if(loading == FALSE) {
@@ -640,12 +649,26 @@ int main(int argc, char * argv[]) {
 
 	/* main loop */
 	//Event nexts[dungeon.ns]
+	
+	if(regen == TRUE) {
+		int px = dungeon.ss[0].p.x;
+		int py = dungeon.ss[0].p.y;
+		dungeon.ss[0] = p_pc;
+		dungeon.ss[0].p.x = px;
+		dungeon.ss[0].p.y = py;
+		dungeon.ss[0].to.x = px;
+		dungeon.ss[0].to.y = py;
+	}
+	
 
 	for(i = 1; i < dungeon.ns; i++) {
 		gen_move_sprite(&dungeon, i);
 		//nexts[i] = next;
 	}
-
+	
+	if(regen == TRUE)
+		goto PNC;
+	
 	/* ncurses or not ;; this will likely amount to nothing */
 	void (*printer)(Dungeon*, int, int);
 	if(nnc == FALSE) {
@@ -658,6 +681,9 @@ int main(int argc, char * argv[]) {
 	} else {
 		printer = &print_dungeon_nnc;
 	}
+
+	PNC: ;
+	regen = FALSE;
 
 	print_dungeon(&dungeon, 0, 0);
 	Bool first = TRUE;
@@ -675,7 +701,12 @@ int main(int argc, char * argv[]) {
 
 
 		if(l == dungeon.pc || first == TRUE) {
-			parse_pc(&dungeon, &run);
+			parse_pc(&dungeon, &run, &regen);
+			if(regen == TRUE) {
+				p_pc = dungeon.ss[0];
+				goto DUNFREE;
+			}
+			
 			//gen_move_sprite(&dungeon, l);
 			map_dungeon_nont(&dungeon);
 			map_dungeon_t(&dungeon);
@@ -707,24 +738,25 @@ int main(int argc, char * argv[]) {
 
 		Bool any = check_any_monsters(&dungeon);
 		if(any == FALSE) {
-			printf("You win!\n");
+			//printf("You win!\n");
 			goto END;
 		}
 		first = FALSE;
 	}
 	printer(&dungeon, 0, 0);
-	printf("Game Over!\n");
+	//printf("Game Over!\n");
 
 	/*** tear down sequence ***/
 	//binheap_delete(&h);
 	END: ;
-	if(nnc == FALSE)
-		endwin();
+	delwin(stdscr);
+	endwin();
 
 	if(saving == TRUE) {
 		write_dungeon(&dungeon, path);
 	}
 
+	DUNFREE: ;
 	/* free our arrays */
 	for(i = 0; i < dungeon.h; i++) {
 		free(dungeon.d[i]);
@@ -744,6 +776,10 @@ int main(int argc, char * argv[]) {
 		free(dungeon.cst[i]);
 	}
 	free(dungeon.cst);
+	
+	if(regen == TRUE)
+		goto DUNGEN;
+	
 	free(path);
 	return 0;
 }

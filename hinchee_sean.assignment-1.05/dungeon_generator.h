@@ -72,6 +72,8 @@ typedef struct {
 	int			pc;		/* location of PC in SpriteS array (.ss) */
     int         t;      /* turn number */
 	Bool		go;		/* game over T/F */
+	Position	su;		/* location of the dungeon's up staircase */
+	Position	sd;		/* location of the dungeon's down staircase */
 } Dungeon;
 
 typedef struct {
@@ -96,6 +98,7 @@ void gen_move_sprite(Dungeon * dungeon, int sn);
 void parse_move(Dungeon * dungeon, int sn);
 Bool check_any_monsters(Dungeon * dungeon);
 Bool test_loc(Dungeon * dungeon, int x, int y, Sprite *s);
+void with_pc(Dungeon * dungeon, Sprite * s, Bool *in);
 
 /* world.c */
 void gen_corridors(Dungeon * dungeon);

@@ -288,6 +288,25 @@ void gen_dungeon(Dungeon * dungeon) {
 		}
 	}
 
+	/* set the stairs */
+	int x;
+	int y;
+
+	int r_id = rand() % dungeon->nr;
+	x = (rand() % dungeon->r[r_id].w) + dungeon->r[r_id].tl.x;
+	y = (rand() % dungeon->r[r_id].h) + dungeon->r[r_id].tl.y;
+	dungeon->sd.x = x;
+	dungeon->sd.y = y;
+	
+	SD: ;
+	r_id = rand() % dungeon->nr;
+	x = (rand() % dungeon->r[r_id].w) + dungeon->r[r_id].tl.x;
+	y = (rand() % dungeon->r[r_id].h) + dungeon->r[r_id].tl.y;
+	dungeon->su.x = x;
+	dungeon->su.y = y;
+	
+	if(dungeon->su.x == dungeon->sd.x && dungeon->su.y == dungeon->sd.y)
+		goto SD;
 
 }
 
