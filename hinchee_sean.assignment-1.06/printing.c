@@ -54,7 +54,7 @@ void print_nont_heatmap(Dungeon * dungeon) {
 /* prints the dungeon */
 void print_dungeon(Dungeon * dungeon, int nt, int t) {
 	clear();
-	
+
 	int i;
 	int j;
 	int h;
@@ -82,7 +82,7 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 			}
 		}
 	}
-	
+
 	dungeon->p[dungeon->su.y][dungeon->su.x].c = '<';
 	dungeon->p[dungeon->sd.y][dungeon->sd.x].c = '>';
 
@@ -173,7 +173,8 @@ void print_dungeon_nnc(Dungeon * dungeon, int nt, int t) {
 	for(i = 0; i < dungeon->ns; i++) {
 		//printf("%d, %d: %c speed: %d turn: %d\n", dungeon->ss[i].p.y, dungeon->ss[i].p.x, dungeon->ss[i].c, dungeon->ss[i].s.s, dungeon->ss[i].t);
 		if(dungeon->ss[i].a == TRUE)
-			dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = dungeon->ss[i].c;
+			//dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = dungeon->ss[i].c;
+			dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = getSpriteC(&dungeon->ss[i]);
 	}
 
 	/* print non-tunnelling dijkstra's */
