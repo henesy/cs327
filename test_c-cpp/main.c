@@ -3,6 +3,19 @@
 
 int main() {
 
+	/* array */
+	Thing * things;
+	things = initThings(3);
+
+	setAX(things, 1, 9);
+	
+	int n = -1;
+
+	n = getAX(things, 1);
+
+	printf("%d\n", n);
+	
+	/* singleton */
 	Thing * t;
 	t = initThing();
 

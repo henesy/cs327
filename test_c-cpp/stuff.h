@@ -18,7 +18,10 @@ typedef struct Thing Thing;
 /* both */
 int getX(Thing *);
 void setX(Thing *, int);
+int getAX(Thing *, int);
+void setAX(Thing *, int, int);
 Thing * initThing();
+Thing * initThings(int);
 #endif
 
 #ifdef __cplusplus
