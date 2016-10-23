@@ -52,8 +52,85 @@
 		typedef struct Monster Monster;
 		typedef struct PC PC;
 
-		/* functions to make C++ and C play nicely together on their little hellish playground  */
+		/*** functions to make C++ and C play nicely together on their little hellish playground  ***/
+		/***
+		setter functions
+		***/
+
+		void initSprite(Sprite *);
+		void initSprites(Sprite *);
+
+		/***
+		getter
+		***/
+		/* singleton */
+		int getSpritePX(Sprite *);
+		int getSpritePY(Sprite *);
 		char getSpriteC(Sprite *);
+		bool getSpriteSIn(Sprite *);
+		bool getSpriteSTe(Sprite *);
+		bool getSpriteSTu(Sprite *);
+		bool getSpriteSEb(Sprite *);
+		int getSpriteSS(Sprite *);
+		int getSpriteT(Sprite *);
+		int getSpriteToX(Sprite *);
+		int getSpriteToY(Sprite *);
+		int getSpriteSn(Sprite *);
+		int getSpritePcX(Sprite *);
+		int getSpritePcY(Sprite *);
+		bool getSpriteA(Sprite *);
+		/* array-based */
+		int getSpriteAPX(Sprite *, int);
+		int getSpriteAPY(Sprite *, int);
+		char getSpriteAC(Sprite *, int);
+		bool getSpriteASIn(Sprite *, int);
+		bool getSpriteASTe(Sprite *, int);
+		bool getSpriteASTu(Sprite *, int);
+		bool getSpriteASEb(Sprite *, int);
+		int getSpriteASS(Sprite *, int);
+		int getSpriteAT(Sprite *, int);
+		int getSpriteAToX(Sprite *, int);
+		int getSpriteAToY(Sprite *, int);
+		int getSpriteASn(Sprite *, int);
+		int getSpriteAPcX(Sprite *, int);
+		int getSpriteAPcY(Sprite *, int);
+		bool getSpriteAA(Sprite *, int);
+		/***
+		Setter functions
+		kill me
+		***/
+		/* singleton */
+		int setSpritePX(Sprite *, int n);
+		int setSpritePY(Sprite *, int n);
+		char setSpriteC(Sprite * s, char c);
+		bool setSpriteSIn(Sprite *, bool b);
+		bool setSpriteSTe(Sprite *, bool b);
+		bool setSpriteSTu(Sprite *, bool b);
+		bool setSpriteSEb(Sprite *, bool b);
+		int setSpriteSS(Sprite *, int n);
+		int setSpriteT(Sprite *, int n);
+		int setSpriteToX(Sprite *, int n);
+		int setSpriteToY(Sprite *, int n);
+		int setSpriteSn(Sprite *, int n);
+		int setSpritePcX(Sprite *, int n);
+		int setSpritePcY(Sprite *, int n);
+		bool setSpriteA(Sprite *, bool b);
+		/* array-based */
+		int setSpriteAPX(Sprite *, int i, int n);
+		int setSpriteAPY(Sprite *, int i, int n);
+		char setSpriteAC(Sprite *, int i, char c);
+		bool setSpriteASIn(Sprite *, int i, bool b);
+		bool setSpriteASTe(Sprite *, int i, bool b);
+		bool setSpriteASTu(Sprite *, int i, bool b);
+		bool setSpriteASEb(Sprite *, int i, bool b);
+		int setSpriteASS(Sprite *, int i, int n);
+		int setSpriteAT(Sprite *, int i, int n);
+		int setSpriteAToX(Sprite *, int i, int n);
+		int setSpriteAToY(Sprite *, int i, int n);
+		int setSpriteASn(Sprite *, int i, int n);
+		int setSpriteAPcX(Sprite *, int i, int n);
+		int setSpriteAPcY(Sprite *, int i, int n);
+		bool setSpriteAA(Sprite *, int i, bool b);
 
 	#endif
 
