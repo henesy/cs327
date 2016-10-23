@@ -89,8 +89,8 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 	/* add sprites to the print buffer */
 	for(i = 0; i < dungeon->ns; i++) {
 		//printf("%d, %d: %c speed: %d turn: %d\n", dungeon->ss[i].p.y, dungeon->ss[i].p.x, dungeon->ss[i].c, dungeon->ss[i].s.s, dungeon->ss[i].t);
-		if(dungeon->ss[i].a == TRUE)
-			dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = dungeon->ss[i].c;
+		if(getSpriteAA(dungeon->ss, i) == TRUE)
+			dungeon->p[getSpriteAPY(dungeon->ss, i)][getSpriteAPX(dungeon->ss, i)].c = getSpriteAC(dungeon->ss, i);
 	}
 
 	/* print non-tunnelling dijkstra's */
@@ -163,7 +163,7 @@ void print_dungeon_nnc(Dungeon * dungeon, int nt, int t) {
 	/* add rooms to the print buffer */
 	for(h = 0; h < dungeon->nr; h++) {
 		for(i = dungeon->r[h].tl.y; i < dungeon->r[h].br.y+1; i++) {
-			for(j = dungeon->r[h].tl.x; j < dungeon->r[h].br.x+1; j++) {
+			for(j = getPosX(dungeon->r[h].tl); j < getPosX(dungeon->r[h].br)+1; j++) {
 				dungeon->p[i][j].c = '.';
 			}
 		}
@@ -172,9 +172,9 @@ void print_dungeon_nnc(Dungeon * dungeon, int nt, int t) {
 	/* add sprites to the print buffer */
 	for(i = 0; i < dungeon->ns; i++) {
 		//printf("%d, %d: %c speed: %d turn: %d\n", dungeon->ss[i].p.y, dungeon->ss[i].p.x, dungeon->ss[i].c, dungeon->ss[i].s.s, dungeon->ss[i].t);
-		if(dungeon->ss[i].a == TRUE)
+		if(getSpriteAA(dungeon->ss, i) == TRUE)
 			//dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = dungeon->ss[i].c;
-			dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = getSpriteC(&dungeon->ss[i]);
+			dungeon->p[getSpriteAPY(dungeon->ss, i)][getSpriteAPX(dungeon->ss, i)].c = getSpriteAC(dungeon->ss, i);
 	}
 
 	/* print non-tunnelling dijkstra's */

@@ -83,7 +83,7 @@ int getSpriteAPX(Sprite * s, int i) {
 }
 
 int getSpriteAPY(Sprite * s, int i) {
-    return s[i].p.x;
+    return s[i].p.y;
 }
 
 char getSpriteAC(Sprite * s, int i) {
@@ -145,11 +145,11 @@ kill me
 
 /* singleton */
 void setSpritePX(Sprite * s, int n) {
-
+    s->p.x = n;
 }
 
 void setSpritePY(Sprite * s, int n) {
-
+    s->p.y = n;
 }
 
 void setSpriteC(Sprite * s, char c) {
@@ -157,110 +157,132 @@ void setSpriteC(Sprite * s, char c) {
 }
 
 void setSpriteSIn(Sprite * s, bool b) {
-
+    s->s.in = b;
 }
 
 void setSpriteSTe(Sprite * s, bool b) {
-
+    s->s.te = b;
 }
 
 void setSpriteSTu(Sprite * s, bool b) {
-
+    s->s.tu = b;
 }
 
 void setSpriteSEb(Sprite * s, bool b) {
-
+    s->s.eb = b;
 }
 
 void setSpriteSS(Sprite * s, int n) {
-
+    s->s.s = n;
 }
 
 void setSpriteT(Sprite * s, int n) {
-
+    s->t = n;
 }
 
 void setSpriteToX(Sprite * s, int n) {
-
+    s->to.x = n;
 }
 
 void setSpriteToY(Sprite * s, int n) {
-
+    s->to.y = n;
 }
 
 void setSpriteSn(Sprite * s, int n) {
-
+    s->sn = n;
 }
 
 void setSpritePcX(Sprite * s, int n) {
-
+    s->pc.x = n;
 }
 
 void setSpritePcY(Sprite * s, int n) {
-
+    s->pc.y = n;
 }
 
 void setSpriteA(Sprite * s, bool b) {
-
+    s->a = b;
 }
 
 /* array-based */
 void setSpriteAPX(Sprite * s, int i, int n) {
-
+    s[i].p.x = n;
 }
 
 void setSpriteAPY(Sprite * s, int i, int n) {
-
+    s[i].p.y = n;
 }
 
 void setSpriteAC(Sprite * s, int i, char c) {
-
+    s[i].c = c;
 }
 
 void setSpriteASIn(Sprite * s, int i, bool b) {
-
+    s[i].s.in = b;
 }
 
 void setSpriteASTe(Sprite * s, int i, bool b) {
-
+    s[i].s.te = b;
 }
 
 void setSpriteASTu(Sprite * s, int i, bool b) {
-
+    s[i].s.tu = b;
 }
 
 void setSpriteASEb(Sprite * s, int i, bool b) {
-
+    s[i].s.eb = b;
 }
 
 void setSpriteASS(Sprite * s, int i, int n) {
-
+    s[i].s.s = n;
 }
 
 void setSpriteAT(Sprite * s, int i, int n) {
-
+    s[i].t = n;
 }
 
 void setSpriteAToX(Sprite * s, int i, int n) {
-
+    s[i].to.x = n;
 }
 
 void setSpriteAToY(Sprite * s, int i, int n) {
-
+    s[i].to.y = n;
 }
 
 void setSpriteASn(Sprite * s, int i, int n) {
-
+    s[i].sn = n;
 }
 
 void setSpriteAPcX(Sprite * s, int i, int n) {
-
+    s[i].pc.x = n;
 }
 
 void setSpriteAPcY(Sprite * s, int i, int n) {
-
+    s[i].pc.y = n;
 }
 
 void setSpriteAA(Sprite * s, int i, bool b) {
+    s[i].a = b;
+}
 
+/***
+Position functions
+### These exist because positions are used outside of classes for this project ###
+can be safely moved out of sprite at a later time
+***/
+
+int getPosX(Position * p) {
+    return p->x;
+}
+
+int getPosY(Position * p) {
+    return p->y;
+}
+
+void setPosX(Position * p, int n) {
+    p->x = n;
+}
+
+void setPosY(Position * p, int n) {
+    p->y = n;
 }

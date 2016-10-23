@@ -1,12 +1,2 @@
-10/15@02:05pm: re-structured code prior to tackling ncurses, shrank the size of main.c as a result
-10/15@03:40pm: can print and monster movement is intact, pc isn't moving yet
-10/15@09:08pm: added player movement at full functionality, many cores were dumped during creation of this change
-10/15@10:34pm: added most input commands
-10/17@07:36pm: added monster list functionality bar scrolling
-10/17@07:42pm: added monster list scrolling ;; was more simple than expected
-10/17@08:31pm: added dungeon re-generation and as such, stairwells
-10/17@08:45pm: fixed a memory leak issue and reduced all leaks to native ncurses leaks ;; fixed stairs overlapping occasionally
-10/17@08:52pm: composed and edited README
-10/18@02:26pm: tweaked the ncurses escape delay
-10/18@02:34pm: fixed a bug where the monster list viewing was treated as a valid move 
+10/23@02:36am Added a lot of skeleton after testing c and c++ interconnection /stuff/
 

@@ -133,6 +133,14 @@
 		void setSpriteAPcY(Sprite *, int, int);
 		void setSpriteAA(Sprite *, int, bool);
 
+		/***
+		our happy little position pointer section that made us go from 204 to 272 errors
+		***/
+		int getPosX(Position * p);
+		int getPosY(Position * p);
+		void setPosX(Position * p, int n);
+		void setPosY(Position * p, int n);
+
 	#endif
 
 #ifdef __cplusplus
@@ -161,13 +169,13 @@
 		} Path;
 
 		typedef struct {
-			Position	tl;		/* top left coordinate of the room, used as the core point of reference */
-			Position	br;		/* bottom right coordinate of the room as per above */
+			Position*	tl;		/* top left coordinate of the room, used as the core point of reference */
+			Position*	br;		/* bottom right coordinate of the room as per above */
 			int			w;		/* width */
 			int			h;		/* height */
 			int			id;		/* room ID, potentially useful for organization */
 			int			p;		/* mark 1 if processed; 0 if not processed (corridors) */
-			Position	ctr;	/* "center" point; very rough, might need improved */
+			Position*	ctr;	/* "center" point; very rough, might need improved */
 			int			c;		/* if connected or not; TRUE/FALSE switch */
 		} Room;
 
@@ -189,8 +197,8 @@
 			int			pc;		/* location of PC in SpriteS array (.ss) */
 		    int         t;      /* turn number */
 			Bool		go;		/* game over T/F */
-			Position	su;		/* location of the dungeon's up staircase */
-			Position	sd;		/* location of the dungeon's down staircase */
+			Position*	su;		/* location of the dungeon's up staircase */
+			Position*	sd;		/* location of the dungeon's down staircase */
 		} Dungeon;
 
 		typedef struct {
@@ -199,13 +207,6 @@
 			int cost;
 			int v;
 		} Tile_Node;
-
-		typedef struct {
-			int			sn;	/* sprite number */
-			int 		speed;	/* speed of the Sprite */
-			int			turn;	/* turn counter */
-			Position	to;		/* where we move to */
-		} Event;
 
 		/*** Function prototypes ***/
 		/* monsters.c */
