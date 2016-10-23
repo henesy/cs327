@@ -5,6 +5,7 @@
 
 		/* c++ classes */
 		class Position {
+		public:
 			int	x; /* x coordinate */
 			int	y; /* y coordinate */
 		};
@@ -57,8 +58,8 @@
 		setter functions
 		***/
 
-		void initSprite(Sprite *);
-		void initSprites(Sprite *);
+		Sprite * initSprite();
+		Sprite * initSprites(int);
 
 		/***
 		getter
@@ -100,37 +101,37 @@
 		kill me
 		***/
 		/* singleton */
-		int setSpritePX(Sprite *, int n);
-		int setSpritePY(Sprite *, int n);
-		char setSpriteC(Sprite * s, char c);
-		bool setSpriteSIn(Sprite *, bool b);
-		bool setSpriteSTe(Sprite *, bool b);
-		bool setSpriteSTu(Sprite *, bool b);
-		bool setSpriteSEb(Sprite *, bool b);
-		int setSpriteSS(Sprite *, int n);
-		int setSpriteT(Sprite *, int n);
-		int setSpriteToX(Sprite *, int n);
-		int setSpriteToY(Sprite *, int n);
-		int setSpriteSn(Sprite *, int n);
-		int setSpritePcX(Sprite *, int n);
-		int setSpritePcY(Sprite *, int n);
-		bool setSpriteA(Sprite *, bool b);
+		void setSpritePX(Sprite *, int);
+		void setSpritePY(Sprite *, int);
+		void setSpriteC(Sprite * s, char c);
+		void setSpriteSIn(Sprite *, bool);
+		void setSpriteSTe(Sprite *, bool);
+		void setSpriteSTu(Sprite *, bool);
+		void setSpriteSEb(Sprite *, bool);
+		void setSpriteSS(Sprite *, int);
+		void setSpriteT(Sprite *, int);
+		void setSpriteToX(Sprite *, int);
+		void setSpriteToY(Sprite *, int);
+		void setSpriteSn(Sprite *, int);
+		void setSpritePcX(Sprite *, int);
+		void setSpritePcY(Sprite *, int);
+		void setSpriteA(Sprite *, bool);
 		/* array-based */
-		int setSpriteAPX(Sprite *, int i, int n);
-		int setSpriteAPY(Sprite *, int i, int n);
-		char setSpriteAC(Sprite *, int i, char c);
-		bool setSpriteASIn(Sprite *, int i, bool b);
-		bool setSpriteASTe(Sprite *, int i, bool b);
-		bool setSpriteASTu(Sprite *, int i, bool b);
-		bool setSpriteASEb(Sprite *, int i, bool b);
-		int setSpriteASS(Sprite *, int i, int n);
-		int setSpriteAT(Sprite *, int i, int n);
-		int setSpriteAToX(Sprite *, int i, int n);
-		int setSpriteAToY(Sprite *, int i, int n);
-		int setSpriteASn(Sprite *, int i, int n);
-		int setSpriteAPcX(Sprite *, int i, int n);
-		int setSpriteAPcY(Sprite *, int i, int n);
-		bool setSpriteAA(Sprite *, int i, bool b);
+		void setSpriteAPX(Sprite *, int, int);
+		void setSpriteAPY(Sprite *, int, int);
+		void setSpriteAC(Sprite *, int, char c);
+		void setSpriteASIn(Sprite *, int, bool);
+		void setSpriteASTe(Sprite *, int, bool);
+		void setSpriteASTu(Sprite *, int, bool);
+		void setSpriteASEb(Sprite *, int, bool);
+		void setSpriteASS(Sprite *, int, int);
+		void setSpriteAT(Sprite *, int, int);
+		void setSpriteAToX(Sprite *, int, int);
+		void setSpriteAToY(Sprite *, int, int);
+		void setSpriteASn(Sprite *, int, int);
+		void setSpriteAPcX(Sprite *, int, int);
+		void setSpriteAPcY(Sprite *, int, int);
+		void setSpriteAA(Sprite *, int, bool);
 
 	#endif
 
