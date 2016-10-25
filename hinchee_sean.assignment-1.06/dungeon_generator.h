@@ -45,6 +45,8 @@
 
 
 	#else
+		#include <stdbool.h>
+
 
 		/* not C++ */
 		typedef struct Position Position;

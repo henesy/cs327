@@ -76,15 +76,15 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 
 	/* add rooms to the print buffer */
 	for(h = 0; h < dungeon->nr; h++) {
-		for(i = dungeon->r[h].tl.y; i < dungeon->r[h].br.y+1; i++) {
-			for(j = dungeon->r[h].tl.x; j < dungeon->r[h].br.x+1; j++) {
+		for(i = getPosY(dungeon->r[h].tl); i < getPosY(dungeon->r[h].br)+1; i++) {
+			for(j = getPosX(dungeon->r[h].tl); j < getPosX(dungeon->r[h].br)+1; j++) {
 				dungeon->p[i][j].c = '.';
 			}
 		}
 	}
 
-	dungeon->p[dungeon->su.y][dungeon->su.x].c = '<';
-	dungeon->p[dungeon->sd.y][dungeon->sd.x].c = '>';
+	dungeon->p[getPosY(dungeon->su)][getPosX(dungeon->su)].c = '<';
+	dungeon->p[getPosY(dungeon->sd)][getPosX(dungeon->sd)].c = '>';
 
 	/* add sprites to the print buffer */
 	for(i = 0; i < dungeon->ns; i++) {
@@ -162,7 +162,7 @@ void print_dungeon_nnc(Dungeon * dungeon, int nt, int t) {
 
 	/* add rooms to the print buffer */
 	for(h = 0; h < dungeon->nr; h++) {
-		for(i = dungeon->r[h].tl.y; i < dungeon->r[h].br.y+1; i++) {
+		for(i = getPosY(dungeon->r[h].tl); i < getPosY(dungeon->r[h].br)+1; i++) {
 			for(j = getPosX(dungeon->r[h].tl); j < getPosX(dungeon->r[h].br)+1; j++) {
 				dungeon->p[i][j].c = '.';
 			}

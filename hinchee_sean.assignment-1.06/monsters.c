@@ -245,89 +245,6 @@ void parse_move(Dungeon * dungeon, int sn) {
 	dungeon->ss[sn].p.y = dungeon->ss[sn].to.y;
 }
 
-/* move a sprite following its built in rules */
-Event gen_move_sprite_old(Dungeon * dungeon, int sn) {
-	Event e;
-
-	int xs[8] = {-1,0,1,1,1,0,-1,-1};
-	int ys[8] = {-1,-1,-1,0,1,1,1,0};
-
-    int sx = dungeon->ss[sn].p.x;
-    int sy = dungeon->ss[sn].p.y;
-	Sprite s = dungeon->ss[sn];
-	int qp = -1;
-
-	/* increment the turn */
-	dungeon->ss[sn].t += (100 / s.s.s);
-
-    int i;
-    for(i = 0; i < 8; i++) {
-        int x = sx + xs[i];
-        int y = sy + ys[i];
-        if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
-            int hard = dungeon->d[y][x].h;
-            if(hard < 255) {
-                /* check for erratic behaviour */
-				if(s.s.eb == TRUE) {
-					int b = rand() % 2;
-					if(b) {
-						goto RP;
-					}
-				}
-
-				/* check if tunneling */
-				if(hard > 0 && s.s.tu == FALSE) {
-					continue;
-				}
-
-
-				/* check for line of sight / telepathic */
-				if(s.s.te == FALSE) {
-					/* if line of sight ;; path and cache -> exit ;; else go to RP ; */
-					if(dungeon->d[y][x].c == '.') {
-
-					} else {
-						goto RP;
-					}
-
-				} else {
-					/* path direct to PC if possible */
-					Sprite pc = dungeon->ss[dungeon->pc];
-					if(sx < pc.p.x)
-						x = sx + 1;
-					if(sx > pc.p.x)
-						x = sx - 1;
-					if(sy < pc.p.y)
-						y = sy + 1;
-					if(sy > pc.p.y)
-						y = sy - 1;
-
-				}
-
-
-				/* check for lowest if intelligent */
-				if(s.s.in == TRUE) {
-					if(s.s.tu == TRUE) {
-						if(dungeon->cst[ys[qp]+sy][xs[qp]+sx] > dungeon->cst[y][x] || qp == -1) {
-							qp = i;
-						}
-					} else {
-						if(dungeon->csnt[ys[qp]+sy][xs[qp]+sx] > dungeon->csnt[y][x] || qp == -1) {
-							qp = i;
-						}
-					}
-				} else {
-					RP: ;
-					qp = rand() % 9;
-					break;
-				}
-
-            }
-        }
-    }
-	return e;
-}
-
 /* add a sprite to the dungeon */
 void add_sprite(Dungeon * dungeon, Sprite s) {
 	if(dungeon->ns < dungeon->ms) {
@@ -349,65 +266,65 @@ void add_sprite(Dungeon * dungeon, Sprite s) {
 generate a sprite, because in-line structs are icky
 if r(oom) = 1 then x and y will be ignored and should be passed as -1 as such (normally meaning random)
 */
-Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
-	Sprite s;
+Sprite * gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
+	Sprite * s = initSprite();
 
-	s.c = c;
-	s.a = TRUE;
+	setSpriteC(s, c);
+	setSpriteA(s, TRUE);
 
     /* set stats */
     if(s.c == '@') {
-        s.s.s = 10;
-        s.s.tu = FALSE;
-		s.s.eb = FALSE;
-		s.s.te = FALSE;
-		s.s.in = FALSE;
+        setSpriteSS(s, 10);
+        setSpriteSTu(s, FALSE);
+		setSpriteSEb(s, FALSE);
+		setSpriteSTe(s, FALSE);
+		setSpriteSIn(s, FALSE);
 	} else {
         /* if not the pc a value 5-20 */
-        s.s.s = (rand() % 16) + 5;
+        setSpriteSS(s, (rand() % 16) + 5);
         /* generate stats */
-        s.s.in = rand() % 2;
-        s.s.te = rand() % 2;
-        s.s.tu = rand() % 2;
-        s.s.eb = rand() % 2;
+        setSpriteSIn(s, rand() % 2);
+        setSpriteSTe(s, rand() % 2);
+        setSpriteSTu(s, rand() % 2);
+        setSpriteSEb(s, rand() % 2);
 
         /* set character as per assignment 4 */
-        if(s.s.in == FALSE && s.s.te == FALSE && s.s.tu == FALSE && s.s.eb == FALSE)
-            s.c = '0';
-        else if(s.s.in == FALSE && s.s.te == FALSE && s.s.tu == FALSE && s.s.eb == TRUE)
-            s.c = '1';
-        else if(s.s.in == FALSE && s.s.te == FALSE && s.s.tu == TRUE && s.s.eb == FALSE)
-            s.c = '2';
-        else if(s.s.in == FALSE && s.s.te == FALSE && s.s.tu == TRUE && s.s.eb == TRUE)
-            s.c = '3';
-        else if(s.s.in == FALSE && s.s.te == TRUE && s.s.tu == FALSE && s.s.eb == FALSE)
-            s.c = '4';
-        else if(s.s.in == FALSE && s.s.te == TRUE && s.s.tu == FALSE && s.s.eb == TRUE)
-            s.c = '5';
-        else if(s.s.in == FALSE && s.s.te == TRUE && s.s.tu == TRUE && s.s.eb == FALSE)
-            s.c = '6';
-        else if(s.s.in == FALSE && s.s.te == TRUE && s.s.tu == TRUE && s.s.eb == TRUE)
-            s.c = '7';
-        else if(s.s.in == TRUE && s.s.te == FALSE && s.s.tu == FALSE && s.s.eb == FALSE)
-            s.c = '8';
-        else if(s.s.in == TRUE && s.s.te == FALSE && s.s.tu == FALSE && s.s.eb == TRUE)
-            s.c = '9';
-        else if(s.s.in == TRUE && s.s.te == FALSE && s.s.tu == TRUE && s.s.eb == FALSE)
-            s.c = 'a';
-        else if(s.s.in == TRUE && s.s.te == FALSE && s.s.tu == TRUE && s.s.eb == TRUE)
-            s.c = 'b';
-        else if(s.s.in == TRUE && s.s.te == TRUE && s.s.tu == FALSE && s.s.eb == FALSE)
-            s.c = 'c';
-        else if(s.s.in == TRUE && s.s.te == TRUE && s.s.tu == FALSE && s.s.eb == TRUE)
-            s.c = 'd';
-        else if(s.s.in == TRUE && s.s.te == TRUE && s.s.tu == TRUE && s.s.eb == FALSE)
-            s.c = 'e';
-        else if(s.s.in == TRUE && s.s.te == TRUE && s.s.tu == TRUE && s.s.eb == TRUE)
-            s.c = 'f';
+        if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == FALSE)
+            setSpriteC(s, '0');
+        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == TRUE)
+            setSpriteC(s, '1');
+        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == FALSE)
+            setSpriteC(s, '2');
+        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == TRUE)
+            setSpriteC(s, '3');
+        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == FALSE)
+            setSpriteC(s, '4');
+        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == TRUE)
+            setSpriteC(s, '5');
+        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == FALSE)
+            setSpriteC(s, '6');
+        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == TRUE)
+            setSpriteC(s, '7');
+        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == FALSE)
+            setSpriteC(s, '8');
+        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == TRUE)
+            setSpriteC(s, '9');
+        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == FALSE)
+            setSpriteC(s, 'a');
+        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == TRUE)
+            setSpriteC(s, 'b');
+        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == FALSE)
+            setSpriteC(s, 'c');
+        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == TRUE)
+            setSpriteC(s, 'd');
+        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == FALSE)
+            setSpriteC(s, 'e');
+        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == TRUE)
+            setSpriteC(s, 'f');
     }
 
     /* put the tunneling monsters anywhere */
-    if(s.s.tu == TRUE) {
+    if(getSpriteSTu(s) == TRUE) {
 		int t = 0;
 		PRT: ;
         /* randomize location anywhere in the dungeon */
@@ -418,12 +335,12 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
             y = (rand() % (dungeon->h-2)) + 1;
         }
 
-		if(s.c != '@' && dungeon->nr > 1) {
-			s.p.x = x;
-		    s.p.y = y;
+		if(getSpriteC(s) != '@' && dungeon->nr > 1) {
+			setSpritePX(s, x);
+		    setSpritePY(s, y);
 
 			Bool w_pc = FALSE;
-			with_pc(dungeon, &s, &w_pc);
+			with_pc(dungeon, s, &w_pc);
 			if(w_pc == TRUE && t < 8) {
 				t++;
 				goto PRT;
@@ -432,19 +349,19 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
     }
 
     /* place in a room if 1 or more. implicitly random ;; force in a room even if tunneling */
-    if(r > 0 || s.s.tu == FALSE) {
+    if(r > 0 || getSpriteSTu(s) == FALSE) {
 		int t = 0;
 		PRNT: ;
         int r_id = rand() % dungeon->nr;
-        x = (rand() % dungeon->r[r_id].w) + dungeon->r[r_id].tl.x;
-        y = (rand() % dungeon->r[r_id].h) + dungeon->r[r_id].tl.y;
+        x = (rand() % dungeon->r[r_id].w) + getPosX(dungeon->r[r_id].tl);
+        y = (rand() % dungeon->r[r_id].h) + getPosY(dungeon->r[r_id].tl);
 
-		if(s.c != '@' && dungeon->nr > 1) {
-			s.p.x = x;
-		    s.p.y = y;
+		if(getSpriteC(s) != '@' && dungeon->nr > 1) {
+			setSpritePX(s, x);
+		    setSpritePY(s, y);
 
 			Bool w_pc = FALSE;
-			with_pc(dungeon, &s, &w_pc);
+			with_pc(dungeon, s, &w_pc);
 			if(w_pc == TRUE && t < 8) {
 				t++;
 				goto PRNT;
@@ -454,12 +371,12 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 
     }
 
-    s.p.x = x;
-    s.p.y = y;
-	s.to.x = x;
-	s.to.y = y;
+    setSpritePX(s, x);
+    setSpritePY(s, y);
+	setSpriteToX(s, x);
+	setSpriteToY(s, y);
 	//s.t = 100/s.s.s;
-	s.t = 0;
+	setSpriteT(s, 0);
 
 	return s;
 }
@@ -468,7 +385,7 @@ Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 Bool check_any_monsters(Dungeon * dungeon) {
 	int i;
 	for(i = 0; i < dungeon->ns; i++) {
-		if(dungeon->ss[i].a == TRUE && i != 0)
+		if(getSpriteAA(dungeon->ss, i) == TRUE && i != 0)
 			return TRUE;
 	}
 

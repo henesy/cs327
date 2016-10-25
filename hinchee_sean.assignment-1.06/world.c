@@ -12,8 +12,8 @@ int place_room(Dungeon * dungeon) {
 	set top right to rng number; might be worth making a more detailed placer with a lower
 		fail rate
 	*/
-	new_room.tl.x = x;
-	new_room.tl.y = y;
+	setPosX(new_room.tl, x);
+	setPosY(new_room.tl, y);
 	/* for RNG, maybe do a rando room width/height and re-set .br */
 
 	HW: ;
@@ -29,8 +29,8 @@ int place_room(Dungeon * dungeon) {
 	new_room.h = he;
 	new_room.w = we;
 
-	new_room.br.x = x + new_room.w-1;
-	new_room.br.y = y + new_room.h-1;
+	setPosX(new_room.br, x + new_room.w-1);
+	setPosY(new_room.br, y + new_room.h-1);
 
 	/* check for rooms loaded into the dungeon buffer already */
 	int i;
@@ -51,7 +51,7 @@ int place_room(Dungeon * dungeon) {
 	}
 
 	/* return a failure if part of the room is out of bounds */
-	if(new_room.br.x >= dungeon->w || new_room.br.y >= dungeon->h) {
+	if(getPosX(new_room.br) >= dungeon->w || getPosY(new_room.br) >= dungeon->h) {
 		return placed;
 	}
 
@@ -59,29 +59,29 @@ int place_room(Dungeon * dungeon) {
 	/* check for surrounding rooms */
 
 	/* top row */
-	for(i = new_room.tl.x-1; i < new_room.br.x+2 && new_room.tl.x-1 >= 0 && new_room.br.x+1 < dungeon->w && new_room.tl.y-1 >= 0; i++) {
-		if((dungeon->p[new_room.tl.y-1][i]).c == '.') {
+	for(i = getPosX(new_room.tl)-1; i < getPosX(new_room.br)+2 && getPosX(new_room.tl)-1 >= 0 && getPosX(new_room.br)+1 < dungeon->w && getPosY(new_room.tl)-1 >= 0; i++) {
+		if((dungeon->p[getPosY(new_room.tl)-1][i]).c == '.') {
 			return placed;
 		}
 	}
 
 	/* bottom row */
-	for(i = new_room.tl.x-1; i < new_room.br.x+2 && new_room.tl.x-1 >= 0 && new_room.br.x+1 < dungeon->w && new_room.br.y+1 < dungeon->h; i++) {
-		if((dungeon->p[new_room.br.y+1][i]).c == '.') {
+	for(i = getPosX(new_room.tl)-1; i < getPosX(new_room.br)+2 && getPosX(new_room.tl)-1 >= 0 && getPosX(new_room.br)+1 < dungeon->w && getPosY(new_room.br)+1 < dungeon->h; i++) {
+		if((dungeon->p[getPosY(new_room.br)+1][i]).c == '.') {
 			return placed;
 		}
 	}
 
 	/* left side */
-	for(i = new_room.tl.y; i < new_room.br.y+1 && new_room.br.y+1 < dungeon->h && new_room.tl.x-1 >= 0; i++) {
-		if((dungeon->p[i][new_room.tl.x-1]).c == '.') {
+	for(i = getPosY(new_room.tl); i < getPosY(new_room.br)+1 && getPosY(new_room.br)+1 < dungeon->h && getPosX(new_room.tl)-1 >= 0; i++) {
+		if((dungeon->p[i][getPosX(new_room.tl)-1]).c == '.') {
 			return placed;
 		}
 	}
 
 	/* right side */
-	for(i = new_room.tl.y; i < new_room.br.y+1 && new_room.br.y+1 < dungeon->h && new_room.br.x+1 < dungeon->w; i++) {
-		if((dungeon->p[i][new_room.br.x+1]).c == '.') {
+	for(i = getPosY(new_room.tl); i < getPosY(new_room.br)+1 && getPosY(new_room.br)+1 < dungeon->h && getPosX(new_room.br)+1 < dungeon->w; i++) {
+		if((dungeon->p[i][getPosX(new_room.br)+1]).c == '.') {
 			return placed;
 		}
 	}
@@ -102,8 +102,8 @@ int place_room(Dungeon * dungeon) {
 	if(dungeon->nr < dungeon->mr) {
 		dungeon->nr++;
 		new_room.id = dungeon->nr-1; /* reflects position in the array */
-		new_room.ctr.x = (new_room.w)/2 + new_room.tl.x;
-		new_room.ctr.y = (new_room.h)/2 + new_room.tl.y;
+		setPosX(new_room.ctr, (new_room.w)/2 + getPosX(new_room.tl));
+		setPosY(new_room.ctr, (new_room.h)/2 + getPosY(new_room.tl));
 		/* printf("%d: (%d, %d)\n", new_room.id, new_room.ctr.x, new_room.ctr.y); */
 		dungeon->r[dungeon->nr-1] = new_room;
 	} else {
@@ -164,7 +164,7 @@ void gen_corridors(Dungeon * dungeon) {
 		/* populate dists from the current position */
 		for(i = 0; i < dungeon->nr; i++) {
 			/* calculate distance */
-			d =  sqrt(pow(dungeon->r[i].ctr.x - dungeon->r[room_pos].ctr.x, 2) + pow(dungeon->r[i].ctr.y - dungeon->r[room_pos].ctr.y, 2));
+			d =  sqrt(pow(getPosX(dungeon->r[i].ctr) - getPosX(dungeon->r[room_pos].ctr), 2) + pow(getPosY(dungeon->r[i].ctr) - getPosY(dungeon->r[room_pos].ctr), 2));
 			dists[i] = d;
 		}
 
@@ -200,24 +200,24 @@ void gen_corridors(Dungeon * dungeon) {
 	/* draw dungeon paths in the dungeon grid; start at room 0 as per above */
 
 	for(i = 0; i < path_cnt; i++) {
-		int x = dungeon->r[paths[i].prev].ctr.x;
-		int y = dungeon->r[paths[i].prev].ctr.y;
+		int x = getPosX(dungeon->r[paths[i].prev].ctr);
+		int y = getPosY(dungeon->r[paths[i].prev].ctr);
 
 		/*printf("%d: (%d, %d)\n", i, x, y);*/
 
-		while(x != dungeon->r[paths[i].next].ctr.x || y != dungeon->r[paths[i].next].ctr.y) {
+		while(x != getPosX(dungeon->r[paths[i].next].ctr) || y != getPosY(dungeon->r[paths[i].next].ctr)) {
 			int dirx = 0; /* -1 for left, 1 for right */
 			int diry = 0; /* -1 for down, 1 for up */
 
-			if(x < dungeon->r[paths[i].next].ctr.x) {
+			if(x < getPosX(dungeon->r[paths[i].next].ctr)) {
 				dirx = 1;
-			} else if(x > dungeon->r[paths[i].next].ctr.x) {
+			} else if(x > getPosX(dungeon->r[paths[i].next].ctr)) {
 				dirx = -1;
 			}
 
-			if(y < dungeon->r[paths[i].next].ctr.y) {
+			if(y < getPosY(dungeon->r[paths[i].next].ctr)) {
 				diry = 1;
-			} else if(y > dungeon->r[paths[i].next].ctr.y) {
+			} else if(y > getPosY(dungeon->r[paths[i].next].ctr)) {
 				diry = -1;
 			}
 
@@ -293,19 +293,19 @@ void gen_dungeon(Dungeon * dungeon) {
 	int y;
 
 	int r_id = rand() % dungeon->nr;
-	x = (rand() % dungeon->r[r_id].w) + dungeon->r[r_id].tl.x;
-	y = (rand() % dungeon->r[r_id].h) + dungeon->r[r_id].tl.y;
-	dungeon->sd.x = x;
-	dungeon->sd.y = y;
+	x = (rand() % dungeon->r[r_id].w) + getPosX(dungeon->r[r_id].tl);
+	y = (rand() % dungeon->r[r_id].h) + getPosY(dungeon->r[r_id].tl);
+	setPosX(dungeon->sd, x);
+	setPosY(dungeon->sd, y);
 	
 	SD: ;
 	r_id = rand() % dungeon->nr;
-	x = (rand() % dungeon->r[r_id].w) + dungeon->r[r_id].tl.x;
-	y = (rand() % dungeon->r[r_id].h) + dungeon->r[r_id].tl.y;
-	dungeon->su.x = x;
-	dungeon->su.y = y;
+	x = (rand() % dungeon->r[r_id].w) + getPosX(dungeon->r[r_id].tl);
+	y = (rand() % dungeon->r[r_id].h) + getPosY(dungeon->r[r_id].tl);
+	setPosX(dungeon->su, x);
+	setPosY(dungeon->su, y);
 	
-	if(dungeon->su.x == dungeon->sd.x && dungeon->su.y == dungeon->sd.y)
+	if(getPosX(dungeon->su) == getPosX(dungeon->sd) && getPosY(dungeon->su) == getPosY(dungeon->sd))
 		goto SD;
 
 }
@@ -341,7 +341,7 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	new_dungeon.r = calloc(new_dungeon.mr, sizeof(Room));
 
 	/* sprites allocation */
-	new_dungeon.ss = calloc(new_dungeon.ms, sizeof(Sprite));
+	new_dungeon.ss = calloc(new_dungeon.ms, sizeof(Sprite *));
 
 	/* djikstra-based cost map allocation */
 	new_dungeon.cst = calloc(w*h, sizeof(int *));
