@@ -8,7 +8,7 @@ Bool test_loc(Dungeon * dungeon, int x, int y, Sprite *s) {
 	if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
 		int hard = dungeon->d[y][x].h;
 		if(dungeon->d[y][x].h < 255) {
-			if(s->s.tu == FALSE && hard > 0)
+			if(getSpriteSTu(s) == FALSE && hard > 0)
 				return FALSE;
 			return TRUE;
 		}
@@ -20,14 +20,15 @@ Bool test_loc(Dungeon * dungeon, int x, int y, Sprite *s) {
 void with_pc(Dungeon * dungeon, Sprite * s, Bool *in) {
 	int pc_rid	= -1;
 	int s_rid	= -1;
-	Sprite *pc = &(dungeon->ss[dungeon->pc]);
+	// Sprite *pc = &(dungeon->ss[dungeon->pc]);
+	Sprite *pc = thisASprite(dungeon->ss, dungeon->pc);
 
 	int i;
 	for(i = 0; i < dungeon->nr; i++) {
-		if(s->p.x <= dungeon->r[i].br.x && s->p.y <= dungeon->r[i].br.y && s->p.x >= dungeon->r[i].tl.x && s->p.y >= dungeon->r[i].tl.y) {
+		if(getSpritePX(s) <= getPosX(dungeon->r[i].br) && getSpritePY(s) <= getPosY(dungeon->r[i].br) && getSpritePX(s) >= getPosX(dungeon->r[i].tl) && getSpritePY(s) >= getPosY(dungeon->r[i].tl)) {
 			s_rid = i;
 		}
-		if(pc->p.x <= dungeon->r[i].br.x && pc->p.y <= dungeon->r[i].br.y && pc->p.x >= dungeon->r[i].tl.x && pc->p.y >= dungeon->r[i].tl.y) {
+		if(getSpritePX(pc) <= getPosX(dungeon->r[i].br) && getSpritePY(pc) <= getPosY(dungeon->r[i].br) && getSpritePX(pc) >= getPosX(dungeon->r[i].tl) && getSpritePY(pc) >= getPosY(dungeon->r[i].tl)) {
 			pc_rid = i;
 		}
 	}
@@ -37,24 +38,30 @@ void with_pc(Dungeon * dungeon, Sprite * s, Bool *in) {
 
 void gen_move_sprite(Dungeon * dungeon, int sn) {
 	//make ss[sn] when possible
-	int sx = dungeon->ss[sn].p.x;
-	int sy = dungeon->ss[sn].p.y;
+	// int sx = dungeon->ss[sn].p.x;
+	// int sy = dungeon->ss[sn].p.y;
+	int sx = getSpriteAPX(dungeon->ss, sn);
+	int sy = getSpriteAPY(dungeon->ss, sn);
 	int xs[8] = {-1,0,1,1,1,0,-1,-1};
 	int ys[8] = {-1,-1,-1,0,1,1,1,0};
 
-	Sprite *s = &(dungeon->ss[sn]);
+	//Sprite *s = &(dungeon->ss[sn]);
+	Sprite *s = thisASprite(dungeon->ss, sn);
 
 	/* increment the turn */
-	dungeon->ss[sn].t += (100 / s->s.s);
+	//dungeon->ss[sn].t += (100 / s->s.s);
+	setSpriteAT(dungeon->ss, sn, getSpriteAT(dungeon->ss, sn) + (100 / getSpriteSS(s)));
 
-	Position new = {-1, -1};
+	Position * new = NULL;
+	setPosX(new, -1);
+	setPosY(new, -1);
 
-	dungeon->d[s->p.y][s->p.x].h -= 85;
-	if(dungeon->d[s->p.y][s->p.x].h < 0)
-		dungeon->d[s->p.y][s->p.x].h = 0;
+	dungeon->d[getSpritePY(s)][getSpritePX(s)].h -= 85;
+	if(dungeon->d[getSpritePY(s)][getSpritePX(s)].h < 0)
+		dungeon->d[getSpritePY(s)][getSpritePX(s)].h = 0;
 
 	// make sure we're alive
-	if(s->a == TRUE) {
+	if(getSpriteA(s) == TRUE) {
 		int i;
 		int j;
 		int eb = rand() % 2; /* we have a 50% chance to behave erratically */
@@ -66,25 +73,27 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 				/* drunken PC movement as per assignment 1.04 */
 
 				/* check erratic behaviour */
-				if(s->s.eb == FALSE || (s->s.eb == TRUE && eb)) {
+				if(getSpriteSEb(s) == FALSE || (getSpriteSEb(s) == TRUE && eb)) {
 					/** check if intelligent / telepathic **/
 					//new.x = sx;
 					//new.y = sy;
-					if(s->s.te == FALSE) {
+					if(getSpriteSTe(s) == FALSE) {
 						/* see if you're in the same room */
 						Bool in_room = FALSE;
 						with_pc(dungeon, s, &in_room);
 						if(in_room == TRUE) {
 							//cache PC location
-							s->pc = dungeon->ss[dungeon->pc].p;
+							//s->pc = dungeon->ss[dungeon->pc].p;
+							setSpritePcX(s, getSpriteAPX(dungeon->ss, dungeon->pc));
+							setSpritePcY(s, getSpriteAPY(dungeon->ss, dungeon->pc));
 
 							IN: ;
-							if(s->s.in == TRUE) {
+							if(getSpriteSIn(s) == TRUE) {
 								/* we are intelligent and can see our mark (tele or otherwise) */
 								int k;
 								int lowest = 0;
 								Bool set = FALSE;
-								if(s->s.tu) {
+								if(getSpriteSTu(s)) {
 									//tunneling
 									for(k = 0; k < 8; k++) {
 										if(xs[k]+sx >= 0 && xs[k]+sx < dungeon->w && ys[k]+sy >= 0 && ys[k]+sy < dungeon->h) {
@@ -118,19 +127,19 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 										*/
 								}
 								if(set == TRUE) {
-									new.x = xs[lowest] + sx;
-									new.y = ys[lowest] + sy;
+									setPosX(new, xs[lowest] + sx);
+									setPosY(new, ys[lowest] + sy);
 									break;
 								} else {
-									new.x = sx;
-									new.y = sy;
+									setPosX(new, sx);
+									setPosY(new, sy);
 									break;
 								}
 
 									/*
 									if(test_loc(dungeon, px, py, s) == TRUE) {
 										//if we can move to the point
-										if(s->s.tu) {
+										if(getSpriteSTu(s)) {
 											//tunneling
 											if(new.x > 0 && new.y > 0 && new.x != sx && new.y != sy) {
 												if(dungeon->cst[py][px] < dungeon->cst[new.y][new.x]) {
@@ -157,18 +166,19 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 									*/
 							} else {
 								//if not intelligent
-								if(s->pc.x < sx)
+								if(getSpritePcX(s) < sx)
 									px = sx - 1;
-								if(s->pc.x > sx)
+								if(getSpritePcX(s) > sx)
 									px = sx + 1;
-								if(s->pc.y < sy)
+								if(getSpritePcY(s) < sy)
 									py = sy - 1;
-								if(s->pc.y > sy)
+								if(getSpritePcY(s) > sy)
 									py = sy + 1;
 
 								if(test_loc(dungeon, px, py, s) == TRUE) {
-									new.x = px;
-									new.y = py;
+									setPosX(new, px);
+									setPosY(new, py);
+
 									break;
 								}
 							}
@@ -179,7 +189,9 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 						}
 					} else {
 						//we know where the PC is
-						s->pc = dungeon->ss[dungeon->pc].p;
+						//s->pc = dungeon->ss[dungeon->pc].p;
+						setSpritePcX(s, getSpriteAPX(dungeon->ss, dungeon->pc));
+						setSpritePcY(s, getSpriteAPY(dungeon->ss, dungeon->pc));
 						/**
 						intelligence test still applies
 						we just treat it as if we're always in the room " "
@@ -203,8 +215,8 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 					}
 					if(test_loc(dungeon, px, py, s) == TRUE) {
 						/* if the location is okay, commit it*/
-						new.x = px;
-						new.y = py;
+						setPosX(new, px);
+						setPosY(new, py);
 					}
 
 					break;
@@ -214,23 +226,25 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 	}
 
 	/* safety net */
-	if(new.x < 0)
-		new.x = sx;
-	if(new.y < 0)
-		new.y = sy;
+	if(getPosX(new) < 0)
+		setPosX(new, sx);
+	if(getPosY(new) < 0)
+		setPosY(new, sy);
 
-	dungeon->ss[sn].to.x = new.x;
-	dungeon->ss[sn].to.y = new.y;
+	//dungeon->ss[sn].to.x = new.x;
+	//dungeon->ss[sn].to.y = new.y;
+	setSpriteAToX(dungeon->ss, sn, getPosX(new));
+	setSpriteAToY(dungeon->ss, sn, getPosY(new));
 
-	if(new.x == dungeon->ss[dungeon->pc].p.x && new.y == dungeon->ss[dungeon->pc].p.y)
+	if(getPosX(new) == getSpriteAPX(dungeon->ss, dungeon->pc) && getPosY(new) == getSpriteAPY(dungeon->ss, dungeon->pc))
 		dungeon->go = TRUE;
 
 	/* check if we have to kill another sprite */
 	int i;
 	for(i = 0; i < dungeon->ns; i++) {
 		if(i != sn) {
-			if((dungeon->ss[i].to.x == dungeon->ss[sn].to.x) && (dungeon->ss[i].to.y == dungeon->ss[sn].to.y) && dungeon->ss[sn].a == TRUE)
-				dungeon->ss[i].a = FALSE;
+			if((getSpriteAToX(dungeon->ss, i)  == getSpriteAToX(dungeon->ss, sn)) && (getSpriteAToY(dungeon->ss, i) == getSpriteAToY(dungeon->ss, sn)) && getSpriteAA(dungeon->ss, sn) == TRUE)
+				setSpriteAA(dungeon->ss, i, FALSE);
 			/*
 			else if(dungeon->ss[i].p.x == dungeon->ss[sn].p.x && dungeon->ss[i].p.y == dungeon->ss[sn].p.y && dungeon->ss[i].a == TRUE)
 				dungeon->ss[sn].a = FALSE;
@@ -241,23 +255,26 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 
 /* parse and apply a movement */
 void parse_move(Dungeon * dungeon, int sn) {
-	dungeon->ss[sn].p.x = dungeon->ss[sn].to.x;
-	dungeon->ss[sn].p.y = dungeon->ss[sn].to.y;
+	//dungeon->ss[sn].p.x = dungeon->ss[sn].to.x;
+	//dungeon->ss[sn].p.y = dungeon->ss[sn].to.y;
+	setSpriteAPX(dungeon->ss, sn, getSpriteAToX(dungeon->ss, sn));
+	setSpriteAPY(dungeon->ss, sn, getSpriteAToY(dungeon->ss, sn));
 }
 
 /* add a sprite to the dungeon */
-void add_sprite(Dungeon * dungeon, Sprite s) {
+void add_sprite(Dungeon * dungeon, Sprite * s) {
 	if(dungeon->ns < dungeon->ms) {
 		dungeon->ns++;
 	} else {
 		goto END;
 	}
 
-	if(s.c == '@') {
+	if(getSpriteC(s) == '@') {
 		dungeon->pc = dungeon->ns - 1;
     }
 
-	dungeon->ss[dungeon->ns - 1] = s;
+	//dungeon->ss[dungeon->ns - 1] = s;
+	copyASprite(dungeon->ss, dungeon->ns -1, s);
 
 	END: ;
 }
@@ -273,7 +290,7 @@ Sprite * gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 	setSpriteA(s, TRUE);
 
     /* set stats */
-    if(s.c == '@') {
+    if(getSpriteC(s) == '@') {
         setSpriteSS(s, 10);
         setSpriteSTu(s, FALSE);
 		setSpriteSEb(s, FALSE);

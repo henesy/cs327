@@ -12,11 +12,11 @@
 
 		class Stats {
 		public:
-				bool    in; /* intelligence */
-				bool    te; /* telepathy */
-				bool    tu; /* tunneling ability */
-				bool    eb; /* erratic behaviour */
-				int     s;  /* speed ;; pc has 10 ; 5-20 */
+			bool    in; /* intelligence */
+			bool    te; /* telepathy */
+			bool    tu; /* tunneling ability */
+			bool    eb; /* erratic behaviour */
+			int     s;  /* speed ;; pc has 10 ; 5-20 */
 		};
 
 		class Sprite {
@@ -29,6 +29,7 @@
 			int			sn;	/* sprite number */
 			Position	pc;	/* last known location of the PC */
 			bool		a;	/* alive T/F */
+			Sprite * thisSprite(void);
 		};
 
 		class Monster: public Sprite {
@@ -62,6 +63,13 @@
 
 		Sprite * initSprite();
 		Sprite * initSprites(int);
+
+		/***
+		copy functions
+		***/
+		void copySprite(Sprite *, Sprite *);
+		void copyASprite(Sprite * to, int n, Sprite * from);
+		Sprite * thisASprite(Sprite * arr, int i);
 
 		/***
 		getter
@@ -212,8 +220,8 @@
 
 		/*** Function prototypes ***/
 		/* monsters.c */
-		void add_sprite(Dungeon * dungeon, Sprite s);
-		Sprite gen_sprite(Dungeon * dungeon, char c, int x, int y, int r);
+		void add_sprite(Dungeon * dungeon, Sprite * s);
+		Sprite * gen_sprite(Dungeon * dungeon, char c, int x, int y, int r);
 		void gen_move_sprite(Dungeon * dungeon, int sn);
 		void parse_move(Dungeon * dungeon, int sn);
 		Bool check_any_monsters(Dungeon * dungeon);

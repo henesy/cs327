@@ -13,6 +13,53 @@ Sprite * initSprites(int n) {
 }
 
 /***
+copy function, deep copy
+***/
+void copySprite(Sprite * to, Sprite * from) {
+    to->p.x  =  from->p.x ;
+    to->p.y  = from->p.y ;
+    to->c    = from->c   ;
+    to->s.in = from->s.in;
+    to->s.te = from->s.te;
+    to->s.tu = from->s.tu;
+    to->s.eb = from->s.eb;
+    to->s.s  = from->s.s ;
+    to->t    = from->t   ;
+    to->to.x = from->to.x;
+    to->to.y = from->to.y;
+    to->sn   = from->sn  ;
+    to->pc.x = from->pc.x;
+    to->pc.y = from->pc.y;
+    to->a    = from->a   ;
+}
+
+void copyASprite(Sprite * to, int n, Sprite * from) {
+    (to[n]).p.x  =  from->p.x ;
+    (to[n]).p.y  = from->p.y ;
+    (to[n]).c    = from->c   ;
+    (to[n]).s.in = from->s.in;
+    (to[n]).s.te = from->s.te;
+    (to[n]).s.tu = from->s.tu;
+    (to[n]).s.eb = from->s.eb;
+    (to[n]).s.s  = from->s.s ;
+    (to[n]).t    = from->t   ;
+    (to[n]).to.x = from->to.x;
+    (to[n]).to.y = from->to.y;
+    (to[n]).sn   = from->sn  ;
+    (to[n]).pc.x = from->pc.x;
+    (to[n]).pc.y = from->pc.y;
+    (to[n]).a    = from->a   ;
+}
+
+Sprite * thisASprite(Sprite * arr, int i) {
+    return arr[i].thisSprite();
+}
+
+Sprite * Sprite::thisSprite() {
+    return this;
+}
+
+/***
 getter functions
 ***/
 
