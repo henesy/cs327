@@ -56,100 +56,6 @@
 		typedef struct Monster Monster;
 		typedef struct PC PC;
 
-		/*** functions to make C++ and C play nicely together on their little hellish playground  ***/
-		/***
-		setter functions
-		***/
-
-		Sprite * initSprite();
-		Sprite * initSprites(int);
-
-		/***
-		copy functions
-		***/
-		void copySprite(Sprite *, Sprite *);
-		void copyASprite(Sprite * to, int n, Sprite * from);
-		Sprite * thisASprite(Sprite * arr, int i);
-
-		/***
-		getter
-		***/
-		/* singleton */
-		int getSpritePX(Sprite *);
-		int getSpritePY(Sprite *);
-		char getSpriteC(Sprite *);
-		bool getSpriteSIn(Sprite *);
-		bool getSpriteSTe(Sprite *);
-		bool getSpriteSTu(Sprite *);
-		bool getSpriteSEb(Sprite *);
-		int getSpriteSS(Sprite *);
-		int getSpriteT(Sprite *);
-		int getSpriteToX(Sprite *);
-		int getSpriteToY(Sprite *);
-		int getSpriteSn(Sprite *);
-		int getSpritePcX(Sprite *);
-		int getSpritePcY(Sprite *);
-		bool getSpriteA(Sprite *);
-		/* array-based */
-		int getSpriteAPX(Sprite *, int);
-		int getSpriteAPY(Sprite *, int);
-		char getSpriteAC(Sprite *, int);
-		bool getSpriteASIn(Sprite *, int);
-		bool getSpriteASTe(Sprite *, int);
-		bool getSpriteASTu(Sprite *, int);
-		bool getSpriteASEb(Sprite *, int);
-		int getSpriteASS(Sprite *, int);
-		int getSpriteAT(Sprite *, int);
-		int getSpriteAToX(Sprite *, int);
-		int getSpriteAToY(Sprite *, int);
-		int getSpriteASn(Sprite *, int);
-		int getSpriteAPcX(Sprite *, int);
-		int getSpriteAPcY(Sprite *, int);
-		bool getSpriteAA(Sprite *, int);
-		/***
-		Setter functions
-		kill me
-		***/
-		/* singleton */
-		void setSpritePX(Sprite *, int);
-		void setSpritePY(Sprite *, int);
-		void setSpriteC(Sprite * s, char c);
-		void setSpriteSIn(Sprite *, bool);
-		void setSpriteSTe(Sprite *, bool);
-		void setSpriteSTu(Sprite *, bool);
-		void setSpriteSEb(Sprite *, bool);
-		void setSpriteSS(Sprite *, int);
-		void setSpriteT(Sprite *, int);
-		void setSpriteToX(Sprite *, int);
-		void setSpriteToY(Sprite *, int);
-		void setSpriteSn(Sprite *, int);
-		void setSpritePcX(Sprite *, int);
-		void setSpritePcY(Sprite *, int);
-		void setSpriteA(Sprite *, bool);
-		/* array-based */
-		void setSpriteAPX(Sprite *, int, int);
-		void setSpriteAPY(Sprite *, int, int);
-		void setSpriteAC(Sprite *, int, char c);
-		void setSpriteASIn(Sprite *, int, bool);
-		void setSpriteASTe(Sprite *, int, bool);
-		void setSpriteASTu(Sprite *, int, bool);
-		void setSpriteASEb(Sprite *, int, bool);
-		void setSpriteASS(Sprite *, int, int);
-		void setSpriteAT(Sprite *, int, int);
-		void setSpriteAToX(Sprite *, int, int);
-		void setSpriteAToY(Sprite *, int, int);
-		void setSpriteASn(Sprite *, int, int);
-		void setSpriteAPcX(Sprite *, int, int);
-		void setSpriteAPcY(Sprite *, int, int);
-		void setSpriteAA(Sprite *, int, bool);
-
-		/***
-		our happy little position pointer section that made us go from 204 to 272 errors
-		***/
-		int getPosX(Position * p);
-		int getPosY(Position * p);
-		void setPosX(Position * p, int n);
-		void setPosY(Position * p, int n);
 
 	#endif
 
@@ -242,6 +148,102 @@
 
 		/* main.c */
 		void map_dungeon_t(Dungeon * dungeon);
+		
+		/*** functions to make C++ and C play nicely together on their little hellish playground  ***/
+		/***
+		setter functions
+		***/
+
+		Sprite * initSprite();
+		Sprite * initSprites(int);
+
+		/***
+		copy functions
+		***/
+		void copySprite(Sprite *, Sprite *);
+		void copyASprite(Sprite * to, int n, Sprite * from);
+		Sprite * thisASprite(Sprite * arr, int i);
+
+		/***
+		getter
+		***/
+		/* singleton */
+		int getSpritePX(Sprite *);
+		int getSpritePY(Sprite *);
+		char getSpriteC(Sprite *);
+		bool getSpriteSIn(Sprite *);
+		bool getSpriteSTe(Sprite *);
+		bool getSpriteSTu(Sprite *);
+		bool getSpriteSEb(Sprite *);
+		int getSpriteSS(Sprite *);
+		int getSpriteT(Sprite *);
+		int getSpriteToX(Sprite *);
+		int getSpriteToY(Sprite *);
+		int getSpriteSn(Sprite *);
+		int getSpritePcX(Sprite *);
+		int getSpritePcY(Sprite *);
+		bool getSpriteA(Sprite *);
+		/* array-based */
+		int getSpriteAPX(Sprite *, int);
+		int getSpriteAPY(Sprite *, int);
+		char getSpriteAC(Sprite *, int);
+		bool getSpriteASIn(Sprite *, int);
+		bool getSpriteASTe(Sprite *, int);
+		bool getSpriteASTu(Sprite *, int);
+		bool getSpriteASEb(Sprite *, int);
+		int getSpriteASS(Sprite *, int);
+		int getSpriteAT(Sprite *, int);
+		int getSpriteAToX(Sprite *, int);
+		int getSpriteAToY(Sprite *, int);
+		int getSpriteASn(Sprite *, int);
+		int getSpriteAPcX(Sprite *, int);
+		int getSpriteAPcY(Sprite *, int);
+		bool getSpriteAA(Sprite *, int);
+		/***
+		Setter functions
+		kill me
+		***/
+		/* singleton */
+		void setSpritePX(Sprite *, int);
+		void setSpritePY(Sprite *, int);
+		void setSpriteC(Sprite *, char);
+		void setSpriteSIn(Sprite *, bool);
+		void setSpriteSTe(Sprite *, bool);
+		void setSpriteSTu(Sprite *, bool);
+		void setSpriteSEb(Sprite *, bool);
+		void setSpriteSS(Sprite *, int);
+		void setSpriteT(Sprite *, int);
+		void setSpriteToX(Sprite *, int);
+		void setSpriteToY(Sprite *, int);
+		void setSpriteSn(Sprite *, int);
+		void setSpritePcX(Sprite *, int);
+		void setSpritePcY(Sprite *, int);
+		void setSpriteA(Sprite *, bool);
+		/* array-based */
+		void setSpriteAPX(Sprite *, int, int);
+		void setSpriteAPY(Sprite *, int, int);
+		void setSpriteAC(Sprite *, int, char c);
+		void setSpriteASIn(Sprite *, int, bool);
+		void setSpriteASTe(Sprite *, int, bool);
+		void setSpriteASTu(Sprite *, int, bool);
+		void setSpriteASEb(Sprite *, int, bool);
+		void setSpriteASS(Sprite *, int, int);
+		void setSpriteAT(Sprite *, int, int);
+		void setSpriteAToX(Sprite *, int, int);
+		void setSpriteAToY(Sprite *, int, int);
+		void setSpriteASn(Sprite *, int, int);
+		void setSpriteAPcX(Sprite *, int, int);
+		void setSpriteAPcY(Sprite *, int, int);
+		void setSpriteAA(Sprite *, int, bool);
+
+		/***
+		our happy little position pointer section that made us go from 204 to 272 errors
+		***/
+		int getPosX(Position * p);
+		int getPosY(Position * p);
+		void setPosX(Position * p, int n);
+		void setPosY(Position * p, int n);
+		Position * initPos(void);
 	#endif
 
 	#ifdef __cplusplus

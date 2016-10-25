@@ -333,3 +333,7 @@ void setPosX(Position * p, int n) {
 void setPosY(Position * p, int n) {
     p->y = n;
 }
+
+Position * initPos(void) {
+	return new Position;
+}

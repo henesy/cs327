@@ -61,8 +61,11 @@ void map_dungeon_t(Dungeon * dungeon) {
 	}
 
 	/* set the player's cost as 0: */
-	int px = dungeon->ss[dungeon->pc].p.x;
-	int py = dungeon->ss[dungeon->pc].p.y;
+	//int px = dungeon->ss[dungeon->pc].p.x;
+	//int py = dungeon->ss[dungeon->pc].p.y;
+	int px = getSpriteAPX(dungeon->ss, dungeon->pc);
+	int py = getSpriteAPY(dungeon->ss, dungeon->pc);
+	
 	tiles[py][px].cost = 0;
 	tiles[py][px].v = TRUE;
 	binheap_insert(&h, &tiles[py][px]);
@@ -132,8 +135,11 @@ void map_dungeon_nont(Dungeon * dungeon) {
 	}
 
 	/* set the player's cost as 0: */
-	int px = dungeon->ss[dungeon->pc].p.x;
-	int py = dungeon->ss[dungeon->pc].p.y;
+	//int px = dungeon->ss[dungeon->pc].p.x;
+	//int py = dungeon->ss[dungeon->pc].p.y;
+	int px = getSpriteAPX(dungeon->ss, dungeon->pc);
+	int py = getSpriteAPY(dungeon->ss, dungeon->pc);
+	
 	tiles[py][px].cost = 0;
 	tiles[py][px].v = TRUE;
 	binheap_insert(&h, &tiles[py][px]);
@@ -242,12 +248,18 @@ void read_dungeon(Dungeon * dungeon, char * path) {
 		fread(&y_8, sizeof(int8_t), 1, file);
 		fread(&h_8, sizeof(int8_t), 1, file);
 
-		dungeon->r[room_i].tl.x = (int8_t) x_8;
+		//dungeon->r[room_i].tl.x = (int8_t) x_8;
+		//dungeon->r[room_i].w = (int8_t) w_8;
+		//dungeon->r[room_i].tl.y = (int8_t) y_8;
+		//dungeon->r[room_i].h = (int8_t) h_8;
+		//dungeon->r[room_i].br.x = ((int8_t) x_8) + dungeon->r[room_i].w-1;
+		//dungeon->r[room_i].br.y = ((int8_t) y_8) + dungeon->r[room_i].h-1;
+		setPosX(dungeon->r[room_i].tl, (int8_t) x_8);
 		dungeon->r[room_i].w = (int8_t) w_8;
-		dungeon->r[room_i].tl.y = (int8_t) y_8;
+		setPosY(dungeon->r[room_i].tl, (int8_t) y_8);
 		dungeon->r[room_i].h = (int8_t) h_8;
-		dungeon->r[room_i].br.x = ((int8_t) x_8) + dungeon->r[room_i].w-1;
-		dungeon->r[room_i].br.y = ((int8_t) y_8) + dungeon->r[room_i].h-1;
+		setPosX(dungeon->r[room_i].br, ((int8_t) x_8) + dungeon->r[room_i].w-1);
+		setPosY(dungeon->r[room_i].br, ((int8_t) y_8) + dungeon->r[room_i].h-1);
 
 
 
@@ -259,8 +271,8 @@ void read_dungeon(Dungeon * dungeon, char * path) {
 	/* add rooms to the dungeon buffer */
 	int h;
 	for(h = 0; h < dungeon->nr; h++) {
-		for(i = dungeon->r[h].tl.y; i < dungeon->r[h].br.y+1; i++) {
-			for(j = dungeon->r[h].tl.x; j < dungeon->r[h].br.x+1; j++) {
+		for(i = getPosY(dungeon->r[h].tl); i < getPosY(dungeon->r[h].br)+1; i++) {
+			for(j = getPosX(dungeon->r[h].tl); j < getPosX(dungeon->r[h].br)+1; j++) {
 				dungeon->d[i][j].c = '.';
 			}
 		}
@@ -337,9 +349,9 @@ void write_dungeon(Dungeon * dungeon, char * path) {
 	/* room positions ;; 4 bytes per room */
 	fseek(file, 1694, SEEK_SET);
 	for(i = 0; i < dungeon->nr; i++) {
-		int8_t x = (int8_t) dungeon->r[i].tl.x;
+		int8_t x = (int8_t) getPosX(dungeon->r[i].tl);
 		int8_t w = (int8_t) dungeon->r[i].w;
-		int8_t y = (int8_t) dungeon->r[i].tl.y;
+		int8_t y = (int8_t) getPosY(dungeon->r[i].tl);
 		int8_t h = (int8_t) dungeon->r[i].h;
 
 		fwrite(&x, sizeof(int8_t), 1, file);
@@ -375,30 +387,32 @@ void test_args(int argc, char ** argv, int this, int * s, int * l, int *p, int *
 /* monster list view */
 void monster_list(Dungeon * dungeon) {
 	clear();
-	
+
 	/* monster view array and population */
 	char mons [dungeon->ns-1][30];
 	int i;
 	for(i = 1; i < dungeon->ns; i++) {
 		char ns[6];
 		char ew[5];
-		
-		int hd = dungeon->ss[0].p.y - dungeon->ss[i].p.y;
-		int wd = dungeon->ss[0].p.x - dungeon->ss[i].p.x;
-		
+
+		//int hd = dungeon->ss[0].p.y - dungeon->ss[i].p.y;
+		//int wd = dungeon->ss[0].p.x - dungeon->ss[i].p.x;
+		int hd = getSpriteAPY(dungeon->ss, 0) - getSpriteAPY(dungeon->ss, i);
+		int wd = getSpriteAPX(dungeon->ss, 0) - getSpriteAPX(dungeon->ss, i);
+
 		if(hd > 0)
 			strcpy(ns, "north");
 		else
 			strcpy(ns, "south");
-		
+
 		if(wd > 0)
 			strcpy(ew, "west");
 		else
 			strcpy(ew, "east");
-		
-		sprintf(mons[i-1], "%c, %2d %s and %2d %s", dungeon->ss[i].c, abs(hd), ns, abs(wd), ew);
+
+		sprintf(mons[i-1], "%c, %2d %s and %2d %s", getSpriteAC(dungeon->ss, i), abs(hd), ns, abs(wd), ew);
 	}
-	
+
 	/* secondary window */
 	WINDOW *w;
 	w = newwin(24, 80, 0, 0);
@@ -411,14 +425,14 @@ void monster_list(Dungeon * dungeon) {
 	} else {
 		bot = dungeon->ns -2;
 	}
-	
+
 	int j;
 	for(;;) {
 		/* put the monster view to the screen */
 		for(i = top, j = 0; i < dungeon->ns -1 && i <= bot && j < 24; i++, j++) {
 			mvprintw(j, 0, mons[i]);
 		}
-		
+
 		/* handle user interaction */
 		MLV: ;
 		int32_t k;
@@ -429,25 +443,25 @@ void monster_list(Dungeon * dungeon) {
 				/* scroll up */
 				if(scroll == FALSE)
 					goto MLV;
-					
+
 				if(top-1 >= 0) {
 					top--;
 					bot--;
 				}
 				clear();
-				
+
 				break;
 			case KEY_DOWN:
 				/* scroll down */
 				if(scroll == FALSE)
 					goto MLV;
-				
+
 				if(bot+1 < dungeon->ns-1) {
 					bot++;
 					top++;
 				}
 				clear();
-				
+
 				break;
 			case 27:
 				/* ESC */
@@ -456,10 +470,10 @@ void monster_list(Dungeon * dungeon) {
 			default:
 				goto MLV;
 		}
-		
+
 		wrefresh(w);
 	}
-	
+
 	delwin(w);
 	print_dungeon(dungeon, 0, 0);
 }
@@ -477,64 +491,76 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 	switch(k) {
 		case 'h':
 			H: ;
-			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) -1);
 			break;
 		case '4':
 			goto H;
 		case 'l':
 			L: ;
-			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
+			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
+			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) +1);
 			break;
 		case '6':
 			goto L;
 		case 'k':
 			K: ;
-			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
+			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
+			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) -1);
 			break;
 		case '8':
 			goto K;
 		case 'j':
 			J: ;
-			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
+			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
+			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) +1);
 			break;
 		case '2':
 			goto J;
 		case 'y':
 			Y: ;
-			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
-			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
+			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) -1);
+			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) -1);
 			break;
 		case '7':
 			goto Y;
 		case 'u':
 			U: ;
-			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
-			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
+			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
+			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
+			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) -1);
+			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) +1);
 			break;
 		case '9':
 			goto U;
 		case 'n':
 			N: ;
-			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
-			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
+			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
+			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
+			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) +1);
+			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) +1);
 			break;
 		case '3':
 			goto N;
 		case 'b':
 			B: ;
-			dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
-			dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
+			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
+			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) +1);
+			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) -1);
 			break;
 		case '1':
 			goto B;
 		case '<':
 			/* stair up */
-			if(dungeon->ss[0].p.x == dungeon->su.x && dungeon->ss[0].p.y == dungeon->su.y)
+			if(getSpriteAPX(dungeon->ss, 0) == getPosX(dungeon->su) && getSpriteAPY(dungeon->ss, 0) == getPosY(dungeon->su))
 				*regen = TRUE;
 			break;
 		case '>':
 			/* stair down */
-			if(dungeon->ss[0].p.x == dungeon->sd.x && dungeon->ss[0].p.y == dungeon->sd.y)
+			if(getSpriteAPX(dungeon->ss, 0) == getPosX(dungeon->sd) && getSpriteAPY(dungeon->ss, 0) == getPosY(dungeon->sd))
 				*regen = TRUE;
 			break;
 		case '5':
@@ -550,22 +576,27 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 	}
 
     /* movement validity check */
-	if(dungeon->d[dungeon->ss[dungeon->pc].to.y][dungeon->ss[dungeon->pc].to.x].h > 0) {
-		dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x;
-		dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y;
+	if(dungeon->d[getSpriteAToY(dungeon->ss, dungeon->pc)][getSpriteAToX(dungeon->ss, dungeon->pc)].h > 0) {
+		//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x;
+		//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y;
+		setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc));
+		setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc));
 	} else {
-		dungeon->ss[dungeon->pc].p.x = dungeon->ss[dungeon->pc].to.x;
-		dungeon->ss[dungeon->pc].p.y = dungeon->ss[dungeon->pc].to.y;
+		//dungeon->ss[dungeon->pc].p.x = dungeon->ss[dungeon->pc].to.x;
+		//dungeon->ss[dungeon->pc].p.y = dungeon->ss[dungeon->pc].to.y;
+		setSpriteAPX(dungeon->ss, dungeon->pc, getSpriteAToX(dungeon->ss, dungeon->pc));
+		setSpriteAPY(dungeon->ss, dungeon->pc, getSpriteAToY(dungeon->ss, dungeon->pc));
 	}
-	dungeon->ss[0].t += (100 / dungeon->ss[0].s.s);
+	//dungeon->ss[0].t += (100 / dungeon->ss[0].s.s);
+	setSpriteAT(dungeon->ss, 0, getSpriteAT(dungeon->ss, 0) + (100 / getSpriteASS(dungeon->ss, 0)));
 
     /* check for killing an NPC */
     int sn = 0;
     int i;
 	for(i = 1; i < dungeon->ns; i++) {
 		if(i != sn) {
-			if((dungeon->ss[i].to.x == dungeon->ss[sn].to.x) && (dungeon->ss[i].to.y == dungeon->ss[sn].to.y) && dungeon->ss[sn].a == TRUE)
-				dungeon->ss[i].a = FALSE;
+			if((getSpriteAToX(dungeon->ss, i) == getSpriteAToX(dungeon->ss, sn)) && (getSpriteAToY(dungeon->ss, i) == getSpriteAToY(dungeon->ss, sn)) && getSpriteAA(dungeon->ss, sn) == TRUE)
+				setSpriteAA(dungeon->ss, i, FALSE);
         }
     }
 }
@@ -617,8 +648,8 @@ int main(int argc, char * argv[]) {
 
 	/* persistent player character */
 	Bool regen = FALSE;
-	Sprite p_pc;
-	
+	Sprite * p_pc = NULL;
+
 	/*** dungeon generation starts here ***/
 	DUNGEN: ;
 
@@ -631,13 +662,14 @@ int main(int argc, char * argv[]) {
 		read_dungeon(&dungeon, path);
 	}
 	/*** dungeon is fully initiated ***/
-	Sprite pc = gen_sprite(&dungeon, '@', -1, -1, 1);
+	Sprite * pc = gen_sprite(&dungeon, '@', -1, -1, 1);
 	add_sprite(&dungeon, pc);
 
 	int i;
 	for(i = 0; i < num_mon; i++) {
-		Sprite m = gen_sprite(&dungeon,'m' , -1, -1, 1);
-		m.sn = i;
+		Sprite * m = gen_sprite(&dungeon,'m' , -1, -1, 1);
+		//m.sn = i;
+		setSpriteSn(m, i);
 		add_sprite(&dungeon, m);
 	}
 
@@ -650,26 +682,33 @@ int main(int argc, char * argv[]) {
 
 	/* main loop */
 	//Event nexts[dungeon.ns]
-	
+
 	if(regen == TRUE) {
-		int px = dungeon.ss[0].p.x;
-		int py = dungeon.ss[0].p.y;
-		dungeon.ss[0] = p_pc;
-		dungeon.ss[0].p.x = px;
-		dungeon.ss[0].p.y = py;
-		dungeon.ss[0].to.x = px;
-		dungeon.ss[0].to.y = py;
+		//int px = dungeon.ss[0].p.x;
+		//int py = dungeon.ss[0].p.y;
+		//dungeon.ss[0] = p_pc;
+		//dungeon.ss[0].p.x = px;
+		//dungeon.ss[0].p.y = py;
+		//dungeon.ss[0].to.x = px;
+		//dungeon.ss[0].to.y = py;
+		int px = getSpriteAPX(dungeon.ss, 0);
+		int py = getSpriteAPY(dungeon.ss, 0);
+		copyASprite(dungeon.ss, 0, p_pc);
+		setSpriteAPX(dungeon.ss, 0, px);
+		setSpriteAPY(dungeon.ss, 0, py);
+		setSpriteAToX(dungeon.ss, 0, px);
+		setSpriteAToY(dungeon.ss, 0, py);
 	}
-	
+
 
 	for(i = 1; i < dungeon.ns; i++) {
 		gen_move_sprite(&dungeon, i);
 		//nexts[i] = next;
 	}
-	
+
 	if(regen == TRUE)
 		goto PNC;
-	
+
 	/* ncurses or not ;; this will likely amount to nothing */
 	void (*printer)(Dungeon*, int, int);
 	if(nnc == FALSE) {
@@ -696,7 +735,7 @@ int main(int argc, char * argv[]) {
 
 		int l = 0;
 		for(i = 0; i < dungeon.ns; i++) {
-			if(dungeon.ss[i].t < dungeon.ss[l].t) {
+			if(getSpriteAT(dungeon.ss, i) < getSpriteAT(dungeon.ss, l)) {
 				l = i;
 			}
 		}
@@ -705,22 +744,23 @@ int main(int argc, char * argv[]) {
 		if(l == dungeon.pc || first == TRUE) {
 			parse_pc(&dungeon, &run, &regen);
 			if(regen == TRUE) {
-				p_pc = dungeon.ss[0];
+				//p_pc = dungeon.ss[0];
+				copySprite(p_pc, thisASprite(dungeon.ss, 0));
 				goto DUNFREE;
 			}
-			
+
 			//gen_move_sprite(&dungeon, l);
 			map_dungeon_nont(&dungeon);
 			map_dungeon_t(&dungeon);
-			
+
 			int sn = 0;
 			for(i = 1; i < dungeon.ns; i++) {
 				if(i != sn) {
-					if((dungeon.ss[i].p.x == dungeon.ss[sn].p.x) && (dungeon.ss[i].p.y == dungeon.ss[sn].p.y) && dungeon.ss[sn].a == TRUE)
-						dungeon.ss[i].a = FALSE;
+					if((getSpriteAPX(dungeon.ss, i) == getSpriteAPX(dungeon.ss, sn)) && (getSpriteAPY(dungeon.ss, i) == getSpriteAPY(dungeon.ss, sn)) && getSpriteAA(dungeon.ss, sn) == TRUE)
+						setSpriteAA(dungeon.ss, i, FALSE);
 				}
 			}
-			
+
 			print_dungeon(&dungeon, 0, 0);
 		} else {
 			parse_move(&dungeon, l);
@@ -735,7 +775,7 @@ int main(int argc, char * argv[]) {
 		refresh();
 		/** --- game over sequence checking --- **/
 		/* note: this will stop the game before the new world gets drawn since the monster will move to the player and thus kill him */
-		if(dungeon.go == TRUE || dungeon.ss[dungeon.pc].a == FALSE)
+		if(dungeon.go == TRUE || getSpriteAA(dungeon.ss, dungeon.pc) == FALSE)
 			break;
 
 		Bool any = check_any_monsters(&dungeon);
@@ -778,10 +818,10 @@ int main(int argc, char * argv[]) {
 		free(dungeon.cst[i]);
 	}
 	free(dungeon.cst);
-	
+
 	if(regen == TRUE)
 		goto DUNGEN;
-	
+
 	free(path);
 	return 0;
 }

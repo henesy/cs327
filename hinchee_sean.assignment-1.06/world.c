@@ -8,6 +8,9 @@ int place_room(Dungeon * dungeon) {
 	int x = (rand() % (dungeon->w-1)) +1;
 	int y = (rand() % (dungeon->h-1)) +1;
 	Room new_room;
+	new_room.br = initPos();
+	new_room.tl = initPos();
+	new_room.ctr = initPos();
 	/*
 	set top right to rng number; might be worth making a more detailed placer with a lower
 		fail rate
@@ -295,6 +298,11 @@ void gen_dungeon(Dungeon * dungeon) {
 	int r_id = rand() % dungeon->nr;
 	x = (rand() % dungeon->r[r_id].w) + getPosX(dungeon->r[r_id].tl);
 	y = (rand() % dungeon->r[r_id].h) + getPosY(dungeon->r[r_id].tl);
+	
+	//lol
+	dungeon->sd = initPos();
+	dungeon->su = initPos();
+	
 	setPosX(dungeon->sd, x);
 	setPosY(dungeon->sd, y);
 	
