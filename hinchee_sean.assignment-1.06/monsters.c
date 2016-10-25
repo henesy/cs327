@@ -53,6 +53,7 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 	setSpriteAT(dungeon->ss, sn, getSpriteAT(dungeon->ss, sn) + (100 / getSpriteSS(s)));
 
 	Position * new = NULL;
+	new = initPos();
 	setPosX(new, -1);
 	setPosY(new, -1);
 

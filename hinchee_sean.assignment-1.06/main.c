@@ -648,7 +648,7 @@ int main(int argc, char * argv[]) {
 
 	/* persistent player character */
 	Bool regen = FALSE;
-	Sprite * p_pc = NULL;
+	Sprite * p_pc = initSprite();
 
 	/*** dungeon generation starts here ***/
 	DUNGEN: ;
