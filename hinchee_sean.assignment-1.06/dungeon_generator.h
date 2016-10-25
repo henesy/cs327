@@ -4,6 +4,12 @@
 	#ifdef __cplusplus
 
 		/* c++ classes */
+		class Memory {
+		public:
+			char c; /* character */
+			bool v; /* visited */
+		};
+
 		class Position {
 		public:
 			int	x; /* x coordinate */
@@ -21,6 +27,8 @@
 
 		class Sprite {
 		public:
+			friend class PC;
+			friend class Monster;
 			Position	p;	/* position of the sprite in the dungeon */
 			char		c;	/* character to print for the sprite */
 			Stats       s;	/* stats for a sprite */
@@ -29,18 +37,20 @@
 			int			sn;	/* sprite number */
 			Position	pc;	/* last known location of the PC */
 			bool		a;	/* alive T/F */
-			Sprite * thisSprite(void);
+			Sprite * 	thisSprite(void); /* returns a pointer to the given sprite */
 		};
 
-		class Monster: public Sprite {
+		class Monster : public Sprite {
 		public:
-
-		};
-
-		class PC: public Sprite {
 			friend class Sprite;
+
+		};
+
+		class PC : public Sprite {
 		public:
+			friend class Sprite;
 			int		view;		/* visible viewing distance */
+			Memory	**	mem;	/* map/dungeon view for the PC (memory) */
 		};
 
 
@@ -148,8 +158,12 @@
 
 		/* main.c */
 		void map_dungeon_t(Dungeon * dungeon);
-		
-		/*** functions to make C++ and C play nicely together on their little hellish playground  ***/
+
+		/****
+		functions to make C++ and C play nicely together on their little hellish playground
+		these are all defined in a *.cpp
+		****/
+
 		/***
 		setter functions
 		***/
@@ -237,6 +251,11 @@
 		void setSpriteAA(Sprite *, int, bool);
 
 		/***
+		PC functions
+		***/
+		PC * initPC(Dungeon *);
+
+		/***
 		our happy little position pointer section that made us go from 204 to 272 errors
 		***/
 		int getPosX(Position * p);
@@ -244,6 +263,13 @@
 		void setPosX(Position * p, int n);
 		void setPosY(Position * p, int n);
 		Position * initPos(void);
+
+		/***
+		utility functions from cpp-space
+		***/
+		void updateMemory(PC *, Dungeon *);
+
+
 	#endif
 
 	#ifdef __cplusplus

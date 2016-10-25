@@ -292,11 +292,10 @@ Sprite * gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 
     /* set stats */
     if(getSpriteC(s) == '@') {
-        setSpriteSS(s, 10);
-        setSpriteSTu(s, FALSE);
-		setSpriteSEb(s, FALSE);
-		setSpriteSTe(s, FALSE);
-		setSpriteSIn(s, FALSE);
+		/* fully re-hash and re-write PC setup ;; might need to add a new standalone variable which would s u c k */
+        PC * p = initPC(dungeon);
+
+		return (Sprite *) p;
 	} else {
         /* if not the pc a value 5-20 */
         setSpriteSS(s, (rand() % 16) + 5);
