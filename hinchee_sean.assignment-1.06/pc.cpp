@@ -2,26 +2,38 @@
 #include <cstdlib>
 
 /* updates a PC's memory after the print buffer has been properly populated */
-void updateMemory(PC * pc, Dungeon * dungeon) {
-	if(pc->mem == NULL) {
-		pc->mem = (Memory **) malloc(dungeon->h * dungeon->w * sizeof(Memory));
-	}
+void updateMemory(Dungeon * dungeon) {
 
 	int i;
 	int j;
-	for(i = 0; i < dungeon->h; i++) {
-		for(j = 0; j < dungeon->w; j++) {
-			if(abs(i - pc->p.y) == 3 && abs(j - pc->p.x) == 3 && dungeon->d[i][j].h == 0) {
+	for(i = 1; i < dungeon->h-1; i++) {
+		for(j = 1; j < dungeon->w-1; j++) {
+			if(abs(i - ((PC *) &dungeon->ss[0])->p.y) <= 3 && abs(j - ((PC *) &dungeon->ss[0])->p.x) <= 3 && dungeon->d[i][j].h == 0) {
 				//update from print buffer, this should be called before printing time
-				pc->mem[i][j].c = dungeon->p[i][j].c;
-				pc->mem[i][j].v = true;
-			} else {
-				if(pc->mem[i][j].v == false)
-					pc->mem[i][j].c = ' ';
+				dungeon->plyr->mem[i][j].c = dungeon->p[i][j].c;
+				dungeon->plyr->mem[i][j].v = true;
 			}
 		}
 	}
 }
+
+PC * thisAPC(Sprite * arr, int i) {
+	return arr[i].thisPC();
+}
+
+PC * Sprite::thisPC() {
+    return (PC *) this;
+}
+
+
+char getMem(Dungeon * dungeon, int y, int x) {
+	return dungeon->plyr->mem[y][x].c;
+}
+
+PC * getPC(Sprite * arr) {
+	return (PC *) &(arr[0]);
+}
+
 
 PC * initPC(Dungeon * dungeon) {
 	PC * p= new PC;
@@ -44,6 +56,24 @@ PC * initPC(Dungeon * dungeon) {
 	p->p.y = p->to.y = y;
 
 	p->t = 0;
+
+	dungeon->plyr = p;
+
+
+	p->mem = (Memory **) malloc(dungeon->h * sizeof(Memory *));
+	int i;
+	for(i = 0; i < dungeon->h; i++) {
+		p->mem[i] = (Memory *) malloc(dungeon->w * sizeof(Memory));
+	}
+
+
+	int j;
+	for(i = 0; i < dungeon->h; i++) {
+		for(j = 0; j < dungeon->w; j++) {
+			p->mem[i][j].c = ' ';
+			p->mem[i][j].v = false;
+		}
+	}
 
 	return p;
 }

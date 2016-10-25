@@ -127,12 +127,15 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 		}
 	}
 
+	updateMemory(dungeon);
+
 	/* print the print buffer */
 	for(i = 0; i < dungeon->h; i++) {
 		int j;
 		for(j = 0; j < dungeon->w; j++) {
 			//printf("%c", (dungeon->p[i][j]).c);
-            mvaddch(i+1, j, (dungeon->p[i][j]).c);
+            //mvaddch(i+1, j, (dungeon->p[i][j]).c);
+			mvaddch(i+1, j, getMem(dungeon, i, j));
 		}
 	}
     //clear();

@@ -4,6 +4,8 @@
 	#ifdef __cplusplus
 
 		/* c++ classes */
+		class PC;
+
 		class Memory {
 		public:
 			char c; /* character */
@@ -38,6 +40,7 @@
 			Position	pc;	/* last known location of the PC */
 			bool		a;	/* alive T/F */
 			Sprite * 	thisSprite(void); /* returns a pointer to the given sprite */
+			PC	* 		thisPC(void);
 		};
 
 		class Monster : public Sprite {
@@ -125,6 +128,7 @@
 			Bool		go;		/* game over T/F */
 			Position*	su;		/* location of the dungeon's up staircase */
 			Position*	sd;		/* location of the dungeon's down staircase */
+			PC	*	plyr;
 		} Dungeon;
 
 		typedef struct {
@@ -267,7 +271,10 @@
 		/***
 		utility functions from cpp-space
 		***/
-		void updateMemory(PC *, Dungeon *);
+		void updateMemory(Dungeon *);
+		char getMem(Dungeon *, int, int);
+		PC * getPC(Sprite * arr);
+		PC * thisAPC(Sprite * arr, int i);
 
 
 	#endif
