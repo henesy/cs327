@@ -10,3 +10,4 @@ gpp: sprite.cpp monster.cpp pc.cpp
 
 clean:
 	rm dungeon_generator *.o
+

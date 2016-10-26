@@ -2,4 +2,5 @@
 10/25@02:49am: Fixed all errors and segfaults with no tears shed ;; still need  to add destructors and FoW
 10/25@03:53pm: Got PC migrated to PC class within primary array for sprites
 10/25@06:28pm: Got FoW to work
+10/25@07:38pm: Fixed README file
 
