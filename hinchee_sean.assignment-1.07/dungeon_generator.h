@@ -1,8 +1,29 @@
 #ifndef dungeon_generator
 #define dungeon_generator
 
-	/* c++ classes */
+	/*** utility enums ***/
+	typedef enum {RED, GREEN, BLUE, CYAN, YELLOW, MAGENTA, WHITE, BLACK} colour;
+	/* itype specifically can specify equipment t/f when itype it is ≥ NONEQUIP for false and < for true (is equipment), this is kind of a hack */
+	typedef enum {WEAPON, OFFHAND, RANGED, ARMOR, HELMET, CLOAK, GLOVES, BOOTS, RING, AMULET, LIGHT, NONEQUIP, SCROLL, BOOK, FLASK, GOLD, AMMUNITION, FOOD, WAND, CONTAINER} itype;
+
+	/*** c++ classes ***/
 	class PC;
+	
+	class Item {
+	public:
+		char*	n;			/* name/title */
+		char	desc[78];	/* description, limited to 77 characters wide */
+		itype	t;			/* weapon/item type */
+		bool	e;			/* is equipment (assignment1.07.pdf:6) */
+		colour	c;			/* color of item */
+		int		hib;		/* bonus to hit (applied to probability) */
+		int		dob;		/* bonus to dodge (applied to probability) */
+		int		deb;		/* bonus to defense (reduces damage) */
+		int		w;			/* weight of item */
+		int		spb;		/* bonus to speed (movement) */
+		int		sa;			/* special attribute */
+		int		v;			/* value in Pesos de Ocho */
+	};
 
 	class Memory {
 	public:
@@ -23,6 +44,10 @@
 		bool    tu; /* tunneling ability */
 		bool    eb; /* erratic behaviour */
 		int     s;  /* speed ;; pc has 10 ; 5-20 */
+
+		bool	pa;	/* pass-through, can move through anything */
+		int		a;	/* attack damage */
+		int		hp;	/* health points */
 	};
 
 	class Sprite {
@@ -30,15 +55,20 @@
 		friend class PC;
 		friend class Monster;
 		Position	p;	/* position of the sprite in the dungeon */
-		char	c;	/* character to print for the sprite */
+		char		c;	/* character to print for the sprite */
 		Stats       s;	/* stats for a sprite */
-		int		t;	/* turn count */
+		int			t;	/* turn count */
 		Position	to;	/* to move to */
-		int		sn;	/* sprite number */
+		int			sn;	/* sprite number */
 		Position	pc;	/* last known location of the PC */
-		bool	a;	/* alive T/F */
+		bool		a;	/* alive T/F */
+		
+		colour	color;	/* color */
+		char	desc[78];	/* sprite description, 77 character string, newline at or before byte 78 */
+		
+		/* methods */
 		Sprite * 	thisSprite(void); /* returns a pointer to the given sprite */
-		PC	* 	thisPC(void);
+		PC	* 		thisPC(void);
 	};
 
 	class Monster : public Sprite {
@@ -53,14 +83,15 @@
 		int	view;	/* visible viewing distance */
 		Memory	**	mem;	/* map/dungeon view for the PC (memory) */
 	};
-
-
-	/* not C++ */
-	typedef struct Position Position;
-	typedef struct Stats Stats;
-	typedef struct Sprite Sprite;
-	typedef struct Monster Monster;
-	typedef struct PC PC;
+	
+	class Dice {
+		int	b;	/* base number */
+		int	d;	/* die value (d6, d10, d20, etc.) */
+		int	n;	/* number of dice to roll */
+	public:
+		int	roll(void);
+		Dice(int, int, int);
+	};
 
 
 	/* C stuff for C++ */

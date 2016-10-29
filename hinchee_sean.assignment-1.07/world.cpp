@@ -331,36 +331,36 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	new_dungeon.go	= FALSE;
 
 	/* dungeon buffer allocation+0'ing */
-	new_dungeon.d = calloc(new_dungeon.h, sizeof(Tile *));
+	new_dungeon.d = (Tile**)calloc(new_dungeon.h, sizeof(Tile *));
 
 	int i;
 	for(i = 0; i < new_dungeon.h; i++) {
-		new_dungeon.d[i] = calloc(new_dungeon.w, sizeof(Tile));
+		new_dungeon.d[i] = (Tile*)calloc(new_dungeon.w, sizeof(Tile));
 	}
 
 	/* dungeon visual buffer allocation+0'ing */
-	new_dungeon.p = calloc(new_dungeon.h, sizeof(Tile *));
+	new_dungeon.p = (Tile**)calloc(new_dungeon.h, sizeof(Tile *));
 
 	for(i = 0; i < new_dungeon.h; i++) {
-		new_dungeon.p[i] = calloc(new_dungeon.w, sizeof(Tile));
+		new_dungeon.p[i] = (Tile*)calloc(new_dungeon.w, sizeof(Tile));
 	}
 
 	/* rooms allocation+0'ing */
-	new_dungeon.r = calloc(new_dungeon.mr, sizeof(Room));
+	new_dungeon.r = (Room*)calloc(new_dungeon.mr, sizeof(Room));
 
 	/* sprites allocation */
-	new_dungeon.ss = calloc(new_dungeon.ms, sizeof(Sprite *));
+	new_dungeon.ss = (Sprite*)calloc(new_dungeon.ms, sizeof(Sprite *));
 
 	/* djikstra-based cost map allocation */
-	new_dungeon.cst = calloc(w*h, sizeof(int *));
+	new_dungeon.cst = (int**)calloc(w*h, sizeof(int *));
 	for(i = 0; i < new_dungeon.h; i++) {
-		new_dungeon.cst[i] = calloc(new_dungeon.w, sizeof(int));
+		new_dungeon.cst[i] = (int*)calloc(new_dungeon.w, sizeof(int));
 	}
 
 	/* djikstra-based cost map allocation */
-	new_dungeon.csnt = calloc(w*h, sizeof(int *));
+	new_dungeon.csnt = (int**)calloc(w*h, sizeof(int *));
 	for(i = 0; i < new_dungeon.h; i++) {
-		new_dungeon.csnt[i] = calloc(new_dungeon.w, sizeof(int));
+		new_dungeon.csnt[i] = (int*)calloc(new_dungeon.w, sizeof(int));
 	}
 
 	return new_dungeon;

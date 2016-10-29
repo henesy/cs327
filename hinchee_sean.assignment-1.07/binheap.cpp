@@ -41,7 +41,7 @@ static void percolate_down(binheap_t *h, uint32_t index)
     if (h->compare(h->array[index]->datum, h->array[child]->datum) > 0) {
       tmp = h->array[index];
       h->array[index] = h->array[child];
-      h->array[child] = tmp;
+      h->array[child] = (binheap_node_t*)tmp;
       h->array[index]->index = index;
       h->array[child]->index = child;
     }
@@ -67,7 +67,7 @@ void binheap_init(binheap_t *h,
   h->compare = compare;
   h->datum_delete = datum_delete;
 
-  h->array = calloc(h->array_size, sizeof (*h->array));
+  h->array = (binheap_node_t**)calloc(h->array_size, sizeof (*h->array));
 }
 
 void binheap_init_from_array(binheap_t *h,
@@ -85,10 +85,10 @@ void binheap_init_from_array(binheap_t *h,
   h->compare = compare;
   h->datum_delete = datum_delete;
 
-  h->array = calloc(h->array_size, sizeof (*h->array));
+  h->array = (binheap_node_t**)calloc(h->array_size, sizeof (*h->array));
 
-  for (i = 0, a = array; i < h->size; i++) {
-    h->array[i] = malloc(sizeof (*h->array[i]));
+  for (i = 0, a = (char *)array; i < h->size; i++) {
+    h->array[i] = (binheap_node_t*)malloc(sizeof (*h->array[i]));
     h->array[i]->index = i;
     h->array[i]->datum = a + (i * size);
   }
@@ -117,7 +117,7 @@ binheap_node_t *binheap_insert(binheap_t *h, void *v)
 
   if (h->size == h->array_size) {
     h->array_size *= 2;
-    tmp = realloc(h->array, h->array_size * sizeof (*h->array));
+    tmp = (binheap_node_t**)realloc(h->array, h->array_size * sizeof (*h->array));
     if (!tmp) {
       /* Error */
     } else {
@@ -125,7 +125,7 @@ binheap_node_t *binheap_insert(binheap_t *h, void *v)
     }
   }
 
-  h->array[h->size] = retval = malloc(sizeof (*h->array[h->size]));
+  h->array[h->size] = retval = (binheap_node_t*)malloc(sizeof (*h->array[h->size]));
   h->array[h->size]->datum = v;
   h->array[h->size]->index = h->size;
 

@@ -74,7 +74,7 @@ void map_dungeon_t(Dungeon * dungeon) {
 
 	binheap_node_t	*p;
 
-	while((p = binheap_remove_min(&h))) {
+	while((p = (binheap_node_t*)binheap_remove_min(&h))) {
 		int hx = ((Tile_Node *) p)->x;
 		int hy = ((Tile_Node *) p)->y;
 		int tc = ((Tile_Node *) p)->cost;
@@ -148,7 +148,7 @@ void map_dungeon_nont(Dungeon * dungeon) {
 
 	binheap_node_t	*p;
 
-	while((p = binheap_remove_min(&h))) {
+	while((p = (binheap_node_t*)binheap_remove_min(&h))) {
 		int hx = ((Tile_Node *) p)->x;
 		int hy = ((Tile_Node *) p)->y;
 		int tc = ((Tile_Node *) p)->cost;
@@ -235,10 +235,10 @@ void read_dungeon(Dungeon * dungeon, char * path) {
 	int room_i = 0;
 	int room_count = (size - 1693) / 4;
 	dungeon->nr = room_count;
-	dungeon->r = calloc(room_count, sizeof(Room));
+	dungeon->r = (Room*)calloc(room_count, sizeof(Room));
 	/* could probably be replaced with a getpos() call for complete-ness */
 	int pos;
-	for(pos = 1694; pos < size; pos += 4) {
+	for(pos = 1694; pos < (int)size; pos += 4) {
 		int x_8;
 		int w_8;
 		int y_8;
@@ -299,7 +299,7 @@ void write_dungeon(Dungeon * dungeon, char * path) {
 	/* folder creation logic */
 	char * env_home = getenv("HOME");
 	char * fdir_path;
-	fdir_path = calloc(strlen(env_home) + 9, sizeof(char));
+	fdir_path = (char*)calloc(strlen(env_home) + 9, sizeof(char));
 	strcpy(fdir_path, env_home);
 	strcat(fdir_path, "/.rlg327");
 	mkdir(fdir_path, S_IRWXU);
@@ -636,7 +636,7 @@ int main(int argc, char * argv[]) {
 	/* create 2 char pointers so as not to pollute the original HOME variable */
 	char * env_path = getenv("HOME");
 	/* char * path = calloc(strlen(env_path) + 17, sizeof(char)); */
-	char * path = calloc(strlen(env_path) + 50, sizeof(char));
+	char * path = (char*)calloc(strlen(env_path) + 50, sizeof(char));
 	strcpy(path, env_path);
 	strcat(path, "/.rlg327");
 	if(pathing == TRUE) {
