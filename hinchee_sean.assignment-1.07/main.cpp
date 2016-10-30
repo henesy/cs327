@@ -11,6 +11,9 @@
 #include <ncurses.h>
 #include "binheap.h"
 #include "dungeon_generator.h"
+#include <iostream>
+#include <fstream>
+using namespace std;
 
 
 /* compare two ints used as costs ;; 0 if same, <0 if higher than key; >0 if lower than key */
@@ -601,6 +604,46 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
     }
 }
 
+/* parses the monsters file in ~/.rlg327 */
+int parsemonsters(Dungeon * dungeon) {
+	char * env_path = getenv("HOME");
+	char * path = (char*)calloc(strlen(env_path) + 50, sizeof(char));
+	strcpy(path, env_path);
+	strcat(path, "/.rlg327/monster_desc.txt");
+	
+	string line;
+	ifstream md(path);
+	if(md.is_open()) {
+		while(getline(md, line)) {
+			cout << line << '\n';
+		}
+	}
+	else
+		return -1;
+	
+	return 0;
+}
+
+/* parses the objects file in ~/.rlg327 */
+int parseitems(Dungeon * dungeon) {
+	char * env_path = getenv("HOME");
+	char * path = (char*)calloc(strlen(env_path) + 50, sizeof(char));
+	strcpy(path, env_path);
+	strcat(path, "/.rlg327/object_desc.txt");
+	
+	string line;
+	ifstream od(path);
+	if(od.is_open()) {
+		while(getline(od, line)) {
+			cout << line << '\n';
+		}
+	}
+	else
+		return -1;
+	
+	return 0;
+}
+
 
 /* Basic procedural dungeon generator */
 int main(int argc, char * argv[]) {
@@ -709,10 +752,18 @@ int main(int argc, char * argv[]) {
 	if(regen == TRUE)
 		goto PNC;
 
+	/***
+	TEMPORARY FOR 1.07
+	uncomment printer stuff below and main.cpp:841:25
+	***/
+	parsemonsters(&dungeon);
+	parseitems(&dungeon);
+	return 0;
+
 	/* ncurses or not ;; this will likely amount to nothing */
-	void (*printer)(Dungeon*, int, int);
+	//void (*printer)(Dungeon*, int, int);
 	if(nnc == FALSE) {
-		printer = &print_dungeon;
+		//printer = &print_dungeon;
 		initscr();
 		raw();
 		noecho();
@@ -720,11 +771,12 @@ int main(int argc, char * argv[]) {
 		set_escdelay(25);
 		keypad(stdscr, TRUE);
 	} else {
-		printer = &print_dungeon_nnc;
+		//printer = &print_dungeon_nnc;
 	}
 
 	PNC: ;
 	regen = FALSE;
+
 
 	print_dungeon(&dungeon, 0, 0);
 	Bool first = TRUE;
@@ -785,7 +837,7 @@ int main(int argc, char * argv[]) {
 		}
 		first = FALSE;
 	}
-	printer(&dungeon, 0, 0);
+	//printer(&dungeon, 0, 0);
 	//printf("Game Over!\n");
 
 	/*** tear down sequence ***/

@@ -1,0 +1,21 @@
+RLG327 OBJECT DESCRIPTION 1
+
+BEGIN OBJECT
+NAME a catclock
+TYPE WEAPON
+COLOR WHITE
+WEIGHT 1+1d4
+HIT 0+0d1
+DAM 2+1d6
+ATTR 0+1d100
+VAL 5+2d10
+DODGE 0+0d1
+DEF 9+9d9
+SPEED 0+1d0
+DESC
+#define	MINULEN	27		/* length of minute hand */
+#define	HOURLEN	15		/* length of hour hand */
+#define	HANDWID	4		/* width of clock hands */
+#define	UPDATE	(1000/NTAIL)	/* ms/update -- tail waves at roughly 1/2 hz */
+.
+END

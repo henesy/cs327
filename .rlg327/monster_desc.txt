@@ -1,0 +1,14 @@
+RLG327 MONSTER DESCRIPTION 1
+
+BEGIN MONSTER
+NAME Neckbeard
+SYMB B
+COLOR YELLOW
+DESC
+What a nerd, I bet he uses Plan9 and programs in C and runs servers out from under his bed. Probably doesn't even know how to enjoy computer through proprietary software, kek.
+.
+SPEED 7+1d4
+DAM 0+1d4
+HP 12+2d6
+ABIL SMART ERRATIC
+END
