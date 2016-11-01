@@ -1,5 +1,7 @@
 #ifndef dungeon_generator
 #define dungeon_generator
+	#include <vector>
+	#include <string>
 
 	/*** utility enums ***/
 	typedef enum {RED, GREEN, BLUE, CYAN, YELLOW, MAGENTA, WHITE, BLACK} colour;
@@ -11,8 +13,8 @@
 	
 	class Item {
 	public:
-		char*	n;			/* name/title */
-		char	desc[78];	/* description, limited to 77 characters wide */
+		std::string	n;			/* name/title */
+		char*	desc[78];	/* description, limited to 77 characters wide */
 		itype	t;			/* weapon/item type */
 		bool	e;			/* is equipment (assignment1.07.pdf:6) */
 		colour	c;			/* color of item */
@@ -64,7 +66,7 @@
 		bool		a;	/* alive T/F */
 		
 		colour	color;	/* color */
-		char	desc[78];	/* sprite description, 77 character string, newline at or before byte 78 */
+		char*	desc[78];	/* sprite description, 77 character string, newline at or before byte 78 */
 		
 		/* methods */
 		Sprite * 	thisSprite(void); /* returns a pointer to the given sprite */
@@ -125,26 +127,33 @@
 	} Room;
 
 	typedef struct {
-		Tile 	**	d;	/* dungeon buffer */
-		Tile 	**	p;	/* print buffer */
-		int		h;	/* height */
-		int		w;	/* width */
-		int		nr; 	/* number of rooms */
-		int		mr;	/* max rooms */
-		Room 	*	r;	/* rooms buffer */
-		int		v;	/* file version */
-		int		s;	/* file size */
-		Sprite	*	ss;	/* sprite array */
-		int		ns;	/* number of sprites */
-		int		ms;	/* max number of sprites */
-		int	**	csnt;
-		int	**	cst;	/* costs for djikstra's map */
-		int		pc;	/* location of PC in SpriteS array (.ss) */
-	    int         t;      /* turn number */
-		Bool	go;	/* game over T/F */
-		Position*	su;	/* location of the dungeon's up staircase */
-		Position*	sd;	/* location of the dungeon's down staircase */
-		PC	*	plyr;
+		Tile **		d;		/* dungeon buffer */
+		Tile **		p;		/* print buffer */
+		int			h;		/* height */
+		int			w;		/* width */
+		int			nr;		/* number of rooms */
+		int			mr;		/* max rooms */
+		Room *		r;		/* rooms buffer */
+		int			v;		/* file version */
+		int			s;		/* file size */
+		Sprite *	ss;		/* sprite array */
+		int			ns;		/* number of sprites */
+		int			ms;		/* max number of sprites */
+		int **		csnt;
+		int	**		cst;	/* costs for djikstra's map */
+		int			pc;		/* location of PC in SpriteS array (.ss) */
+	    int         t;		/* turn number */
+		Bool		go;		/* game over T/F */
+		Position *	su;		/* location of the dungeon's up staircase */
+		Position *	sd;		/* location of the dungeon's down staircase */
+		PC *		plyr;	/* pointer to player character un-restricted by Sprite */
+		
+		int			mi;		/* max items/objects that can be defined */
+		int			di;		/* number of defined items */
+		Item *		id;		/* item definitions */
+		int			mm;		/* max monsters that can be defined */
+		int			dm;		/* number of definted monsters*/
+		Monster *	md;		/* monster definitions */
 	} Dungeon;
 
 	typedef struct {

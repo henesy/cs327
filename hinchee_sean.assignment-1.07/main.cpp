@@ -612,15 +612,40 @@ int parsemonsters(Dungeon * dungeon) {
 	strcpy(path, env_path);
 	strcat(path, "/.rlg327/monster_desc.txt");
 	
+	int dm = 0;
+	bool first = true;
+	dungeon->mm = 100;
+	vector <Monster> mons;
+	
+	
 	string line;
 	ifstream md(path);
 	if(md.is_open()) {
+		Monster b_mo;
+		Monster mo;
 		while(getline(md, line)) {
 			cout << line << '\n';
+			
+			if(first) {
+				if(line != "RLG327 MONSTER DESCRIPTION 1") {
+					cout << "Invalid file head!" << endl;
+					return -2;
+				}
+				first = false;
+			} else {
+				//standard file parsing
+				
+				
+				
+			}
+			
+			dm++;
 		}
 	}
 	else
 		return -1;
+		
+	dungeon->dm = dm;
 	
 	return 0;
 }
@@ -632,15 +657,44 @@ int parseitems(Dungeon * dungeon) {
 	strcpy(path, env_path);
 	strcat(path, "/.rlg327/object_desc.txt");
 	
+	int di = 0;
+	bool first = true;
+	dungeon->mi = 100;
+	vector <Item> items;
+	
+	
 	string line;
 	ifstream od(path);
 	if(od.is_open()) {
+		Item b_it;
+		Item it;
 		while(getline(od, line)) {
 			cout << line << '\n';
+			
+			if(first) {
+				if(line != "RLG327 OBJECT DESCRIPTION 1") {
+					cout << "Invalid file head!" << endl;
+					return -2;
+				}
+				first = false;
+			} else {
+				//standard file parsing
+				size_t n = 0;
+				
+				if(line == "BEGIN OBJECT")
+					it = b_it;
+				else if((n = line.find("NAME")) != std::string::npos)
+					it.n = line.substr(5, 77);
+				
+			}
+			
+			di++;
 		}
 	}
 	else
 		return -1;
+		
+	dungeon->di = di;
 	
 	return 0;
 }
@@ -689,6 +743,7 @@ int main(int argc, char * argv[]) {
 	} else {
 		strcat(path, "/dungeon");
 	}
+	
 
 	/* persistent player character */
 	Bool regen = FALSE;
@@ -698,6 +753,14 @@ int main(int argc, char * argv[]) {
 	DUNGEN: ;
 
 	Dungeon dungeon = init_dungeon(21, 80, 12);
+	
+	/***
+	TEMPORARY FOR 1.07
+	!¡!¡
+	***/
+	parsemonsters(&dungeon);
+	parseitems(&dungeon);
+	return 0;
 
 	if(loading == FALSE) {
 		gen_dungeon(&dungeon);
@@ -753,18 +816,11 @@ int main(int argc, char * argv[]) {
 	if(regen == TRUE)
 		goto PNC;
 
-	/***
-	TEMPORARY FOR 1.07
-	uncomment printer stuff below and main.cpp:841:25
-	***/
-	parsemonsters(&dungeon);
-	parseitems(&dungeon);
-	return 0;
 
 	/* ncurses or not ;; this will likely amount to nothing */
-	//void (*printer)(Dungeon*, int, int);
+	void (*printer)(Dungeon*, int, int);
 	if(nnc == FALSE) {
-		//printer = &print_dungeon;
+		printer = &print_dungeon;
 		initscr();
 		raw();
 		noecho();
@@ -772,7 +828,7 @@ int main(int argc, char * argv[]) {
 		set_escdelay(25);
 		keypad(stdscr, TRUE);
 	} else {
-		//printer = &print_dungeon_nnc;
+		printer = &print_dungeon_nnc;
 	}
 
 	PNC: ;
@@ -838,7 +894,7 @@ int main(int argc, char * argv[]) {
 		}
 		first = FALSE;
 	}
-	//printer(&dungeon, 0, 0);
+	printer(&dungeon, 0, 0);
 	//printf("Game Over!\n");
 
 	/*** tear down sequence ***/
