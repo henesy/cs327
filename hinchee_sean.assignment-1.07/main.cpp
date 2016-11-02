@@ -611,7 +611,7 @@ int rolldie(std::string s)
 	int b, n, d;
 	char* str = new char [s.length()+1];
 	std::strcpy(str, s.c_str());
-	sscanf(str, "%d+%dd%d", &b, &n, &d);
+	sscanf(str, "%d%*c%d%*c%d", &b, &n, &d);
 	Dice* di = new Dice(b, n, d);
 	return di->roll();
 }
@@ -621,7 +621,7 @@ Dice* getdie(std::string s)
 	int b, n, d;
 	char* str = new char [s.length()+1];
 	std::strcpy(str, s.c_str());
-	sscanf(str, "%d+%dd%d", &b, &n, &d);
+	sscanf(str, "%d%*c%d%*c%d", &b, &n, &d);
 	Dice* di = new Dice(b, n, d);
 	return di;
 }
@@ -645,7 +645,7 @@ int parsemonsters(Dungeon * dungeon) {
 		Monster b_mo;
 		Monster mo;
 		while(getline(md, line)) {
-			cout << line << '\n';
+			//cout << line << '\n';
 			
 			if(first) {
 				if(line != "RLG327 MONSTER DESCRIPTION 1") {
@@ -656,20 +656,103 @@ int parsemonsters(Dungeon * dungeon) {
 			} else {
 				//standard file parsing
 				
-				/*size_t n = 0;*/
+				size_t n = 0;
 				
-				if(line == "BEGIN OBJECT")
+				if(line == "BEGIN MONSTER")
 					mo = b_mo;
-				
+				else if((n = line.find("NAME")) != std::string::npos)
+					mo.n = line.substr(5, 77);
+				else if((n = line.find("ABIL")) != std::string::npos) {
+					//line.find statements to match abils
+					if((n = line.find("SMART")) != std::string::npos)
+						mo.s.in = true;
+					else if((n = line.find("TELE")) != std::string::npos)
+						mo.s.te = true;
+					else if((n = line.find("TUNNEL")) != std::string::npos)
+						mo.s.tu = true;
+					else if((n = line.find("ERRATIC")) != std::string::npos)
+						mo.s.eb = true;
+					else if((n = line.find("PASS")) != std::string::npos)
+						mo.s.pa = true;
+						
+					
+				} else if((n = line.find("COLOR")) != std::string::npos) {
+					//line.find statements to match enums/ints
+					if((n = line.find("RED")) != std::string::npos)
+						mo.c = RED;
+					else if((n = line.find("GREEN")) != std::string::npos)
+						mo.c = GREEN;
+					else if((n = line.find("BLUE")) != std::string::npos)
+						mo.c = BLUE;
+					else if((n = line.find("CYAN")) != std::string::npos)
+						mo.c = CYAN;
+					else if((n = line.find("YELLOW")) != std::string::npos)
+						mo.c = YELLOW;
+					else if((n = line.find("MAGENTA")) != std::string::npos)
+						mo.c = MAGENTA;
+					else if((n = line.find("WHITE")) != std::string::npos)
+						mo.c = WHITE;
+					else if((n = line.find("BLACK")) != std::string::npos)
+						mo.c = BLACK;
+					
+				} else if((n = line.find("DAM")) != std::string::npos) {
+					//save as a die
+					mo.s.a = getdie(line.substr(5, line.size()));
+					
+				} else if((n = line.find("DESC")) != std::string::npos) {
+					//parse description
+					vector <std::string> desc;
+					
+					while(getline(md, line)) {
+						if(line.find(".") == 0)
+							break;
+
+						desc.push_back(line.substr(0, 77));
+					}
+					
+					mo.desc = new string[desc.size()];
+					
+					int i = desc.size() -1;
+					while(desc.size() > 0) {
+						string s = desc.back();
+						desc.pop_back();
+						mo.desc[i] = s;
+						i--;
+					}
+					
+				} else if((n = line.find("SPEED")) != std::string::npos) { 
+					mo.s.s = rolldie(line.substr(6, line.size()));
+					
+				} else if((n = line.find("HP")) != std::string::npos) { 
+					//health points
+					mo.s.hp = rolldie(line.substr(3, line.size()));
+					
+				} else if((n = line.find("END")) != std::string::npos) {
+					mons.push_back(mo);
+					dm++;
+				}
 			}
 			
-			dm++;
 		}
 	}
 	else
 		return -1;
 		
 	dungeon->dm = dm;
+	
+	dungeon->md = new Monster[mons.size()];
+	
+	int i = 0;
+	while(mons.size() > 0) {
+		Monster tmp = mons.back();
+		dungeon->md[i] = tmp;
+		mons.pop_back();
+		i++;
+	}
+	
+	printf("SIZE: %d\n", dm);
+	cout << "NAME: " << (dungeon->md)[0].n << endl;
+	cout << "DESC (0): " << dungeon->md[0].desc[0] << endl;
 	
 	return 0;
 }
@@ -693,7 +776,7 @@ int parseitems(Dungeon * dungeon) {
 		Item b_it;
 		Item it;
 		while(getline(od, line)) {
-			cout << line << '\n';
+			//cout << line << '\n';
 			
 			if(first) {
 				if(line != "RLG327 OBJECT DESCRIPTION 1") {
@@ -771,42 +854,44 @@ int parseitems(Dungeon * dungeon) {
 						it.c = BLACK;
 					
 				} else if((n = line.find("WEIGHT")) != std::string::npos)
-					it.w = rolldie(line.substr(8, line.size()));
+					it.w = rolldie(line.substr(7, line.size()));
 				else if((n = line.find("HIT")) != std::string::npos)
-					it.hib = rolldie(line.substr(5, line.size()));
+					it.hib = rolldie(line.substr(4, line.size()));
 				else if((n = line.find("DAM")) != std::string::npos) {
 					//save as a die
 					it.d = getdie(line.substr(5, line.size()));
 					
 				} else if((n = line.find("ATTR")) != std::string::npos)
-					it.sa = rolldie(line.substr(6, line.size()));
+					it.sa = rolldie(line.substr(5, line.size()));
 				else if((n = line.find("VAL")) != std::string::npos)
-					it.v = rolldie(line.substr(5, line.size()));
+					it.v = rolldie(line.substr(4, line.size()));
 				else if((n = line.find("DODGE")) != std::string::npos)
-					it.dob = rolldie(line.substr(7, line.size()));
+					it.dob = rolldie(line.substr(6, line.size()));
 				else if((n = line.find("DEF")) != std::string::npos)
-					it.deb = rolldie(line.substr(5, line.size()));
-				else if((n = line.find("SPEED")) != std::string::npos)
-					it.spb = rolldie(line.substr(7, line.size()));
-				else if((n = line.find("DESC")) != std::string::npos) {
+					it.deb = rolldie(line.substr(4, line.size()));
+				else if((n = line.find("SPEED")) != std::string::npos) {
+					cout << "size: " << line.size() << "line: " << line << endl;
+					it.spb = rolldie(line.substr(6, line.size()));
+					cout << "sp: " << it.spb << endl;
+				} else if((n = line.find("DESC")) != std::string::npos) {
 					//parse description
 					vector <std::string> desc;
 					
 					while(getline(od, line)) {
-						desc.push_back(line.substr(0, 77));
-						
 						if(line.find(".") == 0)
 							break;
+
+						desc.push_back(line.substr(0, 77));
 					}
 					
 					it.desc = new string[desc.size()];
 					
-					int i = 0;
+					int i = desc.size() -1;
 					while(desc.size() > 0) {
 						string s = desc.back();
 						desc.pop_back();
 						it.desc[i] = s;
-						i++;
+						i--;
 					}
 					
 				} else if((n = line.find("END")) != std::string::npos) {
@@ -833,6 +918,7 @@ int parseitems(Dungeon * dungeon) {
 	
 	printf("SIZE: %d\n", di);
 	cout << "NAME: " << (dungeon->id)[0].n << endl;
+	cout << "DESC (0): " << dungeon->id[0].desc[0] << endl;
 	
 	return 0;
 }

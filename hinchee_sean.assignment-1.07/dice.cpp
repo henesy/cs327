@@ -4,7 +4,10 @@
 
 
 int	Dice::roll(void) {
-	return b + n * ((rand() % d) + 1);
+	if(d == 0)
+		return b;
+	else
+		return b + n * ((rand() % d) + 1);
 }
 
 Dice::Dice(int base, int num, int die) {

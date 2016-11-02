@@ -75,8 +75,9 @@
 		Position	pc;	/* last known location of the PC */
 		bool		a;	/* alive T/F */
 		
+		std::string	n; /* name */
 		colour	color;	/* color */
-		char*	desc[78];	/* sprite description, 77 character string, newline at or before byte 78 */
+		std::string*	desc;	/* sprite description, 77 character string, newline at or before byte 78 */
 		
 		/* methods */
 		Sprite * 	thisSprite(void); /* returns a pointer to the given sprite */
