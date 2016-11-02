@@ -4,4 +4,5 @@
 10/31@08;46pm: Added boilerplate for loading everything into the dungeon from files
 11/02@01:30am: Item parsing fully implemented ;; no printing yet
 11/02@04:08am: Item and Monster parsing fully implemented ;; no printing yet
+11/02@05:05am: Majority of printing finished, almost there!
 

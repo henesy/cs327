@@ -666,13 +666,13 @@ int parsemonsters(Dungeon * dungeon) {
 					//line.find statements to match abils
 					if((n = line.find("SMART")) != std::string::npos)
 						mo.s.in = true;
-					else if((n = line.find("TELE")) != std::string::npos)
+					if((n = line.find("TELE")) != std::string::npos)
 						mo.s.te = true;
-					else if((n = line.find("TUNNEL")) != std::string::npos)
+					if((n = line.find("TUNNEL")) != std::string::npos)
 						mo.s.tu = true;
-					else if((n = line.find("ERRATIC")) != std::string::npos)
+					if((n = line.find("ERRATIC")) != std::string::npos)
 						mo.s.eb = true;
-					else if((n = line.find("PASS")) != std::string::npos)
+					if((n = line.find("PASS")) != std::string::npos)
 						mo.s.pa = true;
 						
 					
@@ -697,7 +697,7 @@ int parsemonsters(Dungeon * dungeon) {
 					
 				} else if((n = line.find("DAM")) != std::string::npos) {
 					//save as a die
-					mo.s.a = getdie(line.substr(5, line.size()));
+					mo.s.a = getdie(line.substr(4, line.size()));
 					
 				} else if((n = line.find("DESC")) != std::string::npos) {
 					//parse description
@@ -750,9 +750,9 @@ int parsemonsters(Dungeon * dungeon) {
 		i++;
 	}
 	
-	printf("SIZE: %d\n", dm);
+	/*printf("SIZE: %d\n", dm);
 	cout << "NAME: " << (dungeon->md)[0].n << endl;
-	cout << "DESC (0): " << dungeon->md[0].desc[0] << endl;
+	cout << "DESC (0): " << dungeon->md[0].desc[0] << endl;*/
 	
 	return 0;
 }
@@ -859,7 +859,7 @@ int parseitems(Dungeon * dungeon) {
 					it.hib = rolldie(line.substr(4, line.size()));
 				else if((n = line.find("DAM")) != std::string::npos) {
 					//save as a die
-					it.d = getdie(line.substr(5, line.size()));
+					it.d = getdie(line.substr(4, line.size()));
 					
 				} else if((n = line.find("ATTR")) != std::string::npos)
 					it.sa = rolldie(line.substr(5, line.size()));
@@ -870,9 +870,7 @@ int parseitems(Dungeon * dungeon) {
 				else if((n = line.find("DEF")) != std::string::npos)
 					it.deb = rolldie(line.substr(4, line.size()));
 				else if((n = line.find("SPEED")) != std::string::npos) {
-					cout << "size: " << line.size() << "line: " << line << endl;
 					it.spb = rolldie(line.substr(6, line.size()));
-					cout << "sp: " << it.spb << endl;
 				} else if((n = line.find("DESC")) != std::string::npos) {
 					//parse description
 					vector <std::string> desc;
@@ -916,11 +914,50 @@ int parseitems(Dungeon * dungeon) {
 		i++;
 	}
 	
-	printf("SIZE: %d\n", di);
+	/*printf("SIZE: %d\n", di);
 	cout << "NAME: " << (dungeon->id)[0].n << endl;
-	cout << "DESC (0): " << dungeon->id[0].desc[0] << endl;
+	cout << "DESC (0): " << dungeon->id[0].desc[0] << endl;*/
 	
 	return 0;
+}
+
+void printids(Dungeon * dungeon)
+{
+	int i;
+	for(i = 0; i < dungeon->di; i++)
+	{
+		cout << "Name: " << dungeon->md[i].n << endl;
+		//print desc
+		//print color
+		printf("Speed: %d\n", dungeon->md[i].s.s);
+		//print abilities
+		printf("HP: %d\n", dungeon->md[i].s.hp);
+		cout << "Damage: " << dungeon->md[i].s.a->string() << endl;
+
+		cout << endl;
+	}
+}
+
+void printmds(Dungeon * dungeon)
+{
+	int i;
+	for(i = 0; i < dungeon->dm; i++)
+	{
+		cout << "Name: " << dungeon->id[i].n << endl;
+		//print desc
+		//print type
+		//print color
+		printf("Hit bonus: %d\n", dungeon->id[i].hib);
+		cout << "Damage bonus: " << dungeon->id[i].d->string() << endl;
+		printf("Dodge bonus: %d\n", dungeon->id[i].dob);
+		printf("Defense bonus: %d\n", dungeon->id[i].deb);
+		printf("Weight: %d\n", dungeon->id[i].w);
+		printf("Speed bonus: %d\n", dungeon->id[i].spb);
+		printf("Special attribute: %d\n", dungeon->id[i].sa);
+		printf("Value in Pesos de Ocho: %d\n", dungeon->id[i].v);
+		
+		cout << endl;
+	}
 }
 
 
@@ -984,6 +1021,8 @@ int main(int argc, char * argv[]) {
 	***/
 	parsemonsters(&dungeon);
 	parseitems(&dungeon);
+	printmds(&dungeon);
+	printids(&dungeon);
 	return 0;
 
 	if(loading == FALSE) {

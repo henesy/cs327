@@ -18,6 +18,7 @@
 	public:
 		int	roll(void);
 		Dice(int, int, int);
+		std::string string(void);
 	};
 	
 	class Item {
