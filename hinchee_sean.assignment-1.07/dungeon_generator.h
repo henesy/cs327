@@ -25,6 +25,7 @@
 	public:
 		std::string	n;			/* name/title */
 		std::string*	desc;	/* description, limited to 77 characters wide */
+		int		dl;			/* length of description */
 		itype	t;			/* weapon/item type */
 		bool	e;			/* is equipment (assignment1.07.pdf:6) */
 		colour	c;			/* color of item */
@@ -79,6 +80,7 @@
 		std::string	n; /* name */
 		colour	color;	/* color */
 		std::string*	desc;	/* sprite description, 77 character string, newline at or before byte 78 */
+		int			dl;	/* length of description */
 		
 		/* methods */
 		Sprite * 	thisSprite(void); /* returns a pointer to the given sprite */

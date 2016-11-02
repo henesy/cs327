@@ -666,14 +666,25 @@ int parsemonsters(Dungeon * dungeon) {
 					//line.find statements to match abils
 					if((n = line.find("SMART")) != std::string::npos)
 						mo.s.in = true;
+					else
+						mo.s.in = false;
 					if((n = line.find("TELE")) != std::string::npos)
 						mo.s.te = true;
+					else
+						mo.s.te = false;
+					//printf("TELE STUFF: %d", (int)n);
 					if((n = line.find("TUNNEL")) != std::string::npos)
 						mo.s.tu = true;
+					else
+						mo.s.tu = false;
 					if((n = line.find("ERRATIC")) != std::string::npos)
 						mo.s.eb = true;
+					else
+						mo.s.eb = false;
 					if((n = line.find("PASS")) != std::string::npos)
 						mo.s.pa = true;
+					else
+						mo.s.pa = false;
 						
 					
 				} else if((n = line.find("COLOR")) != std::string::npos) {
@@ -711,6 +722,7 @@ int parsemonsters(Dungeon * dungeon) {
 					}
 					
 					mo.desc = new string[desc.size()];
+					mo.dl = desc.size();
 					
 					int i = desc.size() -1;
 					while(desc.size() > 0) {
@@ -883,6 +895,7 @@ int parseitems(Dungeon * dungeon) {
 					}
 					
 					it.desc = new string[desc.size()];
+					it.dl = desc.size();
 					
 					int i = desc.size() -1;
 					while(desc.size() > 0) {
@@ -921,39 +934,121 @@ int parseitems(Dungeon * dungeon) {
 	return 0;
 }
 
-void printids(Dungeon * dungeon)
+void printmds(Dungeon * dungeon)
 {
 	int i;
 	for(i = 0; i < dungeon->di; i++)
 	{
 		cout << "Name: " << dungeon->md[i].n << endl;
-		//print desc
-		//print color
+		
+		cout << "Description: " << endl;
+		int j;
+		for(j = 0; j < dungeon->md[i].dl; j++)
+		{
+			cout << dungeon->md[i].desc[j] << endl;
+		}
+		
+		switch(dungeon->md[i].c)
+		{
+		case RED: cout << "Color: RED" << endl; break;
+		case GREEN: cout << "Color: GREEN" << endl; break;
+		case BLUE: cout << "Color: BLUE" << endl; break;
+		case CYAN: cout << "Color: CYAN" << endl; break;
+		case YELLOW: cout << "Color: YELLOW" << endl; break;
+		case MAGENTA: cout << "Color: MAGENTA" << endl; break;
+		case WHITE: cout << "Color: WHITE" << endl; break;
+		case BLACK: cout << "Color: BLACK" << endl; break;
+		}
+		
 		printf("Speed: %d\n", dungeon->md[i].s.s);
-		//print abilities
+		
+		cout << "Abilities: ";
+		if(dungeon->md[i].s.in)
+			cout << "SMART ";
+		if(dungeon->md[i].s.te)
+			cout << "TELE ";
+		if(dungeon->md[i].s.tu)
+			cout << "TUNNEL ";
+		if(dungeon->md[i].s.eb)
+			cout << "ERRATIC ";
+		if(dungeon->md[i].s.pa)
+			cout << "PASS ";
+		cout << endl;
+		
 		printf("HP: %d\n", dungeon->md[i].s.hp);
+		
 		cout << "Damage: " << dungeon->md[i].s.a->string() << endl;
 
 		cout << endl;
 	}
 }
 
-void printmds(Dungeon * dungeon)
+void printids(Dungeon * dungeon)
 {
 	int i;
 	for(i = 0; i < dungeon->dm; i++)
 	{
 		cout << "Name: " << dungeon->id[i].n << endl;
-		//print desc
-		//print type
-		//print color
+		
+		cout << "Description: " << endl;
+		int j;
+		for(j = 0; j < dungeon->id[i].dl; j++)
+		{
+			cout << dungeon->id[i].desc[j] << endl;
+		}
+		
+		cout << "Type: ";
+		switch(dungeon->id[i].t)
+		{
+		case WEAPON: cout << "WEAPON"; break;
+		case OFFHAND: cout << "OFFHAND"; break;
+		case RANGED: cout << "RANGED"; break;
+		case ARMOR: cout << "ARMOR"; break;
+		case HELMET: cout << "HELMET"; break;
+		case CLOAK: cout << "CLOAK"; break;
+		case GLOVES: cout << "GLOVES"; break;
+		case BOOTS: cout << "BOOTS"; break;
+		case RING: cout << "RING"; break;
+		case AMULET: cout << "AMULET"; break;
+		case LIGHT: cout << "LIGHT"; break;
+		case SCROLL: cout << "SCROLL"; break;
+		case BOOK: cout << "BOOK"; break;
+		case FLASK: cout << "FLASK"; break;
+		case GOLD: cout << "GOLD"; break;
+		case AMMUNITION: cout << "AMMUNITION"; break;
+		case FOOD: cout << "FOOD"; break;
+		case WAND: cout << "WAND"; break;
+		case CONTAINER: cout << "CONTAINER"; break;
+		default: break;
+		}
+		cout << endl;
+		
+		switch(dungeon->id[i].c)
+		{
+		case RED: cout << "Color: RED" << endl; break;
+		case GREEN: cout << "Color: GREEN" << endl; break;
+		case BLUE: cout << "Color: BLUE" << endl; break;
+		case CYAN: cout << "Color: CYAN" << endl; break;
+		case YELLOW: cout << "Color: YELLOW" << endl; break;
+		case MAGENTA: cout << "Color: MAGENTA" << endl; break;
+		case WHITE: cout << "Color: WHITE" << endl; break;
+		case BLACK: cout << "Color: BLACK" << endl; break;
+		}
+		
 		printf("Hit bonus: %d\n", dungeon->id[i].hib);
+		
 		cout << "Damage bonus: " << dungeon->id[i].d->string() << endl;
+		
 		printf("Dodge bonus: %d\n", dungeon->id[i].dob);
+		
 		printf("Defense bonus: %d\n", dungeon->id[i].deb);
+		
 		printf("Weight: %d\n", dungeon->id[i].w);
+		
 		printf("Speed bonus: %d\n", dungeon->id[i].spb);
+		
 		printf("Special attribute: %d\n", dungeon->id[i].sa);
+		
 		printf("Value in Pesos de Ocho: %d\n", dungeon->id[i].v);
 		
 		cout << endl;
