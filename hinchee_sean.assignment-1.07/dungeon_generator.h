@@ -11,13 +11,23 @@
 	/*** c++ classes ***/
 	class PC;
 	
+	class Dice {
+		int	b;	/* base number */
+		int	d;	/* die value (d6, d10, d20, etc.) */
+		int	n;	/* number of dice to roll */
+	public:
+		int	roll(void);
+		Dice(int, int, int);
+	};
+	
 	class Item {
 	public:
 		std::string	n;			/* name/title */
-		char*	desc[78];	/* description, limited to 77 characters wide */
+		std::string*	desc;	/* description, limited to 77 characters wide */
 		itype	t;			/* weapon/item type */
 		bool	e;			/* is equipment (assignment1.07.pdf:6) */
 		colour	c;			/* color of item */
+		Dice*	d;			/* damage */
 		int		hib;		/* bonus to hit (applied to probability) */
 		int		dob;		/* bonus to dodge (applied to probability) */
 		int		deb;		/* bonus to defense (reduces damage) */
@@ -48,7 +58,7 @@
 		int     s;  /* speed ;; pc has 10 ; 5-20 */
 
 		bool	pa;	/* pass-through, can move through anything */
-		int		a;	/* attack damage */
+		Dice*	a;	/* attack damage */
 		int		hp;	/* health points */
 	};
 
@@ -84,15 +94,6 @@
 		friend class Sprite;
 		int	view;	/* visible viewing distance */
 		Memory	**	mem;	/* map/dungeon view for the PC (memory) */
-	};
-	
-	class Dice {
-		int	b;	/* base number */
-		int	d;	/* die value (d6, d10, d20, etc.) */
-		int	n;	/* number of dice to roll */
-	public:
-		int	roll(void);
-		Dice(int, int, int);
 	};
 
 
@@ -164,6 +165,7 @@
 	} Tile_Node;
 
 	/*** Function prototypes ***/
+	
 	/* monsters.c */
 	void add_sprite(Dungeon * dungeon, Sprite * s);
 	Sprite * gen_sprite(Dungeon * dungeon, char c, int x, int y, int r);

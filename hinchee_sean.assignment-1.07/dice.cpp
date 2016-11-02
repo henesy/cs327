@@ -1,5 +1,6 @@
 #include "dungeon_generator.h"
 #include <stdlib.h>
+#include <string>
 
 
 int	Dice::roll(void) {

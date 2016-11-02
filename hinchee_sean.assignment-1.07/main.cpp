@@ -14,6 +14,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 using namespace std;
 
 
@@ -605,6 +606,26 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
     }
 }
 
+int rolldie(std::string s)
+{
+	int b, n, d;
+	char* str = new char [s.length()+1];
+	std::strcpy(str, s.c_str());
+	sscanf(str, "%d+%dd%d", &b, &n, &d);
+	Dice* di = new Dice(b, n, d);
+	return di->roll();
+}
+
+Dice* getdie(std::string s)
+{
+	int b, n, d;
+	char* str = new char [s.length()+1];
+	std::strcpy(str, s.c_str());
+	sscanf(str, "%d+%dd%d", &b, &n, &d);
+	Dice* di = new Dice(b, n, d);
+	return di;
+}
+
 /* parses the monsters file in ~/.rlg327 */
 int parsemonsters(Dungeon * dungeon) {
 	char * env_path = getenv("HOME");
@@ -635,7 +656,10 @@ int parsemonsters(Dungeon * dungeon) {
 			} else {
 				//standard file parsing
 				
+				/*size_t n = 0;*/
 				
+				if(line == "BEGIN OBJECT")
+					mo = b_mo;
 				
 			}
 			
@@ -685,16 +709,130 @@ int parseitems(Dungeon * dungeon) {
 					it = b_it;
 				else if((n = line.find("NAME")) != std::string::npos)
 					it.n = line.substr(5, 77);
-				
+				else if((n = line.find("TYPE")) != std::string::npos) {
+					//line.find statements to match enums
+					if((n = line.find("WEAPON")) != std::string::npos)
+						it.t = WEAPON;
+					else if((n = line.find("OFFHAND")) != std::string::npos)
+						it.t = OFFHAND;
+					else if((n = line.find("RANGED")) != std::string::npos)
+						it.t = RANGED;
+					else if((n = line.find("ARMOR")) != std::string::npos)
+						it.t = ARMOR;
+					else if((n = line.find("HELMET")) != std::string::npos)
+						it.t = HELMET;
+					else if((n = line.find("CLOAK")) != std::string::npos)
+						it.t = CLOAK;
+					else if((n = line.find("GLOVES")) != std::string::npos)
+						it.t = GLOVES;
+					else if((n = line.find("BOOTS")) != std::string::npos)
+						it.t = BOOTS;
+					else if((n = line.find("RING")) != std::string::npos)
+						it.t = RING;
+					else if((n = line.find("AMULET")) != std::string::npos)
+						it.t = AMULET;
+					else if((n = line.find("LIGHT")) != std::string::npos)
+						it.t = LIGHT;
+					else if((n = line.find("SCROLL")) != std::string::npos)
+						it.t = SCROLL;
+					else if((n = line.find("BOOK")) != std::string::npos)
+						it.t = BOOK;
+					else if((n = line.find("FLASK")) != std::string::npos)
+						it.t = FLASK;
+					else if((n = line.find("GOLD")) != std::string::npos)
+						it.t = GOLD;
+					else if((n = line.find("AMMUNITION")) != std::string::npos)
+						it.t = AMMUNITION;
+					else if((n = line.find("FOOD")) != std::string::npos)
+						it.t = FOOD;
+					else if((n = line.find("WAND")) != std::string::npos)
+						it.t = WAND;
+					else if((n = line.find("CONTAINER")) != std::string::npos)
+						it.t = CONTAINER;
+						
+					
+				} else if((n = line.find("COLOR")) != std::string::npos) {
+					//line.find statements to match enums/ints
+					if((n = line.find("RED")) != std::string::npos)
+						it.c = RED;
+					else if((n = line.find("GREEN")) != std::string::npos)
+						it.c = GREEN;
+					else if((n = line.find("BLUE")) != std::string::npos)
+						it.c = BLUE;
+					else if((n = line.find("CYAN")) != std::string::npos)
+						it.c = CYAN;
+					else if((n = line.find("YELLOW")) != std::string::npos)
+						it.c = YELLOW;
+					else if((n = line.find("MAGENTA")) != std::string::npos)
+						it.c = MAGENTA;
+					else if((n = line.find("WHITE")) != std::string::npos)
+						it.c = WHITE;
+					else if((n = line.find("BLACK")) != std::string::npos)
+						it.c = BLACK;
+					
+				} else if((n = line.find("WEIGHT")) != std::string::npos)
+					it.w = rolldie(line.substr(8, line.size()));
+				else if((n = line.find("HIT")) != std::string::npos)
+					it.hib = rolldie(line.substr(5, line.size()));
+				else if((n = line.find("DAM")) != std::string::npos) {
+					//save as a die
+					it.d = getdie(line.substr(5, line.size()));
+					
+				} else if((n = line.find("ATTR")) != std::string::npos)
+					it.sa = rolldie(line.substr(6, line.size()));
+				else if((n = line.find("VAL")) != std::string::npos)
+					it.v = rolldie(line.substr(5, line.size()));
+				else if((n = line.find("DODGE")) != std::string::npos)
+					it.dob = rolldie(line.substr(7, line.size()));
+				else if((n = line.find("DEF")) != std::string::npos)
+					it.deb = rolldie(line.substr(5, line.size()));
+				else if((n = line.find("SPEED")) != std::string::npos)
+					it.spb = rolldie(line.substr(7, line.size()));
+				else if((n = line.find("DESC")) != std::string::npos) {
+					//parse description
+					vector <std::string> desc;
+					
+					while(getline(od, line)) {
+						desc.push_back(line.substr(0, 77));
+						
+						if(line.find(".") == 0)
+							break;
+					}
+					
+					it.desc = new string[desc.size()];
+					
+					int i = 0;
+					while(desc.size() > 0) {
+						string s = desc.back();
+						desc.pop_back();
+						it.desc[i] = s;
+						i++;
+					}
+					
+				} else if((n = line.find("END")) != std::string::npos) {
+					items.push_back(it);
+					di++;
+				}
 			}
-			
-			di++;
 		}
 	}
 	else
 		return -1;
 		
 	dungeon->di = di;
+	
+	dungeon->id = new Item[items.size()];
+	
+	int i = 0;
+	while(items.size() > 0) {
+		Item tmp = items.back();
+		dungeon->id[i] = tmp;
+		items.pop_back();
+		i++;
+	}
+	
+	printf("SIZE: %d\n", di);
+	cout << "NAME: " << (dungeon->id)[0].n << endl;
 	
 	return 0;
 }
