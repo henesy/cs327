@@ -715,7 +715,7 @@ int parsemonsters(Dungeon * dungeon) {
 					vector <std::string> desc;
 					
 					while(getline(md, line)) {
-						if(line.find(".") == 0)
+						if(line == ".")
 							break;
 
 						desc.push_back(line.substr(0, 77));
@@ -739,9 +739,9 @@ int parsemonsters(Dungeon * dungeon) {
 					//health points
 					mo.s.hp = rolldie(line.substr(3, line.size()));
 					
-				} else if((n = line.find("END")) != std::string::npos) {
-					mons.push_back(mo);
-					dm++;
+				} else if(line == "END") {
+						mons.push_back(mo);
+						dm++;
 				}
 			}
 			
@@ -753,10 +753,14 @@ int parsemonsters(Dungeon * dungeon) {
 	dungeon->dm = dm;
 	
 	dungeon->md = new Monster[mons.size()];
-	
+
+	printf("SIZE MONS: %d\n", (int)mons.size());
+
 	int i = 0;
 	while(mons.size() > 0) {
+		cout << "UNLOADED MONSTER" << endl;
 		Monster tmp = mons.back();
+		cout << "NAME HERE: " << tmp.n << endl;
 		dungeon->md[i] = tmp;
 		mons.pop_back();
 		i++;
@@ -937,7 +941,7 @@ int parseitems(Dungeon * dungeon) {
 void printmds(Dungeon * dungeon)
 {
 	int i;
-	for(i = 0; i < dungeon->di; i++)
+	for(i = 0; i < dungeon->dm; i++)
 	{
 		cout << "Name: " << dungeon->md[i].n << endl;
 		
@@ -986,7 +990,7 @@ void printmds(Dungeon * dungeon)
 void printids(Dungeon * dungeon)
 {
 	int i;
-	for(i = 0; i < dungeon->dm; i++)
+	for(i = 0; i < dungeon->di; i++)
 	{
 		cout << "Name: " << dungeon->id[i].n << endl;
 		

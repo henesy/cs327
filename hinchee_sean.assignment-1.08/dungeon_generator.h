@@ -37,6 +37,7 @@
 		int		spb;		/* bonus to speed (movement) */
 		int		sa;			/* special attribute */
 		int		v;			/* value in Pesos de Ocho */
+		char	s;			/* print character */
 	};
 
 	class Memory {

@@ -662,6 +662,8 @@ int parsemonsters(Dungeon * dungeon) {
 					mo = b_mo;
 				else if((n = line.find("NAME")) != std::string::npos)
 					mo.n = line.substr(5, 77);
+				else if((n = line.find("SYMB")) != std::string::npos)
+					mo.c = (char)line.at(5);
 				else if((n = line.find("ABIL")) != std::string::npos) {
 					//line.find statements to match abils
 					if((n = line.find("SMART")) != std::string::npos)
@@ -804,6 +806,8 @@ int parseitems(Dungeon * dungeon) {
 					it = b_it;
 				else if((n = line.find("NAME")) != std::string::npos)
 					it.n = line.substr(5, 77);
+				else if((n = line.find("SYMB")) != std::string::npos)
+					it.s = (char)line.at(5);
 				else if((n = line.find("TYPE")) != std::string::npos) {
 					//line.find statements to match enums
 					if((n = line.find("WEAPON")) != std::string::npos)
@@ -937,7 +941,7 @@ int parseitems(Dungeon * dungeon) {
 void printmds(Dungeon * dungeon)
 {
 	int i;
-	for(i = 0; i < dungeon->di; i++)
+	for(i = 0; i < dungeon->dm; i++)
 	{
 		cout << "Name: " << dungeon->md[i].n << endl;
 		
@@ -986,7 +990,7 @@ void printmds(Dungeon * dungeon)
 void printids(Dungeon * dungeon)
 {
 	int i;
-	for(i = 0; i < dungeon->dm; i++)
+	for(i = 0; i < dungeon->di; i++)
 	{
 		cout << "Name: " << dungeon->id[i].n << endl;
 		
@@ -1110,15 +1114,8 @@ int main(int argc, char * argv[]) {
 
 	Dungeon dungeon = init_dungeon(21, 80, 12);
 	
-	/***
-	TEMPORARY FOR 1.07
-	!¡!¡
-	***/
 	parsemonsters(&dungeon);
 	parseitems(&dungeon);
-	printmds(&dungeon);
-	printids(&dungeon);
-	return 0;
 
 	if(loading == FALSE) {
 		gen_dungeon(&dungeon);
@@ -1185,6 +1182,7 @@ int main(int argc, char * argv[]) {
 		curs_set(0);
 		set_escdelay(25);
 		keypad(stdscr, TRUE);
+		start_color();
 	} else {
 		printer = &print_dungeon_nnc;
 	}
