@@ -1116,6 +1116,8 @@ int main(int argc, char * argv[]) {
 	
 	parsemonsters(&dungeon);
 	parseitems(&dungeon);
+	dungeon.of = new ObjFac(dungeon.di, dungeon.id);
+	dungeon.mf = new MonFac(dungeon.dm, dungeon.md);
 
 	if(loading == FALSE) {
 		gen_dungeon(&dungeon);
@@ -1192,8 +1194,6 @@ int main(int argc, char * argv[]) {
 	Bool first = TRUE;
 	Bool run = TRUE;
 	while(run == TRUE) {
-		//int32_t key;
-		//key = getch();
 
 		int l = 0;
 		for(i = 0; i < dungeon.ns; i++) {
@@ -1233,8 +1233,7 @@ int main(int argc, char * argv[]) {
 		//print_dungeon(&dungeon, 1, 0); /* prints non-tunneling dijkstra's */
 		//print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
 
-		//clear();
-		//refresh();
+
 		/** --- game over sequence checking --- **/
 		/* note: this will stop the game before the new world gets drawn since the monster will move to the player and thus kill him */
 		if(dungeon.go == TRUE || getSpriteAA(dungeon.ss, dungeon.pc) == FALSE)

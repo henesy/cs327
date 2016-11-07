@@ -1,4 +1,5 @@
 #include "dungeon_generator.h"
+#include <stdlib.h>
 
 ObjFac::ObjFac(void) {
 	id = NULL;
@@ -8,4 +9,10 @@ ObjFac::ObjFac(void) {
 ObjFac::ObjFac(int n, Item * defs) {
 	id = defs;
 	dn = n;
+}
+
+Item ObjFac::GetObj() {
+	int n = rand() % dn;
+	Item it = id[n];
+	return it;
 }

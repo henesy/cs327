@@ -106,16 +106,20 @@
 	public:
 		int dn;			/* number of defined items */
 		Sprite * md;	/* monster definitions */
+		
 		MonFac(int, Sprite *);
 		MonFac(void);
+		Sprite GetMon();
 	};
 	
 	class ObjFac {
 	public:
 		int dn;	/* number of defined items */
 		Item * id;	/* item definitions */
+		
 		ObjFac(int, Item *);
 		ObjFac(void);
+		Item GetObj();
 	};
 
 
@@ -180,8 +184,8 @@
 		int			dm;		/* number of definted monsters*/
 		Monster *	md;		/* monster definitions */
 		
-		MonFac		mf;		/* monster factory */
-		ObjFac		of;		/* item factor ;; prettier with the Obj rather than Itm */
+		MonFac*		mf;		/* monster factory */
+		ObjFac*		of;		/* item factor ;; prettier with the Obj rather than Itm */
 		
 		int			nit;	/* number of items in dungeon floor */
 		Item	*	items;	/* items tracker for dungeon */
