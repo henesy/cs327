@@ -4,7 +4,7 @@
 	#include <string>
 
 	/*** utility enums ***/
-	typedef enum {RED, GREEN, BLUE, CYAN, YELLOW, MAGENTA, WHITE, BLACK} colour;
+	typedef enum {BLACK, RED, GREEN, BLUE, CYAN, YELLOW, MAGENTA, WHITE} colour;
 	/* itype specifically can specify equipment t/f when itype it is ≥ NONEQUIP for false and < for true (is equipment), this is kind of a hack */
 	typedef enum {WEAPON, OFFHAND, RANGED, ARMOR, HELMET, CLOAK, GLOVES, BOOTS, RING, AMULET, LIGHT, NONEQUIP, SCROLL, BOOK, FLASK, GOLD, AMMUNITION, FOOD, WAND, CONTAINER} itype;
 
@@ -15,14 +15,6 @@
 	public:
 		int	x; /* x coordinate */
 		int	y; /* y coordinate */
-	};
-	
-	class MonFac {
-		
-	};
-	
-	class ObjFac {
-		
 	};
 	
 	class Dice {
@@ -54,7 +46,7 @@
 		char	s;			/* print character */
 		Position p;
 	};
-
+	
 	class Memory {
 	public:
 		char c; /* character */
@@ -109,6 +101,23 @@
 		int	view;	/* visible viewing distance */
 		Memory	**	mem;	/* map/dungeon view for the PC (memory) */
 	};
+	
+	class MonFac {
+	public:
+		int dn;			/* number of defined items */
+		Sprite * md;	/* monster definitions */
+		MonFac(int, Sprite *);
+		MonFac(void);
+	};
+	
+	class ObjFac {
+	public:
+		int dn;	/* number of defined items */
+		Item * id;	/* item definitions */
+		ObjFac(int, Item *);
+		ObjFac(void);
+	};
+
 
 
 	/* C stuff for C++ */

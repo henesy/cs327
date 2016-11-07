@@ -365,6 +365,7 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	
 	/* item view map */
 	new_dungeon.items = new Item[new_dungeon.ms];
+	new_dungeon.nit = 0;
 
 	return new_dungeon;
 }

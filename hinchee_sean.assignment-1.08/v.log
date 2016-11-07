@@ -1,0 +1,90 @@
+==12475== Memcheck, a memory error detector
+==12475== Copyright (C) 2002-2013, and GNU GPL'd, by Julian Seward et al.
+==12475== Using Valgrind-3.10.1 and LibVEX; rerun with -h for copyright info
+==12475== Command: ./dungeon_generator
+==12475== Parent PID: 11995
+==12475== 
+==12475== Conditional jump or move depends on uninitialised value(s)
+==12475==    at 0x40DF5D: gen_corridors(Dungeon*) (world.cpp:180)
+==12475==    by 0x407838: main (main.cpp:1122)
+==12475== 
+==12475== Conditional jump or move depends on uninitialised value(s)
+==12475==    at 0x40F1E6: print_dungeon(Dungeon*, int, int) (printing.cpp:104)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475== 
+==12475== Conditional jump or move depends on uninitialised value(s)
+==12475==    at 0x40F218: print_dungeon(Dungeon*, int, int) (printing.cpp:107)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475== 
+==12475== Use of uninitialised value of size 8
+==12475==    at 0x40F21C: print_dungeon(Dungeon*, int, int) (printing.cpp:107)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475== 
+==12475== Conditional jump or move depends on uninitialised value(s)
+==12475==    at 0x40F2C8: print_dungeon(Dungeon*, int, int) (printing.cpp:133)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475== 
+==12475== Use of uninitialised value of size 8
+==12475==    at 0x40F2CC: print_dungeon(Dungeon*, int, int) (printing.cpp:133)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475== 
+==12475== Use of uninitialised value of size 8
+==12475==    at 0x40F35C: print_dungeon(Dungeon*, int, int) (printing.cpp:145)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475== 
+==12475== Use of uninitialised value of size 8
+==12475==    at 0x40F392: print_dungeon(Dungeon*, int, int) (printing.cpp:145)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475== 
+==12475== Use of uninitialised value of size 8
+==12475==    at 0x40F3CB: print_dungeon(Dungeon*, int, int) (printing.cpp:146)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475== 
+==12475== Use of uninitialised value of size 8
+==12475==    at 0x40F400: print_dungeon(Dungeon*, int, int) (printing.cpp:146)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475== 
+==12475== Invalid read of size 4
+==12475==    at 0x40F212: print_dungeon(Dungeon*, int, int) (printing.cpp:107)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475==  Address 0x61388ec is 20 bytes after a block of size 134,408 alloc'd
+==12475==    at 0x4C297FD: operator new[](unsigned long) (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==12475==    by 0x40EB38: init_dungeon(int, int, int) (world.cpp:367)
+==12475==    by 0x4077F5: main (main.cpp:1115)
+==12475== 
+==12475== Invalid read of size 4
+==12475==    at 0x40F2C2: print_dungeon(Dungeon*, int, int) (printing.cpp:133)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475==  Address 0x61388f4 is 20 bytes after a block of size 134,416 in arena "client"
+==12475== 
+==12475== Invalid read of size 8
+==12475==    at 0x40F35C: print_dungeon(Dungeon*, int, int) (printing.cpp:145)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475==  Address 0x331a9a808 is not stack'd, malloc'd or (recently) free'd
+==12475== 
+==12475== 
+==12475== Process terminating with default action of signal 11 (SIGSEGV)
+==12475==  Access not within mapped region at address 0x331A9A808
+==12475==    at 0x40F35C: print_dungeon(Dungeon*, int, int) (printing.cpp:145)
+==12475==    by 0x407A73: main (main.cpp:1191)
+==12475==  If you believe this happened as a result of a stack
+==12475==  overflow in your program's main thread (unlikely but
+==12475==  possible), you can try to increase the size of the
+==12475==  main thread stack using the --main-stacksize= flag.
+==12475==  The main thread stack size used in this run was 8388608.
+==12475== 
+==12475== HEAP SUMMARY:
+==12475==     in use at exit: 389,017 bytes in 652 blocks
+==12475==   total heap usage: 2,590 allocs, 1,938 frees, 445,823 bytes allocated
+==12475== 
+==12475== LEAK SUMMARY:
+==12475==    definitely lost: 1,345 bytes in 137 blocks
+==12475==    indirectly lost: 0 bytes in 0 blocks
+==12475==      possibly lost: 136,565 bytes in 32 blocks
+==12475==    still reachable: 251,107 bytes in 483 blocks
+==12475==         suppressed: 0 bytes in 0 blocks
+==12475== Rerun with --leak-check=full to see details of leaked memory
+==12475== 
+==12475== For counts of detected and suppressed errors, rerun with: -v
+==12475== Use --track-origins=yes to see where uninitialised values come from
+==12475== ERROR SUMMARY: 15126 errors from 13 contexts (suppressed: 0 from 0)

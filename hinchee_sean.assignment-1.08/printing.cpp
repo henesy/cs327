@@ -57,7 +57,6 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 	refresh();
 	
 	/* color definitions */
-	init_pair(COLOR_BLACK, COLOR_WHITE, COLOR_BLACK);
 	init_pair(COLOR_RED, COLOR_RED, COLOR_BLACK);
 	init_pair(COLOR_GREEN, COLOR_GREEN, COLOR_BLACK);
 	init_pair(COLOR_YELLOW, COLOR_YELLOW, COLOR_BLACK);
@@ -65,6 +64,7 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 	init_pair(COLOR_MAGENTA, COLOR_MAGENTA, COLOR_BLACK);
 	init_pair(COLOR_CYAN, COLOR_CYAN, COLOR_BLACK);
 	init_pair(COLOR_WHITE, COLOR_WHITE, COLOR_BLACK);
+	init_pair(COLOR_BLACK, COLOR_WHITE, COLOR_BLACK);
 	
 	
 
