@@ -362,6 +362,9 @@ Dungeon init_dungeon(int h, int w, int mr) {
 	for(i = 0; i < new_dungeon.h; i++) {
 		new_dungeon.csnt[i] = (int*)calloc(new_dungeon.w, sizeof(int));
 	}
+	
+	/* item view map */
+	new_dungeon.items = new Item[new_dungeon.ms];
 
 	return new_dungeon;
 }

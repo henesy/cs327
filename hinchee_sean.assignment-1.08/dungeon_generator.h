@@ -11,6 +11,20 @@
 	/*** c++ classes ***/
 	class PC;
 	
+	class Position {
+	public:
+		int	x; /* x coordinate */
+		int	y; /* y coordinate */
+	};
+	
+	class MonFac {
+		
+	};
+	
+	class ObjFac {
+		
+	};
+	
 	class Dice {
 		int	b;	/* base number */
 		int	d;	/* die value (d6, d10, d20, etc.) */
@@ -38,18 +52,13 @@
 		int		sa;			/* special attribute */
 		int		v;			/* value in Pesos de Ocho */
 		char	s;			/* print character */
+		Position p;
 	};
 
 	class Memory {
 	public:
 		char c; /* character */
 		bool v; /* visited */
-	};
-
-	class Position {
-	public:
-		int	x; /* x coordinate */
-		int	y; /* y coordinate */
 	};
 
 	class Stats {
@@ -113,6 +122,7 @@
 		int	h;	/* hardness */
 		char	c;	/* visual character */
 		int	p;	/* mark 1 if path, 0 if not a path (corridors) */
+		int	color;
 	} Tile;
 
 	/* maybe make these pointers? */
@@ -160,6 +170,12 @@
 		int			mm;		/* max monsters that can be defined */
 		int			dm;		/* number of definted monsters*/
 		Monster *	md;		/* monster definitions */
+		
+		MonFac		mf;		/* monster factory */
+		ObjFac		of;		/* item factor ;; prettier with the Obj rather than Itm */
+		
+		int			nit;	/* number of items in dungeon floor */
+		Item	*	items;	/* items tracker for dungeon */
 	} Dungeon;
 
 	typedef struct {

@@ -275,6 +275,8 @@ void add_sprite(Dungeon * dungeon, Sprite * s) {
 	if(getSpriteC(s) == '@') {
 		dungeon->pc = dungeon->ns - 1;
     }
+    
+    s->color = WHITE;
 
 	//dungeon->ss[dungeon->ns - 1] = s;
 	copyASprite(dungeon->ss, dungeon->ns -1, s);

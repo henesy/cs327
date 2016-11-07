@@ -1139,11 +1139,8 @@ int main(int argc, char * argv[]) {
 	map_dungeon_t(&dungeon);
 	/*** dungeon is fully generated ***/
 
-    //binheap_t h;
-	//binheap_init(&h, compare_move, NULL);
 
 	/* main loop */
-	//Event nexts[dungeon.ns]
 
 	if(regen == TRUE) {
 		//int px = dungeon.ss[0].p.x;
@@ -1237,7 +1234,7 @@ int main(int argc, char * argv[]) {
 		//print_dungeon(&dungeon, 0, 1); /* prints tunneling dijkstra's */
 
 		//clear();
-		refresh();
+		//refresh();
 		/** --- game over sequence checking --- **/
 		/* note: this will stop the game before the new world gets drawn since the monster will move to the player and thus kill him */
 		if(dungeon.go == TRUE || getSpriteAA(dungeon.ss, dungeon.pc) == FALSE)
@@ -1254,7 +1251,6 @@ int main(int argc, char * argv[]) {
 	//printf("Game Over!\n");
 
 	/*** tear down sequence ***/
-	//binheap_delete(&h);
 	END: ;
 	delwin(stdscr);
 	endwin();
@@ -1264,6 +1260,15 @@ int main(int argc, char * argv[]) {
 	}
 
 	DUNFREE: ;
+	/* cpp stuff */
+	delete[] dungeon.items;
+	
+	delete[] dungeon.md;
+	delete[] dungeon.id;
+	delete dungeon.plyr;
+	delete dungeon.su;
+	delete dungeon.sd;
+	
 	/* free our arrays */
 	for(i = 0; i < dungeon.h; i++) {
 		free(dungeon.d[i]);
