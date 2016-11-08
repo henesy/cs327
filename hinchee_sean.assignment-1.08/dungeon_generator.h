@@ -71,6 +71,7 @@
 	public:
 		char c; /* character */
 		bool v; /* visited */
+		int color; /* color */
 	};
 
 	class Stats {

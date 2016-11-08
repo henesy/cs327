@@ -1,5 +1,6 @@
 #include "dungeon_generator.h"
 #include <cstdlib>
+#include <ncurses.h>
 
 /* updates a PC's memory after the print buffer has been properly populated */
 void updateMemory(Dungeon * dungeon) {
@@ -12,6 +13,7 @@ void updateMemory(Dungeon * dungeon) {
 				//update from print buffer, this should be called before printing time
 				dungeon->plyr->mem[i][j].c = dungeon->p[i][j].c;
 				dungeon->plyr->mem[i][j].v = true;
+				dungeon->plyr->mem[i][j].color = dungeon->p[i][j].color;
 			}
 		}
 	}
