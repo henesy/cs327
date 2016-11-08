@@ -33,7 +33,7 @@
 		std::string*	desc;	/* description, limited to 77 characters wide */
 		int		dl;			/* length of description */
 		itype	t;			/* weapon/item type */
-		bool	e;			/* is equipment (assignment1.07.pdf:6) */
+		bool	e;			/* is equipment (:6) */
 		colour	c;			/* color of item */
 		Dice*	d;			/* damage */
 		int		hib;		/* bonus to hit (applied to probability) */
@@ -53,7 +53,7 @@
 		std::string*	desc;	/* description, limited to 77 characters wide */
 		int		dl;			/* length of description */
 		itype	t;			/* weapon/item type */
-		bool	e;			/* is equipment (assignment1.07.pdf:6) */
+		bool	e;			/* is equipment (../assignment1.07.pdf:6) */
 		colour	c;			/* color of item */
 		Dice*	d;			/* damage */
 		Dice*	hib;		/* bonus to hit (applied to probability) */
@@ -255,6 +255,9 @@
 	} Tile_Node;
 
 	/*** Function prototypes ***/
+	
+	/* item.c */
+	void placeitem(Dungeon *, Item);
 	
 	/* monsters.c */
 	Sprite * gen_sprite_fac(Dungeon * dungeon, char c, int x, int y, int r);

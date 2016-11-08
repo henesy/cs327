@@ -1143,11 +1143,16 @@ int main(int argc, char * argv[]) {
 		setSpriteSn(m, i);
 		add_sprite(&dungeon, m);
 	}
+	/* 10 as per assignment1.08 */
+	for(i = 0; i < 10; i++) {
+		Item it = dungeon.of->GetObj();
+		placeitem(&dungeon, it);
+	}
 
 	map_dungeon_nont(&dungeon);
 	map_dungeon_t(&dungeon);
 	/*** dungeon is fully generated ***/
-	getchar();
+	//getchar();
 
 	/* main loop */
 
