@@ -636,14 +636,14 @@ int parsemonsters(Dungeon * dungeon) {
 	int dm = 0;
 	bool first = true;
 	dungeon->mm = 100;
-	vector <Monster> mons;
+	vector <SpriteTemp> mons;
 	
 	
 	string line;
 	ifstream md(path);
 	if(md.is_open()) {
-		Monster b_mo;
-		Monster mo;
+		SpriteTemp b_mo;
+		SpriteTemp mo;
 		while(getline(md, line)) {
 			//cout << line << '\n';
 			
@@ -662,9 +662,12 @@ int parsemonsters(Dungeon * dungeon) {
 					mo = b_mo;
 				else if((n = line.find("NAME")) != std::string::npos)
 					mo.n = line.substr(5, 77);
-				else if((n = line.find("SYMB")) != std::string::npos)
-					mo.c = (char)line.at(5);
-				else if((n = line.find("ABIL")) != std::string::npos) {
+				else if((n = line.find("SYMB")) != std::string::npos) {
+					mo.c = line.at(5);
+					//mo.c = 'P';
+					//cout << "SYMBOL READ" << endl;
+					//printf("SIMBUL: %c\n", mo.c);
+				} else if((n = line.find("ABIL")) != std::string::npos) {
 					//line.find statements to match abils
 					if((n = line.find("SMART")) != std::string::npos)
 						mo.s.in = true;
@@ -735,11 +738,11 @@ int parsemonsters(Dungeon * dungeon) {
 					}
 					
 				} else if((n = line.find("SPEED")) != std::string::npos) { 
-					mo.s.s = rolldie(line.substr(6, line.size()));
+					mo.s.s = getdie(line.substr(6, line.size()));
 					
 				} else if((n = line.find("HP")) != std::string::npos) { 
 					//health points
-					mo.s.hp = rolldie(line.substr(3, line.size()));
+					mo.s.hp = getdie(line.substr(3, line.size()));
 					
 				} else if((n = line.find("END")) != std::string::npos) {
 					mons.push_back(mo);
@@ -754,19 +757,15 @@ int parsemonsters(Dungeon * dungeon) {
 		
 	dungeon->dm = dm;
 	
-	dungeon->md = new Monster[mons.size()];
+	dungeon->md = new SpriteTemp[mons.size()];
 	
 	int i = 0;
 	while(mons.size() > 0) {
-		Monster tmp = mons.back();
+		SpriteTemp tmp = mons.back();
 		dungeon->md[i] = tmp;
 		mons.pop_back();
 		i++;
 	}
-	
-	/*printf("SIZE: %d\n", dm);
-	cout << "NAME: " << (dungeon->md)[0].n << endl;
-	cout << "DESC (0): " << dungeon->md[0].desc[0] << endl;*/
 	
 	return 0;
 }
@@ -781,14 +780,14 @@ int parseitems(Dungeon * dungeon) {
 	int di = 0;
 	bool first = true;
 	dungeon->mi = 100;
-	vector <Item> items;
+	vector <ItemTemp> items;
 	
 	
 	string line;
 	ifstream od(path);
 	if(od.is_open()) {
-		Item b_it;
-		Item it;
+		ItemTemp b_it;
+		ItemTemp it;
 		while(getline(od, line)) {
 			//cout << line << '\n';
 			
@@ -870,23 +869,23 @@ int parseitems(Dungeon * dungeon) {
 						it.c = BLACK;
 					
 				} else if((n = line.find("WEIGHT")) != std::string::npos)
-					it.w = rolldie(line.substr(7, line.size()));
+					it.w = getdie(line.substr(7, line.size()));
 				else if((n = line.find("HIT")) != std::string::npos)
-					it.hib = rolldie(line.substr(4, line.size()));
+					it.hib = getdie(line.substr(4, line.size()));
 				else if((n = line.find("DAM")) != std::string::npos) {
 					//save as a die
 					it.d = getdie(line.substr(4, line.size()));
 					
 				} else if((n = line.find("ATTR")) != std::string::npos)
-					it.sa = rolldie(line.substr(5, line.size()));
+					it.sa = getdie(line.substr(5, line.size()));
 				else if((n = line.find("VAL")) != std::string::npos)
-					it.v = rolldie(line.substr(4, line.size()));
+					it.v = getdie(line.substr(4, line.size()));
 				else if((n = line.find("DODGE")) != std::string::npos)
-					it.dob = rolldie(line.substr(6, line.size()));
+					it.dob = getdie(line.substr(6, line.size()));
 				else if((n = line.find("DEF")) != std::string::npos)
-					it.deb = rolldie(line.substr(4, line.size()));
+					it.deb = getdie(line.substr(4, line.size()));
 				else if((n = line.find("SPEED")) != std::string::npos) {
-					it.spb = rolldie(line.substr(6, line.size()));
+					it.spb = getdie(line.substr(6, line.size()));
 				} else if((n = line.find("DESC")) != std::string::npos) {
 					//parse description
 					vector <std::string> desc;
@@ -921,11 +920,11 @@ int parseitems(Dungeon * dungeon) {
 		
 	dungeon->di = di;
 	
-	dungeon->id = new Item[items.size()];
+	dungeon->id = new ItemTemp[items.size()];
 	
 	int i = 0;
 	while(items.size() > 0) {
-		Item tmp = items.back();
+		ItemTemp tmp = items.back();
 		dungeon->id[i] = tmp;
 		items.pop_back();
 		i++;
@@ -938,12 +937,15 @@ int parseitems(Dungeon * dungeon) {
 	return 0;
 }
 
+
 void printmds(Dungeon * dungeon)
 {
 	int i;
 	for(i = 0; i < dungeon->dm; i++)
 	{
 		cout << "Name: " << dungeon->md[i].n << endl;
+		
+		printf("Symbol: %c\n", dungeon->md[i].c);
 		
 		cout << "Description: " << endl;
 		int j;
@@ -964,7 +966,8 @@ void printmds(Dungeon * dungeon)
 		case BLACK: cout << "Color: BLACK" << endl; break;
 		}
 		
-		printf("Speed: %d\n", dungeon->md[i].s.s);
+		//printf("Speed: %d\n", dungeon->md[i].s.s);
+		cout << "Speed: " << dungeon->md[i].s.s->string() << endl;
 		
 		cout << "Abilities: ";
 		if(dungeon->md[i].s.in)
@@ -979,14 +982,15 @@ void printmds(Dungeon * dungeon)
 			cout << "PASS ";
 		cout << endl;
 		
-		printf("HP: %d\n", dungeon->md[i].s.hp);
+		//printf("HP: %d\n", dungeon->md[i].s.hp);
+		cout << "HP: " << dungeon->md[i].s.hp->string() << endl;
 		
 		cout << "Damage: " << dungeon->md[i].s.a->string() << endl;
 
 		cout << endl;
 	}
 }
-
+/*
 void printids(Dungeon * dungeon)
 {
 	int i;
@@ -1058,7 +1062,7 @@ void printids(Dungeon * dungeon)
 		cout << endl;
 	}
 }
-
+*/
 
 /* Basic procedural dungeon generator */
 int main(int argc, char * argv[]) {
@@ -1118,6 +1122,8 @@ int main(int argc, char * argv[]) {
 	parseitems(&dungeon);
 	dungeon.of = new ObjFac(dungeon.di, dungeon.id);
 	dungeon.mf = new MonFac(dungeon.dm, dungeon.md);
+	printmds(&dungeon);
+	getchar();
 
 	if(loading == FALSE) {
 		gen_dungeon(&dungeon);
@@ -1126,12 +1132,12 @@ int main(int argc, char * argv[]) {
 		read_dungeon(&dungeon, path);
 	}
 	/*** dungeon is fully initiated ***/
-	Sprite * pc = gen_sprite(&dungeon, '@', -1, -1, 1);
+	Sprite * pc = gen_sprite_fac(&dungeon, '@', -1, -1, 1);
 	add_sprite(&dungeon, pc);
 
 	int i;
 	for(i = 0; i < num_mon; i++) {
-		Sprite * m = gen_sprite(&dungeon,'m' , -1, -1, 1);
+		Sprite * m = gen_sprite_fac(&dungeon,'m' , -1, -1, 1);
 		//m.sn = i;
 		setSpriteSn(m, i);
 		add_sprite(&dungeon, m);

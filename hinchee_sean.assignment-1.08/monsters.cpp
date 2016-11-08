@@ -274,14 +274,58 @@ void add_sprite(Dungeon * dungeon, Sprite * s) {
 
 	if(getSpriteC(s) == '@') {
 		dungeon->pc = dungeon->ns - 1;
+		s->color = WHITE;
     }
     
-    s->color = WHITE;
+    //s->color = WHITE;
 
 	//dungeon->ss[dungeon->ns - 1] = s;
+	s->sn = dungeon->ns -1;
 	copyASprite(dungeon->ss, dungeon->ns -1, s);
 
 	END: ;
+}
+
+/* generate a sprite from the factory */
+Sprite * gen_sprite_fac(Dungeon * dungeon, char c, int x, int y, int r) {
+	Sprite* s = new Sprite;
+	
+	if(c != '@'){
+		s = dungeon->mf->GetMon();
+		
+		/* place in a room if 1 or more. implicitly random ;; force in a room even if tunneling */
+		if(r > 0 || s->s.tu == true) {
+			int t = 0;
+			PRNTT: ;
+        	int r_id = rand() % dungeon->nr;
+			x = (rand() % dungeon->r[r_id].w) + getPosX(dungeon->r[r_id].tl);
+			y = (rand() % dungeon->r[r_id].h) + getPosY(dungeon->r[r_id].tl);
+
+			if(getSpriteC(s) != '@' && dungeon->nr > 1) {
+				setSpritePX(s, x);
+				setSpritePY(s, y);
+
+				Bool w_pc = FALSE;
+				with_pc(dungeon, s, &w_pc);
+				if(w_pc == TRUE && t < 8) {
+					t++;
+					goto PRNTT;
+				}
+			}
+		} else {
+			if(x < 0 || x > dungeon->w) {
+				x = (rand() % (dungeon->w-2)) + 1;
+        	}
+			if(y < 0 || y > dungeon->h) {
+				y = (rand() % (dungeon->h-2)) + 1;
+			}
+		}
+	} else {
+		//pc
+		s = (Sprite *)initPC(dungeon);
+	}
+		
+	return s;
 }
 
 /*

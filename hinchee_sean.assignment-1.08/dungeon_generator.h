@@ -47,6 +47,26 @@
 		Position p;
 	};
 	
+	class ItemTemp {
+	public:
+		std::string	n;			/* name/title */
+		std::string*	desc;	/* description, limited to 77 characters wide */
+		int		dl;			/* length of description */
+		itype	t;			/* weapon/item type */
+		bool	e;			/* is equipment (assignment1.07.pdf:6) */
+		colour	c;			/* color of item */
+		Dice*	d;			/* damage */
+		Dice*	hib;		/* bonus to hit (applied to probability) */
+		Dice*	dob;		/* bonus to dodge (applied to probability) */
+		Dice*	deb;		/* bonus to defense (reduces damage) */
+		Dice*	w;			/* weight of item */
+		Dice*	spb;		/* bonus to speed (movement) */
+		Dice*	sa;			/* special attribute */
+		Dice*	v;			/* value in Pesos de Ocho */
+		char	s;			/* print character */
+		Position p;
+	};
+	
 	class Memory {
 	public:
 		char c; /* character */
@@ -65,6 +85,19 @@
 		Dice*	a;	/* attack damage */
 		int		hp;	/* health points */
 	};
+	
+	class StatsTemp {
+	public:
+		bool    in; /* intelligence */
+		bool    te; /* telepathy */
+		bool    tu; /* tunneling ability */
+		bool    eb; /* erratic behaviour */
+		Dice*	s;  /* speed ;; pc has 10 ; 5-20 */
+
+		bool	pa;	/* pass-through, can move through anything */
+		Dice*	a;	/* attack damage */
+		Dice*	hp;	/* health points */
+	};
 
 	class Sprite {
 	public:
@@ -73,6 +106,27 @@
 		Position	p;	/* position of the sprite in the dungeon */
 		char		c;	/* character to print for the sprite */
 		Stats       s;	/* stats for a sprite */
+		int			t;	/* turn count */
+		Position	to;	/* to move to */
+		int			sn;	/* sprite number */
+		Position	pc;	/* last known location of the PC */
+		bool		a;	/* alive T/F */
+		
+		std::string	n; /* name */
+		colour	color;	/* color */
+		std::string*	desc;	/* sprite description, 77 character string, newline at or before byte 78 */
+		int			dl;	/* length of description */
+		
+		/* methods */
+		Sprite * 	thisSprite(void); /* returns a pointer to the given sprite */
+		PC	* 		thisPC(void);
+	};
+	
+	class SpriteTemp {
+	public:
+		Position	p;	/* position of the sprite in the dungeon */
+		char		c;	/* character to print for the sprite */
+		StatsTemp       s;	/* stats for a sprite */
 		int			t;	/* turn count */
 		Position	to;	/* to move to */
 		int			sn;	/* sprite number */
@@ -105,19 +159,19 @@
 	class MonFac {
 	public:
 		int dn;			/* number of defined items */
-		Sprite * md;	/* monster definitions */
+		SpriteTemp * md;	/* monster definitions */
 		
-		MonFac(int, Sprite *);
+		MonFac(int, SpriteTemp *);
 		MonFac(void);
-		Sprite GetMon();
+		Sprite* GetMon();
 	};
 	
 	class ObjFac {
 	public:
 		int dn;	/* number of defined items */
-		Item * id;	/* item definitions */
+		ItemTemp * id;	/* item definitions */
 		
-		ObjFac(int, Item *);
+		ObjFac(int, ItemTemp *);
 		ObjFac(void);
 		Item GetObj();
 	};
@@ -179,10 +233,10 @@
 		
 		int			mi;		/* max items/objects that can be defined */
 		int			di;		/* number of defined items */
-		Item *		id;		/* item definitions */
+		ItemTemp *		id;		/* item definitions */
 		int			mm;		/* max monsters that can be defined */
 		int			dm;		/* number of definted monsters*/
-		Monster *	md;		/* monster definitions */
+		SpriteTemp *	md;	/* monster definitions */
 		
 		MonFac*		mf;		/* monster factory */
 		ObjFac*		of;		/* item factor ;; prettier with the Obj rather than Itm */
@@ -201,6 +255,7 @@
 	/*** Function prototypes ***/
 	
 	/* monsters.c */
+	Sprite * gen_sprite_fac(Dungeon * dungeon, char c, int x, int y, int r);
 	void add_sprite(Dungeon * dungeon, Sprite * s);
 	Sprite * gen_sprite(Dungeon * dungeon, char c, int x, int y, int r);
 	void gen_move_sprite(Dungeon * dungeon, int sn);

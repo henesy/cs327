@@ -6,13 +6,14 @@ ObjFac::ObjFac(void) {
 	dn = 0;
 }
 
-ObjFac::ObjFac(int n, Item * defs) {
+ObjFac::ObjFac(int n, ItemTemp * defs) {
 	id = defs;
 	dn = n;
 }
 
 Item ObjFac::GetObj() {
 	int n = rand() % dn;
-	Item it = id[n];
-	return it;
+	ItemTemp it = id[n];
+	Item ni;
+	return ni;
 }
