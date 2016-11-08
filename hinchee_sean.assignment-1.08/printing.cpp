@@ -57,6 +57,7 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 	refresh();
 	
 	/* color definitions */
+	init_pair(COLOR_BLACK, COLOR_WHITE, COLOR_BLACK);
 	init_pair(COLOR_RED, COLOR_RED, COLOR_BLACK);
 	init_pair(COLOR_GREEN, COLOR_GREEN, COLOR_BLACK);
 	init_pair(COLOR_YELLOW, COLOR_YELLOW, COLOR_BLACK);
@@ -64,7 +65,6 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 	init_pair(COLOR_MAGENTA, COLOR_MAGENTA, COLOR_BLACK);
 	init_pair(COLOR_CYAN, COLOR_CYAN, COLOR_BLACK);
 	init_pair(COLOR_WHITE, COLOR_WHITE, COLOR_BLACK);
-	init_pair(COLOR_BLACK, COLOR_WHITE, COLOR_BLACK);
 	
 	
 
@@ -139,7 +139,7 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 		case  MAGENTA: c = COLOR_MAGENTA; break;
 		case  WHITE: c = COLOR_WHITE; break;
 		case  BLACK: c = COLOR_BLACK; break;
-		default: c = COLOR_WHITE; break;
+		default: c = c; break;
 		}
 		
 		dungeon->p[dungeon->items[i].p.y][dungeon->items[i].p.x].c = s;
@@ -218,6 +218,7 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 			refresh();
 			
 			attroff(COLOR_PAIR(dungeon->p[i][j].color));
+			//attroff(COLOR_PAIR(COLOR_RED));
 		}
 	}
     //clear();

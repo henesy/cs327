@@ -4,7 +4,7 @@
 	#include <string>
 
 	/*** utility enums ***/
-	typedef enum {BLACK, RED, GREEN, BLUE, CYAN, YELLOW, MAGENTA, WHITE} colour;
+	typedef enum {BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE} colour;
 	/* itype specifically can specify equipment t/f when itype it is ≥ NONEQUIP for false and < for true (is equipment), this is kind of a hack */
 	typedef enum {WEAPON, OFFHAND, RANGED, ARMOR, HELMET, CLOAK, GLOVES, BOOTS, RING, AMULET, LIGHT, NONEQUIP, SCROLL, BOOK, FLASK, GOLD, AMMUNITION, FOOD, WAND, CONTAINER} itype;
 
@@ -137,6 +137,8 @@
 		colour	color;	/* color */
 		std::string*	desc;	/* sprite description, 77 character string, newline at or before byte 78 */
 		int			dl;	/* length of description */
+		
+		char		pa; /* ? char shit */
 		
 		/* methods */
 		Sprite * 	thisSprite(void); /* returns a pointer to the given sprite */

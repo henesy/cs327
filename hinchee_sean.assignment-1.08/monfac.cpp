@@ -1,5 +1,6 @@
 #include "dungeon_generator.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 MonFac::MonFac(void) {
 	md = NULL;
@@ -24,7 +25,9 @@ Sprite* MonFac::GetMon() {
 	pn1.y = -1;
 	
 	ns->p = p0;
-	ns->c = s.c;
+	ns->c = s.pa;
+	
+	//printf("SYMBOL ns: %c s: %c mdn: %c\n", ns->c, s.c, md[n].c);
 	
 	ns->s.in = s.s.in;
 	ns->s.te = s.s.te;

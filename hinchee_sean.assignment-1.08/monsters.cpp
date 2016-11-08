@@ -276,8 +276,6 @@ void add_sprite(Dungeon * dungeon, Sprite * s) {
 		dungeon->pc = dungeon->ns - 1;
 		s->color = WHITE;
     }
-    
-    //s->color = WHITE;
 
 	//dungeon->ss[dungeon->ns - 1] = s;
 	s->sn = dungeon->ns -1;
@@ -292,6 +290,8 @@ Sprite * gen_sprite_fac(Dungeon * dungeon, char c, int x, int y, int r) {
 	
 	if(c != '@'){
 		s = dungeon->mf->GetMon();
+		
+		//printf("SIMBUL AFTER FAC: %c\n", s->c);
 		
 		/* place in a room if 1 or more. implicitly random ;; force in a room even if tunneling */
 		if(r > 0 || s->s.tu == true) {

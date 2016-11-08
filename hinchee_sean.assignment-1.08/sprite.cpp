@@ -49,6 +49,7 @@ void copyASprite(Sprite * to, int n, Sprite * from) {
     (to[n]).pc.x = from->pc.x;
     (to[n]).pc.y = from->pc.y;
     (to[n]).a    = from->a   ;
+    (to[n]).color= from->color;
 }
 
 Sprite * thisASprite(Sprite * arr, int i) {

@@ -663,10 +663,10 @@ int parsemonsters(Dungeon * dungeon) {
 				else if((n = line.find("NAME")) != std::string::npos)
 					mo.n = line.substr(5, 77);
 				else if((n = line.find("SYMB")) != std::string::npos) {
-					mo.c = line.at(5);
+					mo.pa = line.at(5);
 					//mo.c = 'P';
 					//cout << "SYMBOL READ" << endl;
-					//printf("SIMBUL: %c\n", mo.c);
+					//printf("SIMBUL IN SYMB: %c\n", mo.c);
 				} else if((n = line.find("ABIL")) != std::string::npos) {
 					//line.find statements to match abils
 					if((n = line.find("SMART")) != std::string::npos)
@@ -695,21 +695,21 @@ int parsemonsters(Dungeon * dungeon) {
 				} else if((n = line.find("COLOR")) != std::string::npos) {
 					//line.find statements to match enums/ints
 					if((n = line.find("RED")) != std::string::npos)
-						mo.c = RED;
+						mo.color = RED;
 					else if((n = line.find("GREEN")) != std::string::npos)
-						mo.c = GREEN;
+						mo.color = GREEN;
 					else if((n = line.find("BLUE")) != std::string::npos)
-						mo.c = BLUE;
+						mo.color = BLUE;
 					else if((n = line.find("CYAN")) != std::string::npos)
-						mo.c = CYAN;
+						mo.color = CYAN;
 					else if((n = line.find("YELLOW")) != std::string::npos)
-						mo.c = YELLOW;
+						mo.color = YELLOW;
 					else if((n = line.find("MAGENTA")) != std::string::npos)
-						mo.c = MAGENTA;
+						mo.color = MAGENTA;
 					else if((n = line.find("WHITE")) != std::string::npos)
-						mo.c = WHITE;
+						mo.color = WHITE;
 					else if((n = line.find("BLACK")) != std::string::npos)
-						mo.c = BLACK;
+						mo.color = BLACK;
 					
 				} else if((n = line.find("DAM")) != std::string::npos) {
 					//save as a die
@@ -762,6 +762,7 @@ int parsemonsters(Dungeon * dungeon) {
 	int i = 0;
 	while(mons.size() > 0) {
 		SpriteTemp tmp = mons.back();
+		//printf("IN PARSE SYMBOL: %c\n", tmp.c);
 		dungeon->md[i] = tmp;
 		mons.pop_back();
 		i++;
@@ -945,7 +946,7 @@ void printmds(Dungeon * dungeon)
 	{
 		cout << "Name: " << dungeon->md[i].n << endl;
 		
-		printf("Symbol: %c\n", dungeon->md[i].c);
+		printf("Symbol: %c\n", dungeon->md[i].pa);
 		
 		cout << "Description: " << endl;
 		int j;
@@ -1122,8 +1123,8 @@ int main(int argc, char * argv[]) {
 	parseitems(&dungeon);
 	dungeon.of = new ObjFac(dungeon.di, dungeon.id);
 	dungeon.mf = new MonFac(dungeon.dm, dungeon.md);
-	printmds(&dungeon);
-	getchar();
+	//printmds(&dungeon);
+	//getchar();
 
 	if(loading == FALSE) {
 		gen_dungeon(&dungeon);
@@ -1146,7 +1147,7 @@ int main(int argc, char * argv[]) {
 	map_dungeon_nont(&dungeon);
 	map_dungeon_t(&dungeon);
 	/*** dungeon is fully generated ***/
-
+	getchar();
 
 	/* main loop */
 
