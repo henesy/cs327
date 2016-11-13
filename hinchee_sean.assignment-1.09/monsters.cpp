@@ -239,12 +239,7 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 	setSpriteAToX(dungeon->ss, sn, getPosX(neu));
 	setSpriteAToY(dungeon->ss, sn, getPosY(neu));
 
-	/* this kills the player essentially if a monster is on it
-	if(getPosX(neu) == getSpriteAPX(dungeon->ss, dungeon->pc) && getPosY(neu) == getSpriteAPY(dungeon->ss, dungeon->pc))
-		dungeon->go = TRUE;
-	*/
-
-	/* check if we have to kill another sprite */
+	/* combat sequence */
 	
 }
 
