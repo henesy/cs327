@@ -699,6 +699,14 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
     			//remove i from list ;; add to inventory at inv_loc
     			dungeon->plyr->inv[inv_loc] = dungeon->items[i];
     			dungeon->plyr->invp[inv_loc] = true;
+    			
+    			//remove i from the dungeon
+    			j = i;
+    			for(; j < dungeon->nit - 1; j++)
+    			{
+    				dungeon->items[j] = dungeon->items[j+1];
+    			}
+    			dungeon->nit--;
     		}
     	}
     }
