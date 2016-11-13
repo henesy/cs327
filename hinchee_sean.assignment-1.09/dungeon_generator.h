@@ -157,6 +157,10 @@
 		friend class Sprite;
 		int	view;	/* visible viewing distance */
 		Memory	**	mem;	/* map/dungeon view for the PC (memory) */
+		Item		eqs[12];
+		Item		inv[10];
+		bool		eqsp[12];
+		bool		invp[10];
 	};
 	
 	class MonFac {
@@ -242,7 +246,7 @@
 		SpriteTemp *	md;	/* monster definitions */
 		
 		MonFac*		mf;		/* monster factory */
-		ObjFac*		of;		/* item factor ;; prettier with the Obj rather than Itm */
+		ObjFac*		of;		/* item factory ;; prettier with the Obj rather than Itm */
 		
 		int			nit;	/* number of items in dungeon floor */
 		Item	*	items;	/* items tracker for dungeon */
@@ -322,7 +326,7 @@
 	int getSpriteSn(Sprite *);
 	int getSpritePcX(Sprite *);
 	int getSpritePcY(Sprite *);
-	bool getSpriteA(Sprite *);
+	//bool getSpriteA(Sprite *);
 	/* array-based */
 	int getSpriteAPX(Sprite *, int);
 	int getSpriteAPY(Sprite *, int);
@@ -338,7 +342,7 @@
 	int getSpriteASn(Sprite *, int);
 	int getSpriteAPcX(Sprite *, int);
 	int getSpriteAPcY(Sprite *, int);
-	bool getSpriteAA(Sprite *, int);
+	//bool getSpriteAA(Sprite *, int);
 	/***
 	Setter functions
 	kill me
@@ -358,7 +362,7 @@
 	void setSpriteSn(Sprite *, int);
 	void setSpritePcX(Sprite *, int);
 	void setSpritePcY(Sprite *, int);
-	void setSpriteA(Sprite *, bool);
+	//void setSpriteA(Sprite *, bool);
 	/* array-based */
 	void setSpriteAPX(Sprite *, int, int);
 	void setSpriteAPY(Sprite *, int, int);
@@ -374,7 +378,7 @@
 	void setSpriteASn(Sprite *, int, int);
 	void setSpriteAPcX(Sprite *, int, int);
 	void setSpriteAPcY(Sprite *, int, int);
-	void setSpriteAA(Sprite *, int, bool);
+	//void setSpriteAA(Sprite *, int, bool);
 
 	/***
 	PC functions
@@ -397,5 +401,7 @@
 	char getMem(Dungeon *, int, int);
 	PC * getPC(Sprite * arr);
 	PC * thisAPC(Sprite * arr, int i);
+	
+	void copyPC(PC * to, PC * from);
 
 #endif

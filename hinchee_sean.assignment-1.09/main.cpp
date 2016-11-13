@@ -483,6 +483,90 @@ void monster_list(Dungeon * dungeon) {
 	print_dungeon(dungeon, 0, 0);
 }
 
+/* inventory list view */
+void inventory_list(Dungeon * dungeon, bool is_equip) {
+	clear();
+	
+	int i;
+	int l = 10;
+	char c = 48;
+	
+	if(is_equip) {
+		l = 12;
+		c = 97;
+	}
+	
+	char scr [l][70];
+
+	/* inventory view array and population */
+	for(i = 0; i < l; i++, c++) {
+		/* equip or inv view */
+		if(is_equip)
+			if(dungeon->plyr->eqsp[i])
+				sprintf(scr[i], "%c: %s", c, dungeon->plyr->eqs[i].n.c_str());
+			else
+				sprintf(scr[i], "%c: ", c);
+		else
+			if(dungeon->plyr->invp[i])
+				sprintf(scr[i], "%c: %s", c, dungeon->plyr->inv[i].n.c_str());
+			else
+				sprintf(scr[i], "%c: ", c);
+	}
+
+	/* secondary window */
+	WINDOW *w;
+	w = newwin(24, 80, 0, 0);
+
+	int j;
+	for(;;) {
+		/* put the inventory view to the screen */
+		for(i = 0, j = 0; i < l && j < 24; i++, j++) {
+			mvprintw(j, 0, scr[i]);
+		}
+
+		/* handle user interaction */
+		MLV: ;
+		int32_t k;
+		k = getch();
+
+		switch(k) {
+			case 'w':
+			/* wear */
+				
+				break;
+			case 't':
+			/* take off */
+				
+				break;
+			case 'd':
+			/* drop */
+				
+				break;
+			case 'x':
+			/* expunge */
+				
+				break;
+			case 'I':
+			/* inspect */
+			//new window and all that
+			
+				
+				break;
+			case 27:
+				/* ESC */
+				return;
+				break;
+			default:
+				goto MLV;
+		}
+
+		wrefresh(w);
+	}
+
+	delwin(w);
+	print_dungeon(dungeon, 0, 0);
+}
+
 /* processes pc movements ;; validity checking is in monsters.c's gen_move_sprite() */
 void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 	GCH: ;
@@ -497,28 +581,32 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 		case 'h':
 			H: ;
 			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
-			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) -1);
+			//setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) -1);
+			dungeon->plyr->to.x = dungeon->plyr->p.x - 1;
 			break;
 		case '4':
 			goto H;
 		case 'l':
 			L: ;
 			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
-			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) +1);
+			//setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) +1);
+			dungeon->plyr->to.x = dungeon->plyr->p.x + 1;
 			break;
 		case '6':
 			goto L;
 		case 'k':
 			K: ;
 			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
-			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) -1);
+			//setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) -1);
+			dungeon->plyr->to.y = dungeon->plyr->p.y - 1;
 			break;
 		case '8':
 			goto K;
 		case 'j':
 			J: ;
 			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
-			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) +1);
+			//setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) +1);
+			dungeon->plyr->to.y = dungeon->plyr->p.y + 1;
 			break;
 		case '2':
 			goto J;
@@ -526,8 +614,10 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			Y: ;
 			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
 			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
-			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) -1);
-			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) -1);
+			//setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) -1);
+			//setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) -1);
+			dungeon->plyr->to.x = dungeon->plyr->p.x - 1;
+			dungeon->plyr->to.y = dungeon->plyr->p.y - 1;
 			break;
 		case '7':
 			goto Y;
@@ -535,8 +625,11 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			U: ;
 			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y - 1;
 			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
-			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) -1);
-			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) +1);
+			//setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) -1);
+			//setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) +1);
+			dungeon->plyr->to.x = dungeon->plyr->p.x - 1;
+			dungeon->plyr->to.y = dungeon->plyr->p.y + 1;
+			
 			break;
 		case '9':
 			goto U;
@@ -544,8 +637,10 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			N: ;
 			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
 			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x + 1;
-			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) +1);
-			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) +1);
+			//setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) +1);
+			//setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) +1);
+			dungeon->plyr->to.x = dungeon->plyr->p.x + 1;
+			dungeon->plyr->to.y = dungeon->plyr->p.y + 1;
 			break;
 		case '3':
 			goto N;
@@ -553,19 +648,21 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			B: ;
 			//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y + 1;
 			//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x - 1;
-			setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) +1);
-			setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) -1);
+			//setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc) +1);
+			//setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc) -1);
+			dungeon->plyr->to.x = dungeon->plyr->p.x + 1;
+			dungeon->plyr->to.y = dungeon->plyr->p.y - 1;
 			break;
 		case '1':
 			goto B;
 		case '<':
 			/* stair up */
-			if(getSpriteAPX(dungeon->ss, 0) == getPosX(dungeon->su) && getSpriteAPY(dungeon->ss, 0) == getPosY(dungeon->su))
+			if(dungeon->plyr->p.x == getPosX(dungeon->su) && dungeon->plyr->p.y == getPosY(dungeon->su))
 				*regen = TRUE;
 			break;
 		case '>':
 			/* stair down */
-			if(getSpriteAPX(dungeon->ss, 0) == getPosX(dungeon->sd) && getSpriteAPY(dungeon->ss, 0) == getPosY(dungeon->sd))
+			if(dungeon->plyr->p.x == getPosX(dungeon->sd) && dungeon->plyr->p.y == getPosY(dungeon->sd))
 				*regen = TRUE;
 			break;
 		case '5':
@@ -576,33 +673,50 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			monster_list(dungeon);
 			print_dungeon(dungeon, 0, 0);
 			goto GCH;
+		case 'i':
+			inventory_list(dungeon, false);
+			print_dungeon(dungeon, 0, 0);
+			goto GCH;
+		case 'e':
+			inventory_list(dungeon, true);
+			print_dungeon(dungeon, 0, 0);
+			goto GCH;
 		default:
 			goto GCH;
 	}
 
     /* movement validity check */
-	if(dungeon->d[getSpriteAToY(dungeon->ss, dungeon->pc)][getSpriteAToX(dungeon->ss, dungeon->pc)].h > 0) {
-		//dungeon->ss[dungeon->pc].to.x = dungeon->ss[dungeon->pc].p.x;
-		//dungeon->ss[dungeon->pc].to.y = dungeon->ss[dungeon->pc].p.y;
-		setSpriteAToX(dungeon->ss, dungeon->pc, getSpriteAPX(dungeon->ss, dungeon->pc));
-		setSpriteAToY(dungeon->ss, dungeon->pc, getSpriteAPY(dungeon->ss, dungeon->pc));
+	if(dungeon->d[dungeon->plyr->to.y][dungeon->plyr->to.x].h > 0) {
+		dungeon->plyr->to.x = dungeon->plyr->p.x;
+		dungeon->plyr->to.y = dungeon->plyr->p.y;
 	} else {
-		//dungeon->ss[dungeon->pc].p.x = dungeon->ss[dungeon->pc].to.x;
-		//dungeon->ss[dungeon->pc].p.y = dungeon->ss[dungeon->pc].to.y;
-		setSpriteAPX(dungeon->ss, dungeon->pc, getSpriteAToX(dungeon->ss, dungeon->pc));
-		setSpriteAPY(dungeon->ss, dungeon->pc, getSpriteAToY(dungeon->ss, dungeon->pc));
+		dungeon->plyr->p.x = dungeon->plyr->to.x;
+		dungeon->plyr->p.y = dungeon->plyr->to.y;
 	}
-	//dungeon->ss[0].t += (100 / dungeon->ss[0].s.s);
-	setSpriteAT(dungeon->ss, 0, getSpriteAT(dungeon->ss, 0) + (100 / getSpriteASS(dungeon->ss, 0)));
+	dungeon->plyr->t += (100 / dungeon->plyr->s.s);
 
     /* check for killing an NPC */
-    int sn = 0;
     int i;
-	for(i = 1; i < dungeon->ns; i++) {
-		if(i != sn) {
-			if((getSpriteAToX(dungeon->ss, i) == getSpriteAToX(dungeon->ss, sn)) && (getSpriteAToY(dungeon->ss, i) == getSpriteAToY(dungeon->ss, sn)) && getSpriteAA(dungeon->ss, sn) == TRUE)
-				setSpriteAA(dungeon->ss, i, FALSE);
-        }
+    
+    
+    /* check for picking up an item */
+    int j;
+	int inv_loc = -1;
+    for(j = 0; j < 10; j++)
+    {
+    	if(dungeon->plyr->invp[j] == false)
+    		inv_loc = j;
+    }
+
+    for(i = 0; i < dungeon->nit; i++)
+    {
+    	if(inv_loc >= 0) {
+    		if(dungeon->items[i].p.x == dungeon->plyr->p.x && dungeon->items[i].p.y == dungeon->plyr->p.y) {
+    			//remove i from list ;; add to inventory at inv_loc
+    			dungeon->plyr->inv[inv_loc] = dungeon->items[i];
+    			dungeon->plyr->invp[inv_loc] = true;
+    		}
+    	}
     }
 }
 
@@ -1113,6 +1227,7 @@ int main(int argc, char * argv[]) {
 	/* persistent player character */
 	Bool regen = FALSE;
 	Sprite * p_pc = initSprite();
+	PC * p_ppc = new PC;
 
 	/*** dungeon generation starts here ***/
 	DUNGEN: ;
@@ -1157,16 +1272,10 @@ int main(int argc, char * argv[]) {
 	/* main loop */
 
 	if(regen == TRUE) {
-		//int px = dungeon.ss[0].p.x;
-		//int py = dungeon.ss[0].p.y;
-		//dungeon.ss[0] = p_pc;
-		//dungeon.ss[0].p.x = px;
-		//dungeon.ss[0].p.y = py;
-		//dungeon.ss[0].to.x = px;
-		//dungeon.ss[0].to.y = py;
 		int px = getSpriteAPX(dungeon.ss, 0);
 		int py = getSpriteAPY(dungeon.ss, 0);
 		copyASprite(dungeon.ss, 0, p_pc);
+		copyPC(dungeon.plyr, p_ppc);
 		setSpriteAPX(dungeon.ss, 0, px);
 		setSpriteAPY(dungeon.ss, 0, py);
 		setSpriteAToX(dungeon.ss, 0, px);
@@ -1217,24 +1326,18 @@ int main(int argc, char * argv[]) {
 
 		if(l == dungeon.pc || first == TRUE) {
 			parse_pc(&dungeon, &run, &regen);
+			copyASprite(dungeon.ss, 0, dungeon.plyr);
+			
 			if(regen == TRUE) {
-				//p_pc = dungeon.ss[0];
 				copySprite(p_pc, thisASprite(dungeon.ss, 0));
+				copyPC(p_ppc, dungeon.plyr);
 				goto DUNFREE;
 			}
 
 			//gen_move_sprite(&dungeon, l);
 			map_dungeon_nont(&dungeon);
 			map_dungeon_t(&dungeon);
-
-			int sn = 0;
-			for(i = 1; i < dungeon.ns; i++) {
-				if(i != sn) {
-					if((getSpriteAPX(dungeon.ss, i) == getSpriteAPX(dungeon.ss, sn)) && (getSpriteAPY(dungeon.ss, i) == getSpriteAPY(dungeon.ss, sn)) && getSpriteAA(dungeon.ss, sn) == TRUE)
-						setSpriteAA(dungeon.ss, i, FALSE);
-				}
-			}
-
+			
 			print_dungeon(&dungeon, 0, 0);
 		} else {
 			parse_move(&dungeon, l);
@@ -1248,7 +1351,7 @@ int main(int argc, char * argv[]) {
 
 		/** --- game over sequence checking --- **/
 		/* note: this will stop the game before the new world gets drawn since the monster will move to the player and thus kill him */
-		if(dungeon.go == TRUE || getSpriteAA(dungeon.ss, dungeon.pc) == FALSE)
+		if(dungeon.go == TRUE || dungeon.ss[0].a == FALSE)
 			break;
 
 		Bool any = check_any_monsters(&dungeon);

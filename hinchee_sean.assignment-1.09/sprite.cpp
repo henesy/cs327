@@ -33,6 +33,38 @@ void copySprite(Sprite * to, Sprite * from) {
     to->a    = from->a   ;
 }
 
+void copyPC(PC * to, PC * from) {
+    to->p.x  =  from->p.x;
+    to->p.y  = from->p.y ;
+    to->c    = from->c   ;
+    to->s.in = from->s.in;
+    to->s.te = from->s.te;
+    to->s.tu = from->s.tu;
+    to->s.eb = from->s.eb;
+    to->s.pa = from->s.pa;
+    to->s.s  = from->s.s ;
+    to->t    = from->t   ;
+    to->to.x = from->to.x;
+    to->to.y = from->to.y;
+    to->sn   = from->sn  ;
+    to->pc.x = from->pc.x;
+    to->pc.y = from->pc.y;
+    to->a    = from->a   ;
+    to->color= from->color;
+    
+    int i;
+    for(i = 0; i < 12; i++) {
+    	to->eqs[i]	= from->eqs[i];
+        to->eqsp[i] = from->eqsp[i];
+    }
+    
+    for(i = 0; i < 10; i++) {
+		to->inv[i]	= from->inv[i];
+		to->invp[i] = from->invp[i];
+    }
+    
+}
+
 void copyASprite(Sprite * to, int n, Sprite * from) {
     (to[n]).p.x  =  from->p.x ;
     (to[n]).p.y  = from->p.y ;

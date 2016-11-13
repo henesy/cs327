@@ -148,7 +148,7 @@ void print_dungeon(Dungeon * dungeon, int nt, int t) {
 
 	/* add sprites to the print buffer */
 	for(i = 0; i < dungeon->ns; i++) {
-		if(getSpriteAA(dungeon->ss, i) == TRUE) {
+		if(dungeon->ss[i].a == TRUE) {
 			
 			/* colors */
 			int c = COLOR_WHITE;
@@ -258,7 +258,7 @@ void print_dungeon_nnc(Dungeon * dungeon, int nt, int t) {
 
 	/* add sprites to the print buffer */
 	for(i = 0; i < dungeon->ns; i++) {
-		if(getSpriteAA(dungeon->ss, i) == TRUE)
+		if(dungeon->ss[i].a == TRUE)
 			//dungeon->p[dungeon->ss[i].p.y][dungeon->ss[i].p.x].c = dungeon->ss[i].c;
 			
 			/* item colors */

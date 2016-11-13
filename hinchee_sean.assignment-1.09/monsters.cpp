@@ -62,7 +62,7 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 		dungeon->d[getSpritePY(s)][getSpritePX(s)].h = 0;
 
 	// make sure we're alive
-	if(getSpriteA(s) == TRUE) {
+	if(s->a == TRUE) {
 		Bool in_room;
 		int i;
 		int j;
@@ -239,21 +239,13 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 	setSpriteAToX(dungeon->ss, sn, getPosX(neu));
 	setSpriteAToY(dungeon->ss, sn, getPosY(neu));
 
+	/* this kills the player essentially if a monster is on it
 	if(getPosX(neu) == getSpriteAPX(dungeon->ss, dungeon->pc) && getPosY(neu) == getSpriteAPY(dungeon->ss, dungeon->pc))
 		dungeon->go = TRUE;
+	*/
 
 	/* check if we have to kill another sprite */
-	int i;
-	for(i = 0; i < dungeon->ns; i++) {
-		if(i != sn) {
-			if((getSpriteAToX(dungeon->ss, i)  == getSpriteAToX(dungeon->ss, sn)) && (getSpriteAToY(dungeon->ss, i) == getSpriteAToY(dungeon->ss, sn)) && getSpriteAA(dungeon->ss, sn) == TRUE)
-				setSpriteAA(dungeon->ss, i, FALSE);
-			/*
-			else if(dungeon->ss[i].p.x == dungeon->ss[sn].p.x && dungeon->ss[i].p.y == dungeon->ss[sn].p.y && dungeon->ss[i].a == TRUE)
-				dungeon->ss[sn].a = FALSE;
-			*/
-		}
-	}
+	
 }
 
 /* parse and apply a movement */
@@ -322,127 +314,9 @@ Sprite * gen_sprite_fac(Dungeon * dungeon, char c, int x, int y, int r) {
 		}
 	} else {
 		//pc
-		s = (Sprite *)initPC(dungeon);
+		s = initPC(dungeon);
 	}
 		
-	return s;
-}
-
-/*
-generate a sprite, because in-line structs are icky
-if r(oom) = 1 then x and y will be ignored and should be passed as -1 as such (normally meaning random)
-*/
-Sprite * gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
-	Sprite * s = initSprite();
-
-	setSpriteC(s, c);
-	setSpriteA(s, TRUE);
-
-    /* set stats */
-    if(getSpriteC(s) == '@') {
-		/* fully re-hash and re-write PC setup ;; might need to add a new standalone variable which would s u c k */
-        PC * p = initPC(dungeon);
-
-		return (Sprite *) p;
-	} else {
-        /* if not the pc a value 5-20 */
-        setSpriteSS(s, (rand() % 16) + 5);
-        /* generate stats */
-        setSpriteSIn(s, rand() % 2);
-        setSpriteSTe(s, rand() % 2);
-        setSpriteSTu(s, rand() % 2);
-        setSpriteSEb(s, rand() % 2);
-
-        /* set character as per assignment 4 */
-        if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == FALSE)
-            setSpriteC(s, '0');
-        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == TRUE)
-            setSpriteC(s, '1');
-        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == FALSE)
-            setSpriteC(s, '2');
-        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == TRUE)
-            setSpriteC(s, '3');
-        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == FALSE)
-            setSpriteC(s, '4');
-        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == TRUE)
-            setSpriteC(s, '5');
-        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == FALSE)
-            setSpriteC(s, '6');
-        else if(getSpriteSIn(s) == FALSE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == TRUE)
-            setSpriteC(s, '7');
-        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == FALSE)
-            setSpriteC(s, '8');
-        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == TRUE)
-            setSpriteC(s, '9');
-        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == FALSE)
-            setSpriteC(s, 'a');
-        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == FALSE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == TRUE)
-            setSpriteC(s, 'b');
-        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == FALSE)
-            setSpriteC(s, 'c');
-        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == FALSE && getSpriteSEb(s) == TRUE)
-            setSpriteC(s, 'd');
-        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == FALSE)
-            setSpriteC(s, 'e');
-        else if(getSpriteSIn(s) == TRUE && getSpriteSTe(s) == TRUE && getSpriteSTu(s) == TRUE && getSpriteSEb(s) == TRUE)
-            setSpriteC(s, 'f');
-    }
-
-    /* put the tunneling monsters anywhere */
-    if(getSpriteSTu(s) == TRUE) {
-		int t = 0;
-		PRT: ;
-        /* randomize location anywhere in the dungeon */
-        if(x < 0 || x > dungeon->w) {
-            x = (rand() % (dungeon->w-2)) + 1;
-        }
-        if(y < 0 || y > dungeon->h) {
-            y = (rand() % (dungeon->h-2)) + 1;
-        }
-
-		if(getSpriteC(s) != '@' && dungeon->nr > 1) {
-			setSpritePX(s, x);
-		    setSpritePY(s, y);
-
-			Bool w_pc = FALSE;
-			with_pc(dungeon, s, &w_pc);
-			if(w_pc == TRUE && t < 8) {
-				t++;
-				goto PRT;
-			}
-		}
-    }
-
-    /* place in a room if 1 or more. implicitly random ;; force in a room even if tunneling */
-    if(r > 0 || getSpriteSTu(s) == FALSE) {
-		int t = 0;
-		PRNT: ;
-        int r_id = rand() % dungeon->nr;
-        x = (rand() % dungeon->r[r_id].w) + getPosX(dungeon->r[r_id].tl);
-        y = (rand() % dungeon->r[r_id].h) + getPosY(dungeon->r[r_id].tl);
-
-		if(getSpriteC(s) != '@' && dungeon->nr > 1) {
-			setSpritePX(s, x);
-		    setSpritePY(s, y);
-
-			Bool w_pc = FALSE;
-			with_pc(dungeon, s, &w_pc);
-			if(w_pc == TRUE && t < 8) {
-				t++;
-				goto PRNT;
-			}
-		}
-    } else {
-
-    }
-
-    setSpritePX(s, x);
-    setSpritePY(s, y);
-	setSpriteToX(s, x);
-	setSpriteToY(s, y);
-	//s.t = 100/s.s.s;
-	setSpriteT(s, 0);
-
 	return s;
 }
 
@@ -450,7 +324,7 @@ Sprite * gen_sprite(Dungeon * dungeon, char c, int x, int y, int r) {
 Bool check_any_monsters(Dungeon * dungeon) {
 	int i;
 	for(i = 0; i < dungeon->ns; i++) {
-		if(getSpriteAA(dungeon->ss, i) == TRUE && i != 0)
+		if(dungeon->ss[i].a == TRUE && i != 0)
 			return TRUE;
 	}
 
