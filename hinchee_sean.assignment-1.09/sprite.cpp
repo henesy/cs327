@@ -69,6 +69,7 @@ void copyASprite(Sprite * to, int n, Sprite * from) {
     (to[n]).p.x  =  from->p.x ;
     (to[n]).p.y  = from->p.y ;
     (to[n]).c    = from->c   ;
+    (to[n]).s.a	 = from->s.a;
     (to[n]).s.in = from->s.in;
     (to[n]).s.te = from->s.te;
     (to[n]).s.tu = from->s.tu;

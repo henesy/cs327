@@ -18,12 +18,13 @@
 	};
 	
 	class Dice {
+	public:
 		int	b;	/* base number */
 		int	d;	/* die value (d6, d10, d20, etc.) */
 		int	n;	/* number of dice to roll */
-	public:
 		int	roll(void);
 		Dice(int, int, int);
+		Dice(void);
 		std::string string(void);
 	};
 	

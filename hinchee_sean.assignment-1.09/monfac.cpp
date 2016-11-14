@@ -35,7 +35,10 @@ Sprite* MonFac::GetMon() {
 	ns->s.eb = s.s.eb;
 	ns->s.pa = s.s.pa;
 	ns->s.s = s.s.s->roll();
-	ns->s.a = s.s.a;
+	ns->s.a = new Dice();
+	ns->s.a->b = s.s.a->b;
+	ns->s.a->n = s.s.a->n;
+	ns->s.a->d = s.s.a->d;
 	ns->s.hp = s.s.hp->roll();
 	
 	ns->t = 0;

@@ -415,7 +415,8 @@ void monster_list(Dungeon * dungeon) {
 		else
 			strcpy(ew, "east");
 
-		sprintf(mons[i-1], "%c, %2d %s and %2d %s", getSpriteAC(dungeon->ss, i), abs(hd), ns, abs(wd), ew);
+		if(dungeon->ss[i].a == true)
+			sprintf(mons[i-1], "%c, %2d %s and %2d %s", getSpriteAC(dungeon->ss, i), abs(hd), ns, abs(wd), ew);
 	}
 
 	/* secondary window */
@@ -662,6 +663,8 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 	}
 
     int i;
+    bool combat = false;
+    int targ = -1;
     /* movement validity check */
 	if(dungeon->d[dungeon->plyr->to.y][dungeon->plyr->to.x].h > 0) {
 		dungeon->plyr->to.x = dungeon->plyr->p.x;
@@ -669,6 +672,16 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 	} else {
 		dungeon->plyr->p.x = dungeon->plyr->to.x;
 		dungeon->plyr->p.y = dungeon->plyr->to.y;
+	}
+	for(i = 1; i < dungeon->ns; i++)
+	{
+		if(dungeon->plyr->to.x == dungeon->ss[i].p.x && dungeon->plyr->to.y == dungeon->ss[i].p.y) {
+			dungeon->plyr->to.x = dungeon->plyr->p.x;
+			dungeon->plyr->to.y = dungeon->plyr->p.y;
+			combat = true;
+			targ = i;
+			break;
+		}
 	}
 	
 	int spbns = 0;
@@ -681,7 +694,25 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 	dungeon->plyr->t += (100 / (dungeon->plyr->s.s + spbns));
 
     /* combat sequence */
-    
+    if(combat) {
+    	int dam = 0;
+    	for(i = 0; i < 12; i++)
+    	{
+    		if(dungeon->plyr->eqsp[WEAPON])
+    		{
+    			if(dungeon->plyr->eqsp[i])
+    				dam += dungeon->plyr->eqs[i].hib;
+    		} else {
+    			dam = dungeon->plyr->s.a->roll();
+    			break;
+    		}
+    	}
+    	//apply damage
+    	if(dungeon->ss[targ].s.hp - dam <= 0)
+    		dungeon->ss[targ].a = false;
+    	else
+    		dungeon->ss[targ].s.hp -= dam;
+    }
     
     /* check for picking up an item */
     int j;

@@ -30,4 +30,9 @@ Dice::Dice(int base, int num, int die) {
 	d = die;
 }
 
-
+Dice::Dice(void) {
+	/* format to resemble: rolling 2+1d6 (2 + 1*[1→6]) ∴ (b + n*[1→d]) */
+	b = 0;
+	n = 0;
+	d = 0;
+}

@@ -45,7 +45,7 @@ PC * initPC(Dungeon * dungeon) {
 	p->a = TRUE;
 	
 	p->s.hp = 100;
-	p->a = new Dice(0, 1, 4);
+	p->s.a = new Dice(0, 1, 4);
 
 	p->s.s = 10;
 	p->s.tu = FALSE;

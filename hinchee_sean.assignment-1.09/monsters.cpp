@@ -226,6 +226,8 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 				}
 			}
 		}
+	} else {
+		return;
 	}
 
 	/* safety net */
@@ -240,6 +242,13 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 	setSpriteAToY(dungeon->ss, sn, getPosY(neu));
 
 	/* combat sequence */
+	if(dungeon->ss[sn].to.x == dungeon->plyr->p.x && dungeon->ss[sn].to.y == dungeon->plyr->p.y) {
+		int dam = dungeon->ss[sn].s.a->roll();
+		if(dungeon->plyr->s.hp - dam <= 0)
+			dungeon->go = true;
+		else
+			dungeon->plyr->s.hp -= dam;
+	}
 	
 }
 
@@ -277,6 +286,7 @@ Sprite * gen_sprite_fac(Dungeon * dungeon, char c, int x, int y, int r) {
 	
 	if(c != '@'){
 		s = dungeon->mf->GetMon();
+		s->s.a->roll();
 		
 		//printf("SIMBUL AFTER FAC: %c\n", s->c);
 		
