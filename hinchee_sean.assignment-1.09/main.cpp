@@ -488,6 +488,7 @@ void monster_list(Dungeon * dungeon) {
 void inventory_list(Dungeon * dungeon, bool is_equip) {
 	clear();
 	
+	INV: ;
 	int i;
 	int l = 10;
 	char c = 48;
@@ -524,33 +525,149 @@ void inventory_list(Dungeon * dungeon, bool is_equip) {
 		for(i = 0, j = 0; i < l && j < 24; i++, j++) {
 			mvprintw(j, 0, scr[i]);
 		}
+		refresh();
 
 		/* handle user interaction */
 		MLV: ;
 		int32_t k;
+		int index;
+		int to_move;
 		k = getch();
 
 		switch(k) {
 			case 'w':
 			/* wear */
+				WR: ;
+				//32 long
+				mvprintw(15, 0, "Which inventory item to wear?: ");
+				refresh();
+				k = getch();
+				if(k == 27)
+					goto EIL;
+				mvaddch(15, 32, k);
+				refresh();
+				if(k < 48 || k > 57)
+					goto WR;
+				index = k - 48;
+				//check if item occupied eqp slot and equippable
+				if(dungeon->plyr->inv[index].t >= NONEQUIP)
+					goto INV;
+					
+				if(dungeon->plyr->eqsp[dungeon->plyr->inv[index].t] == false) {
+					dungeon->plyr->invp[index] = false;
+					dungeon->plyr->eqs[dungeon->plyr->inv[index].t] = dungeon->plyr->inv[index];
+					dungeon->plyr->eqsp[dungeon->plyr->inv[index].t] = true;
+				} else {
+					Item tmp = dungeon->plyr->eqs[dungeon->plyr->inv[index].t];
+					dungeon->plyr->eqs[dungeon->plyr->inv[index].t] = dungeon->plyr->inv[index];
+					dungeon->plyr->inv[index] = tmp;
+				}
+				clear();
 				
+				goto INV;
 				break;
 			case 't':
 			/* take off */
+				TO: ;
+				//incl "to" len is 35 total ;; 23 as of "to"
+				mvprintw(15, 0, "Which inventory item to take off?: ");
+				refresh();
+				k = getch();
+				if(k == 27)
+					goto EIL;
+				mvaddch(15, 36, k);
+				refresh();
+				if(k < 97 || k > 108)
+					goto TO;
+				index = k - 97;
+				//take them clothes off
+				dungeon->plyr->eqsp[index] = false;
+				to_move = -1;
+				for(i = 0; i < 10; i++)
+				{
+					if(dungeon->plyr->invp[i] == false) {
+						to_move = i;
+						break;
+					}
+				}
+				if(to_move < 0)
+					goto INV;
+				dungeon->plyr->invp[to_move] = true;
+				dungeon->plyr->eqsp[index] = false;
+				dungeon->plyr->inv[to_move] = dungeon->plyr->eqs[index];
+				clear();
+				goto INV;
 				
 				break;
 			case 'd':
 			/* drop */
+				DP: ;
+				//32 long
+				mvprintw(15, 0, "Which inventory item to drop?: ");
+				refresh();
+				k = getch();
+				if(k == 27)
+					goto EIL;
+				mvaddch(15, 32, k);
+				refresh();
+				if(k < 48 || k > 57)
+					goto DP;
+				index = k - 48;
+				//drop it like it's hot
+				dungeon->plyr->invp[index] = false;
+				dungeon->nit++;
+				dungeon->items[dungeon->nit-1] = dungeon->plyr->inv[index];
+				dungeon->items[dungeon->nit-1].p.x = dungeon->plyr->p.x;
+				dungeon->items[dungeon->nit-1].p.y = dungeon->plyr->p.y;
+				clear();
+				goto INV;
 				
 				break;
 			case 'x':
 			/* expunge */
+				EE: ;
+				//36 long
+				mvprintw(15, 0, "Which inventory item to expunge?: ");
+				refresh();
+				k = getch();
+				if(k == 27)
+					goto EIL;
+				mvaddch(15, 36, k);
+				refresh();
+				if(k < 48 || k > 57)
+					goto EE;
+				index = k - 48;
+				//exterminatus
+				dungeon->plyr->invp[index] = false;
+				clear();
+				goto INV;
 				
 				break;
 			case 'I':
 			/* inspect */
 			//new window and all that
-			
+				IT: ;
+				//36 long
+				mvprintw(15, 0, "Which inventory item to inspect?: ");
+				refresh();
+				k = getch();
+				if(k == 27)
+					goto EIL;
+				mvaddch(15, 36, k);
+				refresh();
+				if(k < 48 || k > 57)
+					goto IT;
+				index = k - 48;
+				//look very closely
+				clear();
+				for(i = 0; i < dungeon->plyr->inv[index].dl; i++)
+				{
+					mvprintw(i, 0, dungeon->plyr->inv[index].desc[i].c_str());
+				}
+				refresh();
+				getch();
+				clear();
+				goto INV;
 				
 				break;
 			case 27:
@@ -560,9 +677,10 @@ void inventory_list(Dungeon * dungeon, bool is_equip) {
 			default:
 				goto MLV;
 		}
-
-		wrefresh(w);
+		clear();
+		refresh();
 	}
+	EIL: ;
 
 	delwin(w);
 	print_dungeon(dungeon, 0, 0);

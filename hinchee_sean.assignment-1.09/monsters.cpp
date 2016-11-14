@@ -5,6 +5,20 @@
 
 /* check if we can move to a location (objectively) */
 Bool test_loc(Dungeon * dungeon, int x, int y, Sprite *s) {
+	if(x == dungeon->plyr->p.x && y == dungeon->plyr->p.y)
+		return FALSE;
+	
+	int i;
+	for(i = 1; i < dungeon->ns; i++)
+	{
+		if(dungeon->ss[i].p.x == x && dungeon->ss[i].p.y == y && i != s->sn) {
+			//swap places with other monster
+			dungeon->ss[i].p.x = dungeon->ss[s->sn].p.x;
+			dungeon->ss[i].p.y = dungeon->ss[s->sn].p.y;
+			return TRUE;
+		}
+	}
+	
 	if(x > 0 && x < dungeon->w-1 && y > 0 && y < dungeon->h-1) {
 		int hard = dungeon->d[y][x].h;
 		if(dungeon->d[y][x].h < 255) {
