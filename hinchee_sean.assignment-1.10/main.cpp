@@ -70,7 +70,7 @@ void map_dungeon_t(Dungeon * dungeon) {
 	//int py = dungeon->ss[dungeon->pc].p.y;
 	int px = getSpriteAPX(dungeon->ss, dungeon->pc);
 	int py = getSpriteAPY(dungeon->ss, dungeon->pc);
-	
+
 	tiles[py][px].cost = 0;
 	tiles[py][px].v = TRUE;
 	binheap_insert(&h, &tiles[py][px]);
@@ -144,7 +144,7 @@ void map_dungeon_nont(Dungeon * dungeon) {
 	//int py = dungeon->ss[dungeon->pc].p.y;
 	int px = getSpriteAPX(dungeon->ss, dungeon->pc);
 	int py = getSpriteAPY(dungeon->ss, dungeon->pc);
-	
+
 	tiles[py][px].cost = 0;
 	tiles[py][px].v = TRUE;
 	binheap_insert(&h, &tiles[py][px]);
@@ -487,17 +487,17 @@ void monster_list(Dungeon * dungeon) {
 /* inventory list view */
 void inventory_list(Dungeon * dungeon, bool is_equip) {
 	clear();
-	
+
 	INV: ;
 	int i;
 	int l = 10;
 	char c = 48;
-	
+
 	if(is_equip) {
 		l = 12;
 		c = 97;
 	}
-	
+
 	char scr [l][70];
 
 	/* inventory view array and population */
@@ -552,7 +552,7 @@ void inventory_list(Dungeon * dungeon, bool is_equip) {
 				//check if item occupied eqp slot and equippable
 				if(dungeon->plyr->inv[index].t >= NONEQUIP)
 					goto INV;
-					
+
 				if(dungeon->plyr->eqsp[dungeon->plyr->inv[index].t] == false) {
 					dungeon->plyr->invp[index] = false;
 					dungeon->plyr->eqs[dungeon->plyr->inv[index].t] = dungeon->plyr->inv[index];
@@ -563,7 +563,7 @@ void inventory_list(Dungeon * dungeon, bool is_equip) {
 					dungeon->plyr->inv[index] = tmp;
 				}
 				clear();
-				
+
 				goto INV;
 				break;
 			case 't':
@@ -597,7 +597,7 @@ void inventory_list(Dungeon * dungeon, bool is_equip) {
 				dungeon->plyr->inv[to_move] = dungeon->plyr->eqs[index];
 				clear();
 				goto INV;
-				
+
 				break;
 			case 'd':
 			/* drop */
@@ -621,7 +621,7 @@ void inventory_list(Dungeon * dungeon, bool is_equip) {
 				dungeon->items[dungeon->nit-1].p.y = dungeon->plyr->p.y;
 				clear();
 				goto INV;
-				
+
 				break;
 			case 'x':
 			/* expunge */
@@ -641,7 +641,7 @@ void inventory_list(Dungeon * dungeon, bool is_equip) {
 				dungeon->plyr->invp[index] = false;
 				clear();
 				goto INV;
-				
+
 				break;
 			case 'I':
 			/* inspect */
@@ -668,7 +668,7 @@ void inventory_list(Dungeon * dungeon, bool is_equip) {
 				getch();
 				clear();
 				goto INV;
-				
+
 				break;
 			case 27:
 				/* ESC */
@@ -737,7 +737,7 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			U: ;
 			dungeon->plyr->to.x = dungeon->plyr->p.x - 1;
 			dungeon->plyr->to.y = dungeon->plyr->p.y + 1;
-			
+
 			break;
 		case '9':
 			goto U;
@@ -790,7 +790,7 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 				if(dungeon->plyr->hlt) {
 					//clean up line of sight/hitting the enemy
 					if(dungeon->ss[dungeon->plyr->lt].a && dungeon->ss[dungeon->plyr->lt].p.x == dungeon->plyr->p.x && dungeon->ss[dungeon->plyr->lt].p.y == dungeon->plyr->p.y) {
-						
+
 						int dam = 0;
 						int i;
    					 	for(i = 0; i < 12; i++)
@@ -810,6 +810,19 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			break;
 		case 's':
 			/* select target (for ranged attack) ;; parses further selection and distance/calculations */
+			clear();
+			
+			mvprintw(0, 0, "What direction [n, e, s, w] do you wish to fire?: ");
+			
+			getch();
+			
+			mvprintw(1, 0, "How far away do you wish to fire?: ");
+			
+			
+			getch();
+			
+			refresh();
+			print_dungeon(dungeon, 0, 0);
 			break;
 		default:
 			goto GCH;
@@ -836,14 +849,14 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			break;
 		}
 	}
-	
+
 	int spbns = 0;
 	for(i = 0; i < 12; i++)
 	{
 		if(dungeon->plyr->eqsp[i])
 			spbns += dungeon->plyr->eqs[i].spb;
 	}
-	
+
 	dungeon->plyr->t += (100 / (dungeon->plyr->s.s + spbns));
 
     /* combat sequence */
@@ -866,7 +879,7 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
     	else
     		dungeon->ss[targ].s.hp -= dam;
     }
-    
+
     /* check for picking up an item */
     int j;
 	int inv_loc = -1;
@@ -883,7 +896,7 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
     			//remove i from list ;; add to inventory at inv_loc
     			dungeon->plyr->inv[inv_loc] = dungeon->items[i];
     			dungeon->plyr->invp[inv_loc] = true;
-    			
+
     			//remove i from the dungeon
     			j = i;
     			for(; j < dungeon->nit - 1; j++)
@@ -922,13 +935,13 @@ int parsemonsters(Dungeon * dungeon) {
 	char * path = (char*)calloc(strlen(env_path) + 50, sizeof(char));
 	strcpy(path, env_path);
 	strcat(path, "/.rlg327/monster_desc.txt");
-	
+
 	int dm = 0;
 	bool first = true;
 	dungeon->mm = 100;
 	vector <SpriteTemp> mons;
-	
-	
+
+
 	string line;
 	ifstream md(path);
 	if(md.is_open()) {
@@ -936,7 +949,7 @@ int parsemonsters(Dungeon * dungeon) {
 		SpriteTemp mo;
 		while(getline(md, line)) {
 			//cout << line << '\n';
-			
+
 			if(first) {
 				if(line != "RLG327 MONSTER DESCRIPTION 1") {
 					cout << "Invalid file head!" << endl;
@@ -945,9 +958,9 @@ int parsemonsters(Dungeon * dungeon) {
 				first = false;
 			} else {
 				//standard file parsing
-				
+
 				size_t n = 0;
-				
+
 				if(line == "BEGIN MONSTER")
 					mo = b_mo;
 				else if((n = line.find("NAME")) != std::string::npos)
@@ -980,8 +993,8 @@ int parsemonsters(Dungeon * dungeon) {
 						mo.s.pa = true;
 					else
 						mo.s.pa = false;
-						
-					
+
+
 				} else if((n = line.find("COLOR")) != std::string::npos) {
 					//line.find statements to match enums/ints
 					if((n = line.find("RED")) != std::string::npos)
@@ -1000,25 +1013,25 @@ int parsemonsters(Dungeon * dungeon) {
 						mo.color = WHITE;
 					else if((n = line.find("BLACK")) != std::string::npos)
 						mo.color = BLACK;
-					
+
 				} else if((n = line.find("DAM")) != std::string::npos) {
 					//save as a die
 					mo.s.a = getdie(line.substr(4, line.size()));
-					
+
 				} else if((n = line.find("DESC")) != std::string::npos) {
 					//parse description
 					vector <std::string> desc;
-					
+
 					while(getline(md, line)) {
 						if(line.find(".") == 0)
 							break;
 
 						desc.push_back(line.substr(0, 77));
 					}
-					
+
 					mo.desc = new string[desc.size()];
 					mo.dl = desc.size();
-					
+
 					int i = desc.size() -1;
 					while(desc.size() > 0) {
 						string s = desc.back();
@@ -1026,29 +1039,29 @@ int parsemonsters(Dungeon * dungeon) {
 						mo.desc[i] = s;
 						i--;
 					}
-					
-				} else if((n = line.find("SPEED")) != std::string::npos) { 
+
+				} else if((n = line.find("SPEED")) != std::string::npos) {
 					mo.s.s = getdie(line.substr(6, line.size()));
-					
-				} else if((n = line.find("HP")) != std::string::npos) { 
+
+				} else if((n = line.find("HP")) != std::string::npos) {
 					//health points
 					mo.s.hp = getdie(line.substr(3, line.size()));
-					
+
 				} else if((n = line.find("END")) != std::string::npos) {
 					mons.push_back(mo);
 					dm++;
 				}
 			}
-			
+
 		}
 	}
 	else
 		return -1;
-		
+
 	dungeon->dm = dm;
-	
+
 	dungeon->md = new SpriteTemp[mons.size()];
-	
+
 	int i = 0;
 	while(mons.size() > 0) {
 		SpriteTemp tmp = mons.back();
@@ -1057,7 +1070,7 @@ int parsemonsters(Dungeon * dungeon) {
 		mons.pop_back();
 		i++;
 	}
-	
+
 	return 0;
 }
 
@@ -1067,13 +1080,13 @@ int parseitems(Dungeon * dungeon) {
 	char * path = (char*)calloc(strlen(env_path) + 50, sizeof(char));
 	strcpy(path, env_path);
 	strcat(path, "/.rlg327/object_desc.txt");
-	
+
 	int di = 0;
 	bool first = true;
 	dungeon->mi = 100;
 	vector <ItemTemp> items;
-	
-	
+
+
 	string line;
 	ifstream od(path);
 	if(od.is_open()) {
@@ -1081,7 +1094,7 @@ int parseitems(Dungeon * dungeon) {
 		ItemTemp it;
 		while(getline(od, line)) {
 			//cout << line << '\n';
-			
+
 			if(first) {
 				if(line != "RLG327 OBJECT DESCRIPTION 1") {
 					cout << "Invalid file head!" << endl;
@@ -1091,7 +1104,7 @@ int parseitems(Dungeon * dungeon) {
 			} else {
 				//standard file parsing
 				size_t n = 0;
-				
+
 				if(line == "BEGIN OBJECT")
 					it = b_it;
 				else if((n = line.find("NAME")) != std::string::npos)
@@ -1138,8 +1151,8 @@ int parseitems(Dungeon * dungeon) {
 						it.t = WAND;
 					else if((n = line.find("CONTAINER")) != std::string::npos)
 						it.t = CONTAINER;
-						
-					
+
+
 				} else if((n = line.find("COLOR")) != std::string::npos) {
 					//line.find statements to match enums/ints
 					if((n = line.find("RED")) != std::string::npos)
@@ -1158,7 +1171,7 @@ int parseitems(Dungeon * dungeon) {
 						it.c = WHITE;
 					else if((n = line.find("BLACK")) != std::string::npos)
 						it.c = BLACK;
-					
+
 				} else if((n = line.find("WEIGHT")) != std::string::npos)
 					it.w = getdie(line.substr(7, line.size()));
 				else if((n = line.find("HIT")) != std::string::npos)
@@ -1166,7 +1179,7 @@ int parseitems(Dungeon * dungeon) {
 				else if((n = line.find("DAM")) != std::string::npos) {
 					//save as a die
 					it.d = getdie(line.substr(4, line.size()));
-					
+
 				} else if((n = line.find("ATTR")) != std::string::npos)
 					it.sa = getdie(line.substr(5, line.size()));
 				else if((n = line.find("VAL")) != std::string::npos)
@@ -1180,17 +1193,17 @@ int parseitems(Dungeon * dungeon) {
 				} else if((n = line.find("DESC")) != std::string::npos) {
 					//parse description
 					vector <std::string> desc;
-					
+
 					while(getline(od, line)) {
 						if(line.find(".") == 0)
 							break;
 
 						desc.push_back(line.substr(0, 77));
 					}
-					
+
 					it.desc = new string[desc.size()];
 					it.dl = desc.size();
-					
+
 					int i = desc.size() -1;
 					while(desc.size() > 0) {
 						string s = desc.back();
@@ -1198,7 +1211,7 @@ int parseitems(Dungeon * dungeon) {
 						it.desc[i] = s;
 						i--;
 					}
-					
+
 				} else if((n = line.find("END")) != std::string::npos) {
 					items.push_back(it);
 					di++;
@@ -1208,11 +1221,11 @@ int parseitems(Dungeon * dungeon) {
 	}
 	else
 		return -1;
-		
+
 	dungeon->di = di;
-	
+
 	dungeon->id = new ItemTemp[items.size()];
-	
+
 	int i = 0;
 	while(items.size() > 0) {
 		ItemTemp tmp = items.back();
@@ -1220,11 +1233,11 @@ int parseitems(Dungeon * dungeon) {
 		items.pop_back();
 		i++;
 	}
-	
+
 	/*printf("SIZE: %d\n", di);
 	cout << "NAME: " << (dungeon->id)[0].n << endl;
 	cout << "DESC (0): " << dungeon->id[0].desc[0] << endl;*/
-	
+
 	return 0;
 }
 
@@ -1235,16 +1248,16 @@ void printmds(Dungeon * dungeon)
 	for(i = 0; i < dungeon->dm; i++)
 	{
 		cout << "Name: " << dungeon->md[i].n << endl;
-		
+
 		printf("Symbol: %c\n", dungeon->md[i].pa);
-		
+
 		cout << "Description: " << endl;
 		int j;
 		for(j = 0; j < dungeon->md[i].dl; j++)
 		{
 			cout << dungeon->md[i].desc[j] << endl;
 		}
-		
+
 		switch(dungeon->md[i].c)
 		{
 		case RED: cout << "Color: RED" << endl; break;
@@ -1256,10 +1269,10 @@ void printmds(Dungeon * dungeon)
 		case WHITE: cout << "Color: WHITE" << endl; break;
 		case BLACK: cout << "Color: BLACK" << endl; break;
 		}
-		
+
 		//printf("Speed: %d\n", dungeon->md[i].s.s);
 		cout << "Speed: " << dungeon->md[i].s.s->string() << endl;
-		
+
 		cout << "Abilities: ";
 		if(dungeon->md[i].s.in)
 			cout << "SMART ";
@@ -1272,10 +1285,10 @@ void printmds(Dungeon * dungeon)
 		if(dungeon->md[i].s.pa)
 			cout << "PASS ";
 		cout << endl;
-		
+
 		//printf("HP: %d\n", dungeon->md[i].s.hp);
 		cout << "HP: " << dungeon->md[i].s.hp->string() << endl;
-		
+
 		cout << "Damage: " << dungeon->md[i].s.a->string() << endl;
 
 		cout << endl;
@@ -1288,14 +1301,14 @@ void printids(Dungeon * dungeon)
 	for(i = 0; i < dungeon->di; i++)
 	{
 		cout << "Name: " << dungeon->id[i].n << endl;
-		
+
 		cout << "Description: " << endl;
 		int j;
 		for(j = 0; j < dungeon->id[i].dl; j++)
 		{
 			cout << dungeon->id[i].desc[j] << endl;
 		}
-		
+
 		cout << "Type: ";
 		switch(dungeon->id[i].t)
 		{
@@ -1321,7 +1334,7 @@ void printids(Dungeon * dungeon)
 		default: break;
 		}
 		cout << endl;
-		
+
 		switch(dungeon->id[i].c)
 		{
 		case RED: cout << "Color: RED" << endl; break;
@@ -1333,23 +1346,23 @@ void printids(Dungeon * dungeon)
 		case WHITE: cout << "Color: WHITE" << endl; break;
 		case BLACK: cout << "Color: BLACK" << endl; break;
 		}
-		
+
 		printf("Hit bonus: %d\n", dungeon->id[i].hib);
-		
+
 		cout << "Damage bonus: " << dungeon->id[i].d->string() << endl;
-		
+
 		printf("Dodge bonus: %d\n", dungeon->id[i].dob);
-		
+
 		printf("Defense bonus: %d\n", dungeon->id[i].deb);
-		
+
 		printf("Weight: %d\n", dungeon->id[i].w);
-		
+
 		printf("Speed bonus: %d\n", dungeon->id[i].spb);
-		
+
 		printf("Special attribute: %d\n", dungeon->id[i].sa);
-		
+
 		printf("Value in Pesos de Ocho: %d\n", dungeon->id[i].v);
-		
+
 		cout << endl;
 	}
 }
@@ -1398,7 +1411,7 @@ int main(int argc, char * argv[]) {
 	} else {
 		strcat(path, "/dungeon");
 	}
-	
+
 
 	/* persistent player character */
 	Bool regen = FALSE;
@@ -1409,7 +1422,7 @@ int main(int argc, char * argv[]) {
 	DUNGEN: ;
 
 	Dungeon dungeon = init_dungeon(21, 80, 12);
-	
+
 	parsemonsters(&dungeon);
 	parseitems(&dungeon);
 	dungeon.of = new ObjFac(dungeon.di, dungeon.id);
@@ -1503,7 +1516,7 @@ int main(int argc, char * argv[]) {
 		if(l == dungeon.pc || first == TRUE) {
 			parse_pc(&dungeon, &run, &regen);
 			copyASprite(dungeon.ss, 0, dungeon.plyr);
-			
+
 			if(regen == TRUE) {
 				copySprite(p_pc, thisASprite(dungeon.ss, 0));
 				copyPC(p_ppc, dungeon.plyr);
@@ -1513,7 +1526,7 @@ int main(int argc, char * argv[]) {
 			//gen_move_sprite(&dungeon, l);
 			map_dungeon_nont(&dungeon);
 			map_dungeon_t(&dungeon);
-			
+
 			print_dungeon(&dungeon, 0, 0);
 		} else {
 			parse_move(&dungeon, l);
@@ -1552,13 +1565,13 @@ int main(int argc, char * argv[]) {
 	DUNFREE: ;
 	/* cpp stuff */
 	delete[] dungeon.items;
-	
+
 	delete[] dungeon.md;
 	delete[] dungeon.id;
 	delete dungeon.plyr;
 	delete dungeon.su;
 	delete dungeon.sd;
-	
+
 	/* free our arrays */
 	for(i = 0; i < dungeon.h; i++) {
 		free(dungeon.d[i]);
