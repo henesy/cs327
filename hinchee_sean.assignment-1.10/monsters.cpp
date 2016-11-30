@@ -50,6 +50,7 @@ void with_pc(Dungeon * dungeon, Sprite * s, Bool *in) {
 		*in = TRUE;
 }
 
+/* this function drives everything, but should probably not be allowed to exist */
 void gen_move_sprite(Dungeon * dungeon, int sn) {
 	//make ss[sn] when possible
 	// int sx = dungeon->ss[sn].p.x;
@@ -58,6 +59,8 @@ void gen_move_sprite(Dungeon * dungeon, int sn) {
 	int sy = getSpriteAPY(dungeon->ss, sn);
 	int xs[8] = {-1,0,1,1,1,0,-1,-1};
 	int ys[8] = {-1,-1,-1,0,1,1,1,0};
+	dungeon->ss[sn].lp.x = sx;
+	dungeon->ss[sn].lp.y = sy;
 
 	//Sprite *s = &(dungeon->ss[sn]);
 	Sprite *s = thisASprite(dungeon->ss, sn);

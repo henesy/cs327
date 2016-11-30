@@ -113,6 +113,7 @@
 		int			sn;	/* sprite number */
 		Position	pc;	/* last known location of the PC */
 		bool		a;	/* alive T/F */
+		Position	lp;
 		
 		std::string	n; /* name */
 		colour	color;	/* color */

@@ -690,6 +690,13 @@ void inventory_list(Dungeon * dungeon, bool is_equip) {
 void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 	GCH: ;
 	int32_t k;
+	
+	char dir;
+	char dist;
+	int distance;
+	int target = -1;
+	int l;
+	
 	k = getch();
 	if(k == 'Q') {
 		*run = FALSE;
@@ -789,7 +796,7 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			if(dungeon->plyr->eqsp[RANGED]) {
 				if(dungeon->plyr->hlt) {
 					//clean up line of sight/hitting the enemy
-					if(dungeon->ss[dungeon->plyr->lt].a && dungeon->ss[dungeon->plyr->lt].p.x == dungeon->plyr->p.x && dungeon->ss[dungeon->plyr->lt].p.y == dungeon->plyr->p.y) {
+					if(dungeon->ss[dungeon->plyr->lt].a && (dungeon->ss[dungeon->plyr->lt].p.x == dungeon->plyr->p.x || dungeon->ss[dungeon->plyr->lt].p.y == dungeon->plyr->p.y)) {
 
 						int dam = 0;
 						int i;
@@ -810,14 +817,100 @@ void parse_pc(Dungeon * dungeon, Bool * run, Bool * regen) {
 			break;
 		case 's':
 			/* select target (for ranged attack) ;; parses further selection and distance/calculations */
-			clear();
 			
 			mvprintw(0, 0, "What direction [n, e, s, w] do you wish to fire?: ");
 			
-			getch();
+			dir = getch();
 			
 			mvprintw(1, 0, "How far away do you wish to fire?: ");
 			
+			dist = getch();
+			distance = dist - 48;
+			
+			//mvprintw(2, 0, "%d %c", distance, dir);
+			
+			//see if we hit a target
+			target = -1;
+			for(l = 1; l < dungeon->ns; l++)
+			{
+				//lazy and goto's are hard
+				int tx = dungeon->plyr->p.x;
+				int ty = dungeon->plyr->p.y;
+				if(dir == 'n')
+					ty -= distance;
+				if(dir == 's')
+					ty += distance;
+				if(dir == 'e')
+					tx += distance;
+				if(dir == 'w')
+					tx -= distance;
+				
+				if((dungeon->ss[l].p.x == tx && dungeon->ss[l].p.y == ty) || (dungeon->ss[l].to.x == tx && dungeon->ss[l].to.y == ty))
+					target = l;
+				
+				if(dungeon->ss[l].lp.x == tx && dungeon->ss[l].lp.y == ty)
+					target = l;
+					
+				//mvprintw(3, 0, "%d %d", tx, ty);
+					
+				tx = dungeon->ss[0].p.x;
+				ty = dungeon->ss[0].p.y;
+				if(dir == 'n')
+					ty -= distance;
+				if(dir == 's')
+					ty += distance;
+				if(dir == 'e')
+					tx += distance;
+				if(dir == 'w')
+					tx -= distance;
+					
+				if((dungeon->ss[l].p.x == tx && dungeon->ss[l].p.y == ty) || (dungeon->ss[l].to.x == tx && dungeon->ss[l].p.y == ty))
+					target = l;
+					
+				//mvprintw(4, 0, "%d %d", tx, ty);
+				
+				//mvprintw(6+l-1, 0, "%d %d", dungeon->ss[l].p.x, dungeon->ss[l].p.y);
+				//mvprintw(11+l-1, 0, "%d %d", dungeon->ss[l].lp.x, dungeon->ss[l].lp.y);
+								
+				//mvprintw(23, 0, "%d %d", dungeon->ss[0].p.x, dungeon->ss[0].p.y);
+			}
+			
+			//mvprintw(2, 0, "%d %c %d", distance, dir, target);
+			
+			if(dungeon->plyr->eqsp[RANGED] == false) {
+				mvprintw(0, 0, "You possess no ranged weapon                                     ");
+				mvprintw(1, 0, "                                                                ");
+				getch();
+				break;
+			}
+			
+			if(target > 0) {
+				//clean up line of sight/hitting the enemy
+				if(dungeon->ss[target].a && (dungeon->ss[target].p.x == dungeon->plyr->p.x || dungeon->ss[target].p.y == dungeon->plyr->p.y)) {
+
+					int dam = 0;
+					int i;
+					for(i = 0; i < 12; i++)
+					{
+						if(dungeon->plyr->eqsp[i])
+							dam += dungeon->plyr->eqs[i].hib;
+					}
+
+					//apply damage
+					if(dungeon->ss[target].s.hp - dam <= 0)
+						dungeon->ss[target].a = false;
+					else
+						dungeon->ss[target].s.hp -= dam;
+						
+					mvprintw(0, 0, "Your attack hits %d damage                                        ", dam);
+					mvprintw(1, 0, "                                                                ");
+				}
+				dungeon->plyr->hlt = true;
+				dungeon->plyr->lt = target;
+			} else {
+				mvprintw(0, 0, "Your attack misses                                         ");
+				mvprintw(1, 0, "                                                                ");
+			}
 			
 			getch();
 			
@@ -1529,8 +1622,9 @@ int main(int argc, char * argv[]) {
 
 			print_dungeon(&dungeon, 0, 0);
 		} else {
-			parse_move(&dungeon, l);
 			gen_move_sprite(&dungeon, l);
+						parse_move(&dungeon, l);
+
 		}
 
 
